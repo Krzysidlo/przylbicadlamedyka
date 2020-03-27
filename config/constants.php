@@ -57,11 +57,8 @@ const AJAX_DIR  = ROOT_DIR . "/ajax";
 const ADMIN_DIR = ROOT_DIR . "/admin";
 
 const IMG_DIR  = MEDIA_DIR . "/img";
-const MSC_DIR  = MEDIA_DIR . "/music";
-const USR_DIR  = IMG_DIR . "/users";
 const TMP_DIR  = IMG_DIR . "/tmp";
 const COMP_DIR = IMG_DIR . "/competitions";
-const SRP_DIR  = IMG_DIR . "/surprise";
 const CSS_DIR  = MEDIA_DIR . "/css";
 const JS_DIR   = MEDIA_DIR . "/js";
 
@@ -149,7 +146,7 @@ define("DEFAULT_OPTIONS", [
 
 fs::init();
 
-$pageName = "CoTyp";
+$pageName = "Przyłbica dla medyka";
 if (DEV_MODE) {
     $pageName .= " DEV";
 }

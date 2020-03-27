@@ -14,41 +14,11 @@ class RegisterController extends PageController
     public function content(array $args = [])
     {
         if (LOGGED_IN) {
-            header("Location: /");
+            self::redirect("/");
+            exit(0);
         }
 
-        try {
-            //Google login
-            $gClient = new Google_Client();
-            $gClient->setClientId("758734978512-7787flc7237g5v8grplaqvprv887cd2v.apps.googleusercontent.com");
-            $gClient->setClientSecret("uOQW_RHZSa7k1W6mIGGOBJWD");
-            $gClient->setApplicationName(PAGE_NAME);
-            $gClient->setRedirectUri(ROOT_URL . "/google");
-            $gClient->addScope("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email");
-            $googleLoginURL = $gClient->createAuthUrl();
-        } catch (Exception $e) {
-            fs::log("Error: " . $e->getMessage());
-            $googleLoginURL = false;
-        }
-
-        try {
-            //Facebook login
-            $fClient          = new Facebook(['app_id' => '211253152858745', 'app_secret' => '23c08914919c6a67c30190d9bc7a7633', 'default_graph_version' => self::FB_GRAPH_VERSION,]);
-            $helper           = $fClient->getRedirectLoginHelper();
-            $permissions      = ['email'];
-            $facebookLoginURL = $helper->getLoginUrl(ROOT_URL . "/facebook", $permissions);
-        } catch (Exception $e) {
-            fs::log("Error: " . $e->getMessage());
-            $facebookLoginURL = false;
-        }
-
-        $data = [
-            'googleLoginURL'   => $googleLoginURL,
-            'facebookLoginURL' => $facebookLoginURL,
-            'easyLogIn'        => fs::getACookie('easyLogIn') ?? false,
-        ];
-
-        return $this->render(array_merge($args, $data));
+        return $this->render($args);
     }
 
     public static function ajax_login($get): void
@@ -70,28 +40,22 @@ class RegisterController extends PageController
                 if ($email) {
                     try {
                         $user = new User($email);
-                        if ($user->pswdExists) {
-                            if (md5($get['lpassword'] . $user->salt) === $user->password) {
-                                $_SESSION['usersID']  = $user->id;
-                                $_SESSION['userName'] = $user->name;
-                                if (!empty($get['lremember'])) {
-                                    fs::setACookie('usersID', $user->id, 3600 * 24 * 30);
-                                }
-                                if (!empty($get['leasy'])) {
-                                    fs::setACookie('easyLogIn', $user->email, 3600 * 24 * 365);
-                                } else {
-                                    fs::setACookie('easyLogIn', NULL, -1);
-                                }
-                                $data['success'] = true;
-                            } else {
-                                $data['message']              = fs::t("Incorrect password");
-                                $data['alert']                = "warning";
-                                $data['invalid']['lpassword'] = true;
+                        if (md5($get['lpassword'] . $user->salt) === $user->password) {
+                            $_SESSION['usersID']  = $user->id;
+                            $_SESSION['userName'] = $user->name;
+                            if (!empty($get['lremember'])) {
+                                fs::setACookie('usersID', $user->id, 3600 * 24 * 30);
                             }
+                            if (!empty($get['leasy'])) {
+                                fs::setACookie('easyLogIn', $user->email, 3600 * 24 * 365);
+                            } else {
+                                fs::setACookie('easyLogIn', NULL, -1);
+                            }
+                            $data['success'] = true;
                         } else {
-                            $type            = $user->getAdditionalInfo()['type'];
-                            $data['message'] = fs::t("Your account was created using") . " " . ucfirst($type) . ". " . fs::t("Please use the same method to log in") . ".";
-                            $data['alert']   = "warning";
+                            $data['message']              = fs::t("Incorrect password");
+                            $data['alert']                = "warning";
+                            $data['invalid']['lpassword'] = true;
                         }
                     } catch (Exception $e) {
                         $data['message']           = fs::t("Incorrect e-mail address");

@@ -5,24 +5,7 @@ use classes\User;
 
 require_once __DIR__ . "/autoload.php";
 
-$defLang = "pl";
-if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-    $defLang = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-}
-$lang = $_COOKIE['lang'] ?? $defLang;
-//Usunąć aby przywrócić opcję wyboru języka
-$lang = "pl";
-
-if (strlen($lang) <= 2) {
-    $localeString = $lang . "_" . strtoupper($lang);
-} else {
-    $localeString = $lang;
-    $lang         = substr($lang, 0, 2);
-}
-
-$localeString .= ".utf-8";
-setlocale(LC_ALL, $localeString);
-//setlocale(LC_TIME, $localeString);
+setlocale(LC_ALL, "pl_PL.utf-8");
 
 $langArr = scandir(__DIR__ . "/../translations");
 array_shift($langArr);
@@ -102,19 +85,6 @@ define('CONST_MODE', $CONST_MODE);
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
 
-/* Check if user uses dark theme */
-$DARK_THEME = false;
-if (LOGGED_IN && $user->getOption('darkTheme') && USER_PRV >= 2) {
-    $DARK_THEME = true;
-}
-if ($view === 'admin') {
-    $DARK_THEME = true;
-}
-if ($page == 'admin') {
-	$DARK_THEME = true;
-}
-define("DARK_THEME", $DARK_THEME);
-
 $COMPETITION_ID = NULL;
 if (LOGGED_IN && !in_array($view, ['logout', 'confirm', 'admin'])) {
     $COMPETITION_ID = $user->getOption('competition') ?? (DEFAULT_OPTIONS['competition'] ?? NULL);
@@ -131,7 +101,7 @@ if (LOGGED_IN && !in_array($view, ['logout', 'confirm', 'admin'])) {
 }
 define("COMPETITION_ID", $COMPETITION_ID);
 
-$noLoggedIn = ['admin', 'chatbot', 'confirm', 'error', 'facebook', 'google', 'register', 'reset', 'ajax'];
+$noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax'];
 
 if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';

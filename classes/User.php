@@ -23,10 +23,7 @@ class User
     public string  $login      = "";
     public ?string $password   = NULL;
     public ?string $salt       = NULL;
-    public bool    $pswdExists = false;
 
-    private       $avatar         = false;
-    private array $groups         = [];
     private array $options        = [];
     private       $privilege      = false;
     private       $additionalInfo = false;
@@ -97,7 +94,6 @@ class User
             $this->name       = $user['name'];
             $this->login      = $user['login'];
             $this->email      = $user['email'];
-            $this->pswdExists = $user['pswdExists'];
             $this->password   = $user['password'];
             $this->salt       = $user['salt'];
         } else {
@@ -119,7 +115,6 @@ class User
                 $output['name'] = $changedName;
             }
             $output['login']      = $this->getOption('login');
-            $output['pswdExists'] = ($output['password'] !== NULL ?: false);
         }
 
         return $output;
@@ -443,52 +438,6 @@ HTML;
         }
 
         return new self($usersID);
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     */
-    public function getGroups()
-    {
-        if (empty($this->groups)) {
-            $this->groups = Group::getAll($this->id);
-        }
-
-        return $this->groups;
-    }
-
-    public function getAvatar(bool $noGravatar = false)
-    {
-        if (!$this->avatar) {
-            if ($this->getOption('gravatar') && !$noGravatar) {
-                $this->avatar = fs::getGravatar($this->email);
-            } else {
-                $avatarURL = $this->getOption('avatar');
-                if (empty($avatarURL)) {
-                    $avatarURL = "default.png";
-                }
-                if (filter_var($avatarURL, FILTER_VALIDATE_URL)) {
-                    $this->avatar = $avatarURL;
-                } else {
-                    $this->avatar = USR_URL . "/" . $avatarURL . "?" . rand(1000, 9999);
-                }
-            }
-        }
-
-        return $this->avatar;
-    }
-
-    public function getAdditionalInfo()
-    {
-        if (!$this->additionalInfo) {
-            $sql = "SELECT * FROM `users_additional_info` WHERE `users_id` = '{$this->id}';";
-            if ($query = fs::$mysqli->query($sql)) {
-                $this->additionalInfo = $query->fetch_assoc();
-            }
-        }
-
-        return $this->additionalInfo;
     }
 
     public function updatePassword(string $password)
