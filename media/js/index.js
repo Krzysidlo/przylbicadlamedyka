@@ -685,31 +685,14 @@ var index = function () {
         (function register() {
             var $register = $("body.register");
             if ($register.length) {
-                console.log("??");
-                var $easyLoginModal = $("#easyLogin"),
-                    $forgotPasswordModal = $("#forgotPassword"),
+                var $forgotPasswordModal = $("#forgotPassword"),
                     $resetPasswordForm = $forgotPasswordModal.find("form"),
                     $logRegForm = $register.find(".logRegForm form");
 
-                console.log($logRegForm);
                 $logRegForm.on('submit', function (e) {
                     e.preventDefault();
                     logRegAjax($(this));
                 });
-
-                if ($easyLoginModal.length) {
-                    $easyLoginModal.on('shown.bs.modal', function () {
-                        $easyLoginModal.find("#mpassword").focus();
-                    });
-                    setTimeout(function () {
-                        $easyLoginModal.modal('show');
-                    }, 3E2);
-
-                    $easyLoginModal.find('form').on('submit', function (e) {
-                        e.preventDefault();
-                        logRegAjax($(this));
-                    });
-                }
 
                 $forgotPasswordModal.on('show.bs.modal', function () {
                     var email = $register.find("input[name='lemail']").val();

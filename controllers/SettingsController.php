@@ -2,10 +2,7 @@
 
 namespace controllers;
 
-use Exception;
 use classes\User;
-use classes\Group;
-use classes\Functions as fs;
 
 class SettingsController extends PageController
 {
@@ -16,23 +13,9 @@ class SettingsController extends PageController
         }
 
         $user = new User;
-        $avatarUrl = $user->getOption('avatar');
-        if (!filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
-            $avatarUrl = USR_URL . "/" . $avatarUrl . "?" . rand(1000, 9999);
-        }
-
-        try {
-            $groups = Group::getAll();
-        } catch (Exception $e) {
-            fs::log("Error: " . $e->getMessage());
-            self::redirect("/error");
-            exit(0);
-        }
 
         $data = [
-            'avatar'     => "<img id='profile' src='{$avatarUrl}' class='img-responsive img-circle img-settings' alt='avatar'>",
-            'user'       => $user,
-            'groups'     => $groups,
+            'user' => $user,
         ];
 
         return parent::content(array_merge($args, $data));

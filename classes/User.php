@@ -192,84 +192,62 @@ class User
             $user->setPrivilege(self::PRIV_NO_ACCESS);
         }
 
-        $mailMessage = date("Y-m-d H:i:s") . ": [{$name}], [{$email}] zarejestrował się właśnie na stronie " . PAGE_NAME . ".\n\n";
-        $mailMessage .= "Za pomocą [{$type}]" . "\n\n";
+        $mailMessage = date("Y-m-d H:i:s") . ": [{$user->name}], [{$email}] zarejestrował się właśnie na stronie " . PAGE_NAME . ".\n\n";
         if ($type === 'normal') {
             $mailMessage .= "Hasło: [{$password}]\n\n";
         }
         @mail(EMAIL, PAGE_NAME . ' - pozytywna rejestracja', $mailMessage);
 
-        $facebook_id = "NULL";
-        $google_id   = "NULL";
-        switch ($type) {
-            case 'normal':
-                $user->sendNotification("In order to gain access please confirm your e-mail address", NULL);
+        $user->sendNotification("Aby uzyskać pełny dostęp do storny proszę potwierdzić adres e-mail", NULL);
 
-                $hash = md5($email . time() . rand(1000, 9999));
-                $user->setOption('confirm-email', $hash);
+        $hash = md5($email . time() . rand(1000, 9999));
+        $user->setOption('confirm-email', $hash);
 
-                $subject = PAGE_NAME . " - " . "E-mail address confirmation";
+        $subject = PAGE_NAME . " - " . "Potwierdzenie rejestracji";
 
-                $text[] = "Thank you for registering on" . " " . PAGE_NAME;
-                $text[] = "Please click the link below to confirm your e-mail address";
-                $link   = ROOT_URL . "/confirm/" . $hash;
+        $text[] = "Dziękujemy za zarejestrowanie się na stronie " . PAGE_NAME;
+        $text[] = "Proszę kliknąc w poniższy link, aby potwierdzić adres e-mail";
 
-                $text = implode("<br>", $text);
-                // Message
-                $message = <<< HTML
-                <html>
-                <head>
-                    <title>{$subject}</title>
-                </head>
-                <body>
-                    <p>{$text}</p>
-                    <a href="{$link}">{$link}</a>
-                </body>
-                </html>
+        $link   = ROOT_URL . "/confirm/" . $hash;
+
+        $text = implode("<br>", $text);
+        // Message
+        $message = <<< HTML
+        <html lang="pl">
+        <head>
+            <title>{$subject}</title>
+        </head>
+        <body>
+            <p>{$text}</p>
+            <a href="{$link}">{$link}</a>
+        </body>
+        </html>
 HTML;
 
-                $replyTo = EMAIL;
-                // To send HTML mail, the Content-type header must be set
-                $headers[] = 'MIME-Version: 1.0';
-                $headers[] = 'Content-type: text/html; charset=UTF-8';
-                // Additional headers
-                $headers[] = "To: {$email}";
-                $headers[] = "From: " . PAGE_NAME . "<no-reply@cotyp.pl>";
-                $headers[] = "Reply-To: {$replyTo}";
+        $replyTo = EMAIL;
+        // To send HTML mail, the Content-type header must be set
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        // Additional headers
+        $headers[] = "To: {$email}";
+        $headers[] = "From: " . PAGE_NAME . "<no-reply@cotyp.pl>";
+        $headers[] = "Reply-To: {$replyTo}";
 
-                mail($email, $subject, $message, implode("\r\n", $headers));
-            case 'facebook':
-                if (is_numeric($password)) {
-                    $facebook_id = "'{$password}'";
-                }
-            case 'google':
-                if ($facebook_id == "NULL") {
-                    if (is_numeric($password)) {
-                        $google_id = "'{$password}'";
-                    }
-                }
+        mail($email, $subject, $message, implode("\r\n", $headers));
 
-                if ($facebook_id !== "NULL" || $google_id !== "NULL") {
-                    $user->setPrivilege(self::PRIV_CONFIRMED);
-                }
-
-                $browserInfo = get_browser(NULL, true);
-                $platform    = $browserInfo['platform'] ?? "";
-                $parent      = $browserInfo['parent'] ?? "";
-                $browser     = $browserInfo['browser'] ?? "";
-                $agent       = $_SERVER['HTTP_USER_AGENT'] ?? "";
-                $userAgent   = "[{$platform}], [{$parent}], [{$browser}], [{$agent}]";
-                $ip1         = $_SERVER['HTTP_CLIENT_IP'] ?? "";
-                $ip2         = $_SERVER['HTTP_FORWARDED_FOR'] ?? "";
-                $ip3         = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? "";
-                $ip4         = $_SERVER['REMOTE_ADDR'] ?? "";
-                $ip          = "[{$ip1}], [{$ip2}], [{$ip3}], [{$ip4}]";
-                $sql         = "INSERT INTO `users_additional_info` (`users_id`, `type`, `user_agent`, `ip`, `facebook_id`, `google_id`) VALUES ('{$user->id}', '{$type}', '{$userAgent}', '{$ip}', {$facebook_id}, {$google_id})";
-                fs::$mysqli->query($sql);
-                break;
-            default:
-                throw new UnexpectedValueException("Unexpected type value = [{$type}]");
-        }
+        $browserInfo = get_browser(NULL, true);
+        $platform    = $browserInfo['platform'] ?? "";
+        $parent      = $browserInfo['parent'] ?? "";
+        $browser     = $browserInfo['browser'] ?? "";
+        $agent       = $_SERVER['HTTP_USER_AGENT'] ?? "";
+        $userAgent   = "[{$platform}], [{$parent}], [{$browser}], [{$agent}]";
+        $ip1         = $_SERVER['HTTP_CLIENT_IP'] ?? "";
+        $ip2         = $_SERVER['HTTP_FORWARDED_FOR'] ?? "";
+        $ip3         = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? "";
+        $ip4         = $_SERVER['REMOTE_ADDR'] ?? "";
+        $ip          = "[{$ip1}], [{$ip2}], [{$ip3}], [{$ip4}]";
+        $sql         = "INSERT INTO `users_additional_info` (`users_id`, `type`, `user_agent`, `ip`) VALUES ('{$user->id}', '{$type}', '{$userAgent}', '{$ip}')";
+        fs::$mysqli->query($sql);
 
         return $user;
     }
@@ -286,13 +264,9 @@ HTML;
     private static function createUser(string $email, string $name, string $password, string $type = 'normal')
     {
         $usersID = md5(time());
-        if (in_array($type, ['google', 'facebook'])) {
-            $sql = "INSERT INTO `users` (`id`, `email`, `name`) VALUES ('{$usersID}', '{$email}', '{$name}');";
-        } else {
-            $salt     = rand(1111111111, 9999999999);
-            $password = md5($password . $salt);
-            $sql      = "INSERT INTO `users` (`id`, `email`, `name`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$name}', '{$password}', '{$salt}');";
-        }
+        $salt     = rand(1111111111, 9999999999);
+        $password = md5($password . $salt);
+        $sql      = "INSERT INTO `users` (`id`, `email`, `name`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$name}', '{$password}', '{$salt}');";
         if (!fs::$mysqli->query($sql)) {
             fs::log($sql);
             throw new Exception("Failed to create new user (DB error)");

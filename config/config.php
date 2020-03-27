@@ -85,22 +85,6 @@ define('CONST_MODE', $CONST_MODE);
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
 
-$COMPETITION_ID = NULL;
-if (LOGGED_IN && !in_array($view, ['logout', 'confirm', 'admin'])) {
-    $COMPETITION_ID = $user->getOption('competition') ?? (DEFAULT_OPTIONS['competition'] ?? NULL);
-    if (!is_null($COMPETITION_ID)) {
-        $query       = fs::$mysqli->query("SELECT `feed_competition_id` FROM `competitions` WHERE `id` = {$COMPETITION_ID};");
-        $competition = $query->fetch_assoc() ?? [];
-
-        if (empty($competition['feed_competition_id'])) {
-            $view = "change";
-        }
-    } else {
-        $view = "change";
-    }
-}
-define("COMPETITION_ID", $COMPETITION_ID);
-
 $noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax'];
 
 if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {

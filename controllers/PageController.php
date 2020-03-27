@@ -6,16 +6,9 @@ use classes\Functions as fs;
 
 abstract class PageController
 {
-    const FB_GRAPH_VERSION = 'v3.3';
-    const FB_APP_ID        = '211253152858745';
-    const FB_APP_SECRET    = '23c08914919c6a67c30190d9bc7a7633';
-
     public string  $menu    = "";
     public string  $view    = "index";
     public ?string $title   = NULL;
-    public ?string $bgImage = NULL;
-    public string  $style   = "";
-    public array   $js      = [];
 
     protected ?string $file = NULL;
 

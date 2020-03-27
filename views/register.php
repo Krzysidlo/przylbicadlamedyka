@@ -3,7 +3,7 @@
 use classes\User;
 use classes\Functions as fs;
 
-$this->title = "Log in";
+$this->title = "Zarejestruj się";
 ?>
 
 <section class="container">
@@ -15,28 +15,8 @@ $this->title = "Log in";
     <div class="row">
         <div class="col-12 col-md-6 offset-md-3">
             <h1 class="text-center">
-                <img class="img-circle img-medium" src="<?= IMG_URL; ?>/logo.svg" alt="logo"> CoTyp
+                <img class="img-circle img-medium" src="<?= IMG_URL; ?>/logo.svg" alt="logo"> <?= PAGE_NAME; ?>
             </h1>
-            <h4 class="mt-3 text-center">Zaloguj się za pomocą:</h4>
-            <?php if (!empty($googleLoginURL)) { ?>
-            <div class="row mt-4">
-                <div class="col-12 col-md-8 offset-md-2">
-                    <a href="<?= $googleLoginURL; ?>" role="button" class="btn btn-white google">
-                        <img src="<?= IMG_URL; ?>/google.png" class="img-responsive" alt="logo_ggle"> Google
-                    </a>
-                </div>
-            </div>
-            <?php }
-            if (!empty($facebookLoginURL)) { ?>
-            <div class="row mt-4 mb-1">
-                <div class="col-12 col-md-8 offset-md-2">
-                    <a href="<?= htmlspecialchars($facebookLoginURL); ?>" role="button"
-                       class="btn btn-indigo facebook">
-                        <img src="<?= IMG_URL; ?>/facebook.png" class="img-responsive" alt="logo_fb"> Facebook
-                    </a>
-                </div>
-            </div>
-            <?php } ?>
         </div>
     </div>
     <div class="row mt-5">
@@ -144,56 +124,6 @@ $this->title = "Log in";
         </div>
     </div>
 </section>
-
-<?php if ($easyLogIn) {
-    try {
-        $user      = new User($easyLogIn);
-        $avatarURL = $user->getAvatar();
-        $name      = $user->name; ?>
-<div class="modal fade" id="easyLogin" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog cascading-modal modal-avatar modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <img src="<?= $avatarURL; ?>" alt="avatar" class="img-responsive img-circle img-login">
-            </div>
-            <div class="modal-body text-center mb-1">
-                <h5 class="mt-1 mb-2"><?= $name; ?></h5>
-                <?php if ($name !== $easyLogIn) { ?>
-                <p class="mt-1 mb-2">(<?= $easyLogIn; ?>)</p>
-                <?php } ?>
-                <form action="/ajax/register/login" method="post">
-                    <div class="md-form ml-0 mr-0">
-                        <input type="hidden" name="lemail" value="<?= $easyLogIn; ?>">
-                        <input type="hidden" name="leasy" value="on">
-                        <input type="password" id="mpassword" name="lpassword" pattern=".{8,}" required
-                               class="form-control form-control-sm validate ml-0<?= !empty($invalid['lpassword']) && $invalid['lpassword'] ? " invalid" : ""; ?>"
-                               title="Minimum password length is 8"
-                               value="<?= !empty($this->get('lpassword')) ? $this->get('lpassword') : ""; ?>">
-                        <label for="mpassword"<?= !empty($message) ? " data-error='" . $message . "'" : ""; ?>
-                               class="ml-0">
-                            Podaj hasło
-                        </label>
-                    </div>
-                    <div class="md-form ml-0 mr-0 clearfix">
-                        <input type="checkbox" class="form-check-input" name="lremember"
-                               id="mremember" <?= !empty($this->get('lremember')) ? "checked" : ""; ?>>
-                        <label for="mremember" class="form-check-label">Pozostań zalogowany</label>
-                    </div>
-                    <div class="text-center mt-4">
-                        <button type="submit" name="submitLogin" value="submitLogin"
-                                class="btn btn-primary mt-1">
-                            Zaloguj się <i class="fas fa-sign-in-alt ml-1"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    <?php } catch (Exception $e) {
-        fs::log("Error: " . $e->getMessage());
-    }
-} ?>
 
 <div class="modal fade" id="forgotPassword" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-notify modal-info modal-sm" role="document">
