@@ -1,0 +1,39 @@
+body.change, body.points {
+  main {
+    padding-top: 70px;
+  }
+
+  .eventBox {
+    margin-top: 15px;
+    margin-bottom: 15px;
+
+    .title {
+      margin: -4px 0 18px 0;
+      text-align: center;
+    }
+
+    .event {
+      transition: box-shadow .3s ease-in-out;
+      background: $event-bg;
+      color: $event-color;
+      padding: 30px 15px;
+      margin: 0;
+      box-shadow: 0 0 12px $event-box-shadow;
+      border-radius: 4px;
+      position: relative;
+      min-height: calc(100% - 30px);
+      cursor: pointer;
+      border: none;
+      display: inline-block;
+
+      &:focus, &:active {
+        outline: none;
+        border: none;
+      }
+
+      &:hover {
+        box-shadow: 0 0 24px $event-box-shadow;
+      }
+    }
+  }
+}

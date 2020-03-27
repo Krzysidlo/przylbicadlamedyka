@@ -1,0 +1,45 @@
+body {
+  &.error, &.construction, &.noaccess {
+    main {
+      margin: 0;
+    }
+
+    margin: 0;
+
+    .errorInfo {
+      min-height: calc(100vh - 33px);
+      text-align: center;
+      background: center;
+      background-size: cover;
+
+      h1, h2 {
+        background: rgba(0, 0, 0, .8);
+        padding: 15px 30px;
+        color: #CCC;
+        display: inline-block;
+      }
+
+      h1 {
+        margin-top: 50px;
+      }
+    }
+  }
+
+  &.construction {
+    .errorInfo {
+      h1 {
+        margin-top: 100px;
+      }
+    }
+  }
+
+  &.noaccess {
+    .errorInfo {
+      background-position: top;
+
+      h1 {
+        margin-top: 40vh;
+      }
+    }
+  }
+}

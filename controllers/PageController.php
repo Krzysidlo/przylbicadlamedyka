@@ -1,0 +1,142 @@
+<?php
+
+namespace controllers;
+
+use classes\Functions as fs;
+
+abstract class PageController
+{
+    const FB_GRAPH_VERSION = 'v3.3';
+    const FB_APP_ID        = '211253152858745';
+    const FB_APP_SECRET    = '23c08914919c6a67c30190d9bc7a7633';
+
+    public string  $menu    = "";
+    public string  $view    = "index";
+    public ?string $title   = NULL;
+    public ?string $bgImage = NULL;
+    public string  $style   = "";
+    public array   $js      = [];
+
+    protected ?string $file = NULL;
+
+    private array $get;
+
+    public function __construct($view = NULL)
+    {
+        if (CONST_MODE) {
+            $view = "construction";
+        }
+
+        if ($view === NULL) {
+            self::redirect("/error");
+        }
+
+        if ($view === 'logout') {
+            $this->logout();
+            exit(0);
+        }
+
+        $this->view = $view;
+
+        $get       = $_GET ?? [];
+        $post      = $_POST ?? [];
+        $this->get = array_merge($get, $post);
+
+        $get_post_variables = [
+            'hash'       => NULL,
+            //login
+            'lemail'     => NULL,
+            'lpassword'  => NULL,
+            'lremember'  => NULL,
+            //register
+            'name'       => NULL,
+            'login'      => NULL,
+            'email'      => NULL,
+            'password'   => NULL,
+            'r-password' => NULL,
+            //ajax
+            'file'       => NULL,
+            'method'     => NULL,
+        ];
+        foreach ($get_post_variables as $name => $defaultValue) {
+            $this->get[$name] = $this->get[$name] ?? $defaultValue;
+        }
+        $this->menu = $this->view;
+    }
+
+    private function logout()
+    {
+        fs::setACookie('usersID', NULL, -1);
+        session_destroy();
+        header("Location: /logout");
+        exit(0);
+    }
+
+    public function content(array $args = [])
+    {
+        return $this->render($args);
+    }
+
+    public function render(array $args = [])
+    {
+        if ($this->file === NULL) {
+            $viewsDir = ROOT_DIR . "/views";
+
+            if (!file_exists($viewsDir . "/" . $this->view . ".php")) {
+                $this->view = 'error';
+            }
+            $this->file = $viewsDir . "/" . $this->view . ".php";
+        }
+        ob_start();
+        foreach ($args as $name => $value) {
+            ${$name} = $value;
+        }
+        if (file_exists($this->file)) {
+            include $this->file;
+        }
+        $var = ob_get_contents();
+        ob_end_clean();
+
+        return $var;
+    }
+
+    public function menu(array $args = [])
+    {
+        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess'])) {
+            $this->file = INC_DIR . "/menu.php";
+        } else {
+            $this->file = "";
+        }
+
+        return $this->render($args);
+    }
+
+    public function head(array $args = [])
+    {
+        $this->file = INC_DIR . "/header.php";
+
+        return $this->render($args);
+    }
+
+    public function foot(array $args = [])
+    {
+        $this->file = INC_DIR . "/footer.php";
+
+        return $this->render($args);
+    }
+
+    public static function redirect($path)
+    {
+        header("Location: " . $path);
+        exit(0);
+    }
+
+    protected function get($var = NULL)
+    {
+        if ($var === NULL) {
+            return $this->get;
+        }
+
+        return (isset($this->get[$var]) ? $this->get[$var] : NULL);
+    }
+}

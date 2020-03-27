@@ -1,0 +1,19 @@
+body.notifications {
+  .container {
+    margin-top: 150px;
+
+    .holder {
+      padding: 5px;
+      color: #000;
+
+      .notification {
+        background: $notifications-bg;
+        padding: 10px 15px;
+
+        &:hover {
+          background: $notifications-hover-bg;
+        }
+      }
+    }
+  }
+}

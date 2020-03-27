@@ -1,0 +1,18 @@
+footer {
+  width: 100%;
+  background: $footer-bg;
+  color: $footer-color;
+  text-align: center;
+  padding: 6px 0;
+  box-shadow: 5px 0 10px rgba(0, 0, 0, .2);
+  font-size: 14px;
+
+  a {
+    text-decoration: none;
+    color: $footer-a-color;
+
+    &:hover {
+      color: darken($footer-a-color, 15%);
+    }
+  }
+}

@@ -1,0 +1,371 @@
+/* ---------------- Checkbox ---------------- */
+.form-check-input {
+  position: absolute;
+  margin-top: .3rem;
+  margin-left: -1.25rem;
+}
+
+.form-check-input[type=checkbox], .form-check-input[type=radio], label.btn input[type=checkbox], label.btn input[type=radio] {
+  position: absolute;
+  left: -9999px;
+  visibility: hidden;
+}
+
+.form-check-input[type=checkbox] + label, .form-check-input[type=radio] + label, label.btn input[type=checkbox] + label, label.btn input[type=radio] + label {
+  position: relative;
+  padding-left: 2.19rem;
+  cursor: pointer;
+  display: inline-block;
+  height: 1.57rem;
+  line-height: 1.57rem;
+  font-size: 1rem;
+}
+
+.md-form label {
+  position: absolute;
+  top: .65rem;
+  left: 0;
+  transition: .2s ease-out;
+  cursor: text;
+  color: #757575;
+}
+
+.form-check-input[type=checkbox] + label:before, label.btn input[type=checkbox] + label:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 17px;
+  height: 17px;
+  z-index: 0;
+  border: 1.5px solid #8a8a8a;
+  border-radius: 1px;
+  margin-top: 2px;
+  transition: .2s;
+}
+
+.form-check-input[type=checkbox]:checked + label:before, label.btn input[type=checkbox]:checked + label:before {
+  top: -4px;
+  left: -3px;
+  width: 12px;
+  height: 22px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: transparent #4285f4 #4285f4 transparent;
+  transform: rotate(40deg);
+  transform-origin: 100% 100%;
+}
+
+/* ---------------- Checkbox ---------------- */
+
+/* ------------------ Radio ----------------- */
+.form-check-input[type=radio]:checked + label, .form-check-input[type=radio]:not(:checked) + label, label.btn input[type=radio]:checked + label, label.btn input[type=radio]:not(:checked) + label {
+  position: relative;
+  padding-left: 35px;
+  cursor: pointer;
+  display: inline-block;
+  height: 1.5625rem;
+  line-height: 1.5625rem;
+  transition: .28s ease;
+  user-select: none;
+}
+
+.form-check-input[type=radio]:checked + label:before, label.btn input[type=radio]:checked + label:before {
+  border: 2px solid transparent;
+}
+
+.form-check-input[type=radio] + label:after, .form-check-input[type=radio] + label:before, label.btn input[type=radio] + label:after, label.btn input[type=radio] + label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 4px;
+  width: 16px;
+  height: 16px;
+  z-index: 0;
+  transition: .28s ease;
+}
+
+.form-check-input[type=radio]:checked + label:after, label.btn input[type=radio]:checked + label:after {
+  transform: scale(1.02);
+}
+
+.form-check-input[type=radio].with-gap:checked + label:after, .form-check-input[type=radio]:checked + label:after, label.btn input[type=radio].with-gap:checked + label:after, label.btn input[type=radio]:checked + label:after {
+  background-color: #4285f4;
+}
+
+.form-check-input[type=radio].with-gap:checked + label:after, .form-check-input[type=radio].with-gap:checked + label:before, .form-check-input[type=radio]:checked + label:after, label.btn input[type=radio].with-gap:checked + label:after, label.btn input[type=radio].with-gap:checked + label:before, label.btn input[type=radio]:checked + label:after {
+  border: 2px solid #4285f4;
+}
+
+.form-check-input[type=radio] + label:after, .form-check-input[type=radio] + label:before, label.btn input[type=radio] + label:after, label.btn input[type=radio] + label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 4px;
+  width: 16px;
+  height: 16px;
+  z-index: 0;
+  transition: .28s ease;
+}
+
+.form-check-input[type=radio]:not(:checked) + label:after, .form-check-input[type=radio]:not(:checked) + label:before, label.btn input[type=radio]:not(:checked) + label:after, label.btn input[type=radio]:not(:checked) + label:before {
+  border: 2px solid #000;
+}
+
+.form-check-input[type=radio].with-gap:checked + label:after, .form-check-input[type=radio].with-gap:checked + label:before, .form-check-input[type=radio]:checked + label:after, .form-check-input[type=radio]:checked + label:before, .form-check-input[type=radio]:not(:checked) + label:after, .form-check-input[type=radio]:not(:checked) + label:before, label.btn input[type=radio].with-gap:checked + label:after, label.btn input[type=radio].with-gap:checked + label:before, label.btn input[type=radio]:checked + label:after, label.btn input[type=radio]:checked + label:before, label.btn input[type=radio]:not(:checked) + label:after, label.btn input[type=radio]:not(:checked) + label:before {
+  border-radius: 50%;
+}
+
+.form-check-input[type=radio]:not(:checked) + label:after, label.btn input[type=radio]:not(:checked) + label:after {
+  transform: scale(0);
+}
+
+.form-check-input[type=radio]:not(:checked) + label:after, .form-check-input[type=radio]:not(:checked) + label:before, label.btn input[type=radio]:not(:checked) + label:after, label.btn input[type=radio]:not(:checked) + label:before {
+  border: 2px solid #000;
+}
+
+/* ------------------ Radio ----------------- */
+
+/* ----------------- Switch ----------------- */
+.switch label {
+  cursor: pointer;
+}
+
+input[type=checkbox], input[type=radio] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.switch label input[type=checkbox] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch label .lever {
+  content: "";
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 15px;
+  background-color: #818181;
+  border-radius: 15px;
+  transition: background .3s ease;
+  vertical-align: middle;
+  margin: 0 16px;
+}
+
+.switch.primary-switch label input[type=checkbox]:checked + .lever {
+  background-color: #689DF6;
+}
+
+.switch label input[type=checkbox]:checked + .lever:after {
+  background-color: #a6c;
+  left: 24px;
+}
+
+.switch.primary-switch label input[type=checkbox]:checked + .lever:after {
+  background-color: #4285F4;
+}
+
+.switch label .lever:after {
+  content: "";
+  position: absolute;
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  background-color: #f1f1f1;
+  border-radius: 21px;
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, .4);
+  left: -5px;
+  top: -3px;
+  transition: left .3s ease, background .3s ease, box-shadow .1s ease;
+}
+
+/* ----------------- Switch ----------------- */
+
+/* ---------------- DropDown ---------------- */
+.dropdown-divider {
+  margin: 0 0 .5rem;
+}
+
+nav.navbar .dropdown-menu {
+  padding-bottom: 0;
+}
+
+.dropdown-menu {
+  .dropdown-item {
+    &.active {
+      background: #F3F3F3;
+    }
+
+    &.current {
+      font-weight: bold;
+    }
+  }
+}
+
+/* ---------------- DropDown ---------------- */
+
+/* --------------- Text color --------------- */
+.primary-text {
+  color: $primary-text;
+}
+
+.danger-text {
+  color: $danger-text;
+}
+
+.warning-text {
+  color: $warning-text;
+}
+
+.success-text {
+  color: $success-text;
+}
+
+.info-text {
+  color: $info-text;
+}
+
+.default-text {
+  color: $default-text;
+}
+
+.secondary-text {
+  color: $secondary-text;
+}
+
+/* --------------- Text color --------------- */
+
+/* ----------- Animated hamburger ----------- */
+/* Icon 1 */
+
+.navbar-toggler {
+  &[aria-expanded='true'] {
+    span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 0;
+      left: 8px;
+    }
+
+    span:nth-child(2) {
+      width: 0;
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 21px !important;
+      left: 8px;
+    }
+  }
+
+  .animated-icon {
+    width: 30px;
+    height: 20px;
+    position: relative;
+    margin: 0;
+    transform: rotate(0deg);
+    transition: .5s ease-in-out;
+    cursor: pointer;
+
+    span {
+      display: block;
+      position: absolute;
+      height: 3px;
+      width: 100%;
+      border-radius: 9px;
+      opacity: 1;
+      left: 0;
+      transform: rotate(0deg);
+      transition: .25s ease-in-out;
+      background: $hamburger-color;
+    }
+
+    span:nth-child(1) {
+      top: 0;
+      transform-origin: left center;
+    }
+
+    span:nth-child(2) {
+      top: 10px;
+      transform-origin: left center;
+    }
+
+    span:nth-child(3) {
+      top: 20px;
+      transform-origin: left center;
+    }
+  }
+}
+
+/* ----------- Animated hamburger ----------- */
+
+.wow {
+  visibility: hidden;
+}
+
+.md-form {
+  .validate {
+    margin-bottom: 0;
+  }
+
+  label:after {
+    margin-top: 5px;
+    width: max-content;
+  }
+
+  [required] + label {
+    &:before {
+      content: '*';
+      color: $red;
+      float: right;
+      position: relative;
+      top: -2px;
+      font-size: .9rem;
+    }
+  }
+}
+
+/* ----------- Display headers ----------- */
+@media (max-width: 576px) {
+  .display-1 {
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.0;
+  }
+
+  .display-2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.0;
+  }
+
+  .display-3 {
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.0;
+  }
+
+  .display-4 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1.0;
+  }
+}
+/* ----------- Display headers ----------- */
+
+@keyframes pulse {
+  from {
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+  to {
+    transform: scale3d(1, 1, 1);
+  }
+}

@@ -1,0 +1,74 @@
+$pred-to-show: 5;
+$pred: 4 + $pred-to-show;
+
+body {
+  &.summary, &.recalculate {
+    .eventsBox {
+      .event {
+        .team {
+          label.input {
+            cursor: default;
+          }
+        }
+
+        .prediction.summary {
+          border-top: 1px solid #555;
+
+          &:nth-of-type(n + #{$pred}) {
+            display: none;
+          }
+
+          &:hover {
+            background: darken($event-FINISHED-bg, 12%);
+
+            &.success {
+              background: darken($event-prediction-success-bg, 8%);
+            }
+          }
+
+          .text {
+            text-align: left;
+          }
+        }
+
+        .prediction.showAll {
+          display: none;
+          text-align: center;
+          cursor: pointer;
+
+          .hide {
+            display: none;
+          }
+        }
+
+        &[data-status='FINISHED'] {
+          .prediction.showAll {
+            display: block;
+          }
+        }
+
+        &.all {
+          .prediction.summary {
+            &:nth-of-type(n + #{$pred}) {
+              display: initial;
+            }
+
+            &:nth-of-type(#{$pred - 1}) {
+              margin: initial;
+            }
+          }
+
+          .prediction.showAll {
+            .hide {
+              display: initial;
+            }
+
+            .show {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+  }
+}

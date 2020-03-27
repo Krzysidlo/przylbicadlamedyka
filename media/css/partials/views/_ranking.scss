@@ -1,0 +1,20 @@
+body.ranking {
+  .rank {
+    table {
+      .img-small {
+        vertical-align: bottom;
+        margin-right: 2px;
+      }
+
+      span {
+        &.success {
+          color: var(--green);
+        }
+
+        &.danger {
+          color: var(--red);
+        }
+      }
+    }
+  }
+}
