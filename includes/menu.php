@@ -18,7 +18,7 @@ $user = new User;
         <ul class="navbar-nav mr-auto">
             <li class="nav-item<?= $this->menu === "index" ? " active" : ""; ?>">
                 <a class="nav-link preload" href="/">
-                    <?= fs::t("My bets") . ($this->menu === "index" ? " <span class='sr-only'>(current)</span>" : ""); ?>
+                    <?= "My bets" . ($this->menu === "index" ? " <span class='sr-only'>(current)</span>" : ""); ?>
                 </a>
             </li>
         </ul>
@@ -32,23 +32,19 @@ $user = new User;
                     <?php if (USER_PRV >= 2) { ?>
                         <a class="dropdown-item preload<?= $this->view === "settings" ? " active" : ""; ?>"
                            href="/settings">
-                            <?= fs::t("Settings"); ?>
+                            Ustawienia
                         </a>
                         <?php if (USER_PRV >= 4) { ?>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item preload<?= $this->view === "check" ? " active" : ""; ?>"
-                               href="/check">
-                                <?= fs::t("Check for errors"); ?>
-                            </a>
                             <?php if (IS_ROOT) { ?>
                                 <a class="dropdown-item preload" href="/admin/">
-                                    <?= fs::t("Admin"); ?>
+                                    Admin
                                 </a>
                             <?php } ?>
                         <?php } ?>
                         <div class="dropdown-divider"></div>
                     <?php } ?>
-                    <a class="dropdown-item preload" href="/logout"><?= fs::t("Logout"); ?></a>
+                    <a class="dropdown-item preload" href="/logout">Wyloguj się</a>
                 </div>
             </li>
             <?php [$new, $notifications] = fs::getNotifications(10);
@@ -56,7 +52,7 @@ $user = new User;
             <li class="nav-item dropdown notifications<?= $this->view === "notifications" ? " active" : ""; ?>">
                 <a class="nav-link dropdown-toggle" href="/notifications" id="notifications" role="button"
                    data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false" title="<?= fs::t("Notifications"); ?>">
+                   aria-haspopup="true" aria-expanded="false" title="Powiadomienia">
                     <i class="fas fa-bell"></i> <span class="num<?= $new > 0 ? " new" : ""; ?>"><?= $new; ?></span>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="notifications">
@@ -69,7 +65,7 @@ $user = new User;
                     if ($count >= 10) { ?>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item preload" href="/notifications">
-                            <?= fs::t("See all"); ?>
+                            Zobacz wszystkie
                         </a>
                     <?php } ?>
                 </div>

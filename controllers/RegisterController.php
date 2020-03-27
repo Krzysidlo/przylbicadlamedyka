@@ -4,8 +4,6 @@ namespace controllers;
 
 use Exception;
 use classes\User;
-use Google_Client;
-use Facebook\Facebook;
 use classes\Functions as fs;
 
 class RegisterController extends PageController
@@ -53,22 +51,22 @@ class RegisterController extends PageController
                             }
                             $data['success'] = true;
                         } else {
-                            $data['message']              = fs::t("Incorrect password");
+                            $data['message']              = "Incorrect password";
                             $data['alert']                = "warning";
                             $data['invalid']['lpassword'] = true;
                         }
                     } catch (Exception $e) {
-                        $data['message']           = fs::t("Incorrect e-mail address");
+                        $data['message']           = "Incorrect e-mail address";
                         $data['alert']             = "warning";
                         $data['invalid']['lemail'] = true;
                     }
                 } else {
-                    $data['message']           = fs::t("Incorrect e-mail address");
+                    $data['message']           = "Incorrect e-mail address";
                     $data['alert']             = "warning";
                     $data['invalid']['lemail'] = true;
                 }
             } else {
-                $data['message'] = fs::t("Please fill in all necessary fields");
+                $data['message'] = "Please fill in all necessary fields";
                 $data['alert']   = "warning";
             }
         }
@@ -101,7 +99,7 @@ class RegisterController extends PageController
             }
             if (!empty($get['name']) && !empty($get['password']) && !empty($get['r-password']) && !empty($get['email'])) {
                 if (fs::$mysqli->query("SELECT 1 FROM `users` WHERE `email` = '{$get['email']}';")->num_rows) {
-                    $data['message']          = fs::t("This e-mail address already exists") . ". " . fs::t("Please use different") . ".";
+                    $data['message']          = "This e-mail address already exists" . ". " . "Please use different" . ".";
                     $data['alert']            = "warning";
                     $data['invalid']['email'] = true;
                 } else {
@@ -119,26 +117,26 @@ class RegisterController extends PageController
                                 } catch (Exception $e) {
                                     fs::log("Error: " . $e->getMessage());
                                     $data['alert']   = "danger";
-                                    $data['message'] = fs::t("There was an error while creating new user");
+                                    $data['message'] = "There was an error while creating new user";
                                 }
                             } else {
-                                $data['message']          = fs::t("E-mail address seems to be incorrect");
+                                $data['message']          = "E-mail address seems to be incorrect";
                                 $data['alert']            = "warning";
                                 $data['invalid']['email'] = true;
                             }
                         } else {
-                            $data['message']             = fs::t("Minimum password length is 8");
+                            $data['message']             = "Minimum password length is 8";
                             $data['alert']               = "warning";
                             $data['invalid']['password'] = $data['invalid']['r-password'] = true;
                         }
                     } else {
-                        $data['message']             = fs::t("Confirmed password is not the same");
+                        $data['message']             = "Confirmed password is not the same";
                         $data['alert']               = "warning";
                         $data['invalid']['password'] = $data['invalid']['r-password'] = true;
                     }
                 }
             } else {
-                $data['message'] = fs::t("Please fill in all necessary fields");
+                $data['message'] = "Please fill in all necessary fields";
                 $data['alert']   = "warning";
             }
         }
@@ -169,22 +167,22 @@ class RegisterController extends PageController
             $break = true;
         }
 
-        if (!$break && $user->pswdExists && empty($get['cpassword'])) {
-            $data['message'] = fs::t("Please provide current password");
+        if (!$break && empty($get['cpassword'])) {
+            $data['message'] = "Please provide current password";
             $data['alert']   = "warning";
             $data['field']   = "cpassword";
             $break           = true;
         }
 
-        if (!$break && $user->pswdExists && md5($get['cpassword'] . $user->salt) !== $user->password) {
-            $data['message'] = fs::t("Incorrect password");
+        if (!$break && md5($get['cpassword'] . $user->salt) !== $user->password) {
+            $data['message'] = "Incorrect password";
             $data['alert']   = "warning";
             $data['field']   = "cpassword";
             $break           = true;
         }
 
         if (!$break && (empty($get['password']) || empty($get['rpassword']))) {
-            $data['message'] = fs::t("Please fill in all fields");
+            $data['message'] = "Please fill in all fields";
             $data['alert']   = "warning";
             $field           = "";
             if (empty($_POST['password'])) {
@@ -202,7 +200,7 @@ class RegisterController extends PageController
         }
 
         if (!$break && $get['password'] !== $get['rpassword']) {
-            $data['message'] = fs::t("Confirmed password is not the same");
+            $data['message'] = "Confirmed password is not the same";
             $data['alert']   = "warning";
             $data['field']   = "password,rpassword";
             $break           = true;
@@ -210,7 +208,7 @@ class RegisterController extends PageController
 
         if (!$break) {
             $success  = $user->updatePassword($get['password']);
-            $message  = ($success ? (fs::t("You have successfully") . " " . ($user->pswdExists ? fs::t("updated") : fs::t("created")) . " " . fs::t("your password")) : (fs::t("There was an error") . ". " . fs::t("Please refresh the page and try again") . "."));
+            $message  = ($success ? ("You have successfully updated your password") : ("There was an error. Please refresh the page and try again."));
             $alert    = ($success ? 'success' : 'warning');
             $data     = [
                 'success' => $success,

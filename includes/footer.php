@@ -10,7 +10,7 @@ use classes\Functions as fs;
 
     <div class="toastContainer"></div>
     <footer>
-        <?= fs::t("Website created by"); ?> <a href="https://kjaniszewski.pl" target="_blank">Krzysztof Janiszewski</a>
+        Strona stworzona przez <a href="https://kjaniszewski.pl" target="_blank">Krzysztof Janiszewski</a>
         2020
     </footer>
 

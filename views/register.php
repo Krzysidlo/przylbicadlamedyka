@@ -3,7 +3,7 @@
 use classes\User;
 use classes\Functions as fs;
 
-$this->title = fs::t("Log in");
+$this->title = "Log in";
 ?>
 
 <section class="container">
@@ -45,12 +45,12 @@ $this->title = fs::t("Log in");
                 <li class="nav-item">
                     <a class="nav-link active" id="home-tab" data-toggle="tab" href="#register" role="tab"
                        aria-controls="register"
-                       aria-selected="true"><?= fs::t("Sign up"); ?></a>
+                       aria-selected="true">Zarejestruj się</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="profile-tab" data-toggle="tab" href="#login" role="tab"
                        aria-controls="login"
-                       aria-selected="false"><?= fs::t("Log in"); ?></a>
+                       aria-selected="false">Zaloguj się</a>
                 </li>
             </ul>
             <div class="tab-content row" id="tabs">
@@ -59,47 +59,43 @@ $this->title = fs::t("Log in");
                     <form action="/ajax/register/register" method="post">
                         <div class="form-group">
                             <label for="email"
-                                   data-error="<?= fs::t("It doesn't look like correct e-mail address"); ?>">
-<!--                                <i class="fa fa-envelope prefix"></i>-->
-                                <?= fs::t("Email"); ?>
+                                   data-error="It doesn't look like correct e-mail address">
+                                E-mail
                             </label>
                             <input type="email" name="email" id="email" required
                                    class="form-control validate<?= !empty($invalid['email']) && $invalid['email'] ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("It doesn't look like correct e-mail address"); ?>"
+                                   title="It doesn't look like correct e-mail address"
                                    value="<?= !empty($this->get('email')) ? $this->get('email') : ""; ?>">
                         </div>
                         <div class="form-group">
-                            <label for="name" data-error="<?= fs::t("Minimum name length is 3"); ?>">
-<!--                                <i class="fa fa-user prefix"></i>-->
-                                <?= fs::t("User name"); ?>
+                            <label for="name" data-error="Minimum name length is 3">
+                                Nazwa użytkownika
                             </label>
                             <input type="text" name="name" id="name" pattern=".{3,}" required
                                    class="form-control validate<?= !empty($invalid['name']) && $invalid['name'] ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("Minimum name length is 3"); ?>"
+                                   title="Minimum name length is 3"
                                    value="<?= !empty($this->get('name')) ? $this->get('name') : ""; ?>">
                         </div>
                         <div class="form-group">
-                            <label for="password" data-error="<?= fs::t("Minimum password length is 8"); ?>">
-<!--                                <i class="fa fa-lock prefix"></i>-->
-                                <?= fs::t("Password"); ?>
+                            <label for="password" data-error="Minimum password length is 8">
+                                Hasło
                             </label>
                             <input type="password" name="password" id="password" pattern=".{8,}" required
                                    class="form-control validate<?= !empty($invalid['password']) && $invalid['password'] ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("Minimum password length is 8"); ?>"
+                                   title="Minimum password length is 8"
                                    value="<?= !empty($this->get('password')) ? $this->get('password') : ""; ?>">
                         </div>
                         <div class="form-group">
-                            <label for="r-password" data-error="<?= fs::t("Minimum password length is 8"); ?>">
-<!--                                <i class="fa fa-exclamation-triangle prefix"></i>-->
-                                <?= fs::t("Confirm password"); ?>
+                            <label for="r-password" data-error="Minimum password length is 8">
+                                Powtórz hasło
                             </label>
                             <input type="password" name="r-password" id="r-password" pattern=".{8,}" required
                                    class="form-control validate<?= !empty($invalid['r-password']) && $invalid['r-password'] ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("Minimum password length is 8"); ?>"
+                                   title="Minimum password length is 8"
                                    value="<?= !empty($this->get('r-password')) ? $this->get('r-password') : ""; ?>">
                         </div>
                         <div class="col-12 text-center">
-                            <button class="btn btn-primary" type="submit"><?= fs::t("Sign up"); ?></button>
+                            <button class="btn btn-primary" type="submit">Zarejestruj się</button>
                         </div>
                     </form>
                 </div>
@@ -107,46 +103,39 @@ $this->title = fs::t("Log in");
                     <form action="/ajax/register/login" method="post">
                         <div class="form-group">
                             <label for="lemail"
-                                   data-error="<?= fs::t("It doesn't look like correct e-mail address"); ?>">
-<!--                                <i class="fa fa-envelope prefix"></i>-->
-                                <?= fs::t("Email"); ?>
+                                   data-error="It doesn't look like correct e-mail address">
+                                E-mail
                             </label>
                             <input type="email" name="lemail" id="lemail" required
                                    class="form-control validate<?= !empty($invalid['email']) && $invalid['email'] ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("It doesn't look like correct e-mail address"); ?>"
+                                   title="It doesn't look like correct e-mail address"
                                    value="<?= !empty($this->get('email')) ? $this->get('email') : ""; ?>">
                         </div>
                         <div class="form-group">
-                            <label for="lpassword" data-error="<?= fs::t("Minimum password length is 8"); ?>">
-<!--                                <i class="fa fa-lock prefix"></i>-->
-                                <?= fs::t("Password"); ?>
+                            <label for="lpassword" data-error="Minimum password length is 8">
+                                Hasło
                             </label>
                             <input type="password" name="lpassword" id="lpassword" pattern=".{8,}" required
                                    class="form-control validate<?= !empty($invalid['lpassword']) && $invalid['lpassword'] && !$easyLogIn ? " invalid" : ""; ?>"
-                                   title="<?= fs::t("Minimum password length is 8"); ?>"
+                                   title="Minimum password length is 8"
                                    value="<?= !empty($this->get('lpassword')) && !$easyLogIn ? $this->get('lpassword') : ""; ?>">
                         </div>
                         <div class="md-form pb-2">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" name="lremember"
                                        id="lremember" <?= !empty($_POST['lremember']) && !$easyLogIn ? "checked" : ""; ?>>
-                                <label for="lremember" class="form-check-label"><?= fs::t("Keep me signed"); ?></label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="leasy"
-                                       id="leasy" <?= !empty($this->get('lremember')) && !$easyLogIn ? "checked" : ""; ?>>
-                                <label for="leasy" class="form-check-label"><?= fs::t("Easy log in"); ?></label>
+                                <label for="lremember" class="form-check-label">Pozostań zalogowany</label>
                             </div>
                         </div>
                         <div class="md-form">
-                            <?= fs::t("Forgot password"); ?>?
+                            Zapomniałeś hasła?
                             <a href="#" data-toggle="modal"
-                               data-target="#forgotPassword"><?= fs::t("Click here"); ?></a>
+                               data-target="#forgotPassword">Kliknij tutaj</a>
                         </div>
                         <input type="hidden" name="submitLogin" value="true">
                         <div class="col-12 text-center">
                             <button type="submit" class="btn btn-primary">
-                                <?= fs::t("Log in"); ?> <i class="fas fa-sign-in-alt ml-1"></i>
+                                Zaloguj się <i class="fas fa-sign-in-alt ml-1"></i>
                             </button>
                         </div>
                     </form>
@@ -178,22 +167,22 @@ $this->title = fs::t("Log in");
                         <input type="hidden" name="leasy" value="on">
                         <input type="password" id="mpassword" name="lpassword" pattern=".{8,}" required
                                class="form-control form-control-sm validate ml-0<?= !empty($invalid['lpassword']) && $invalid['lpassword'] ? " invalid" : ""; ?>"
-                               title="<?= fs::t("Minimum password length is 8"); ?>"
+                               title="Minimum password length is 8"
                                value="<?= !empty($this->get('lpassword')) ? $this->get('lpassword') : ""; ?>">
                         <label for="mpassword"<?= !empty($message) ? " data-error='" . $message . "'" : ""; ?>
                                class="ml-0">
-                            <?= fs::t("Enter password"); ?>
+                            Podaj hasło
                         </label>
                     </div>
                     <div class="md-form ml-0 mr-0 clearfix">
                         <input type="checkbox" class="form-check-input" name="lremember"
                                id="mremember" <?= !empty($this->get('lremember')) ? "checked" : ""; ?>>
-                        <label for="mremember" class="form-check-label"><?= fs::t("Keep me signed"); ?></label>
+                        <label for="mremember" class="form-check-label">Pozostań zalogowany</label>
                     </div>
                     <div class="text-center mt-4">
                         <button type="submit" name="submitLogin" value="submitLogin"
                                 class="btn btn-primary mt-1">
-                            <?= fs::t("Sign in"); ?> <i class="fas fa-sign-in-alt ml-1"></i>
+                            Zaloguj się <i class="fas fa-sign-in-alt ml-1"></i>
                         </button>
                     </div>
                 </form>
@@ -210,7 +199,7 @@ $this->title = fs::t("Log in");
     <div class="modal-dialog modal-notify modal-info modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <p class="heading lead"><?= fs::t("Reset your password"); ?></p>
+                <p class="heading lead">Zresetuj hasło</p>
 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true" class="white-text">&times;</span>
@@ -222,12 +211,12 @@ $this->title = fs::t("Log in");
                         <input type="email" id="femail" name="femail" class="form-control form-control-sm validate ml-0"
                                pattern=".{8,}" required>
                         <label for="femail" class="ml-0">
-                            <?= fs::t("Enter e-mail"); ?>
+                            Podaj adres e-mail
                         </label>
                     </div>
                     <div class="text-center mt-4">
                         <button type="submit" name="forgotPassword" class="btn btn-primary mt-1">
-                            <?= fs::t("Send"); ?> <i class="fas fa-sign-in-alt ml-1"></i>
+                            Wyślij <i class="fas fa-sign-in-alt ml-1"></i>
                         </button>
                     </div>
                 </form>

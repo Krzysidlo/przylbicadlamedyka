@@ -203,15 +203,15 @@ class User
         $google_id   = "NULL";
         switch ($type) {
             case 'normal':
-                $user->sendNotification(fs::t("In order to gain access please confirm your e-mail address"), NULL);
+                $user->sendNotification("In order to gain access please confirm your e-mail address", NULL);
 
                 $hash = md5($email . time() . rand(1000, 9999));
                 $user->setOption('confirm-email', $hash);
 
-                $subject = PAGE_NAME . " - " . fs::t("E-mail address confirmation");
+                $subject = PAGE_NAME . " - " . "E-mail address confirmation";
 
-                $text[] = fs::t("Thank you for registering on") . " " . PAGE_NAME;
-                $text[] = fs::t("Please click the link below to confirm your e-mail address");
+                $text[] = "Thank you for registering on" . " " . PAGE_NAME;
+                $text[] = "Please click the link below to confirm your e-mail address";
                 $link   = ROOT_URL . "/confirm/" . $hash;
 
                 $text = implode("<br>", $text);

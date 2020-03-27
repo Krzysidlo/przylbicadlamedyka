@@ -2,7 +2,9 @@
 
 namespace controllers;
 
+use classes\User;
 use classes\Functions as fs;
+use classes\exceptions\UserNotFoundException;
 
 class ResetController extends PageController
 {
@@ -11,60 +13,54 @@ class ResetController extends PageController
     {
         $hash = $this->get('hash');
 
-        if (empty($hash)) {
-            header("Location: /");
-            die();
+        try {
+            $user = User::getByHash($hash);
+        } catch (UserNotFoundException $e) {
+            fs::log("Error: " . $e->getMessage());
+            self::redirect("/");
+            exit(0);
         }
 
-        $user = fs::findUserByHash($hash);
-        if (empty($user)) {
-            header("Location: /");
-            die();
-        }
-
-        $args['user'] = $user;
+        $data['user'] = $user;
         if (!empty($this->get('resetPassword'))) {
             $break           = false;
-            $args['message'] = fs::t("You have successfuly changed your password") . ". <a href='/'>" . fs::t("Click here to go back to log in") . "</a>.";
-            $args['alert']   = "success";
+            $data['message'] = "You have successfuly changed your password. <a href='/'>Click here to go back to log in</a>.";
+            $data['alert']   = "success";
             if (!$break && empty($this->get('newPassword'))) {
-                $args['message']                = fs::t("Password field cannot be empty");
-                $args['invalid']['newPassword'] = true;
+                $data['message']                = "Password field cannot be empty";
+                $data['invalid']['newPassword'] = true;
                 $break                          = true;
             }
             if (!$break && empty($this->get('r-newPassword'))) {
-                $args['message']                  = fs::t("Repeat password field cannot be empty");
-                $args['invalid']['r-newPassword'] = true;
+                $data['message']                  = "Repeat password field cannot be empty";
+                $data['invalid']['r-newPassword'] = true;
                 $break                            = true;
             }
             if (!$break && $this->get('newPassword') !== $this->get('r-newPassword')) {
-                $args['message']                = fs::t("Repeated password is not the same");
-                $args['invalid']['newPassword'] = $args['invalid']['r-newPassword'] = true;
+                $data['message']                = "Repeated password is not the same";
+                $data['invalid']['newPassword'] = $data['invalid']['r-newPassword'] = true;
                 $break                          = true;
             }
-            if (!$break && strlen($this->get('newPassword']) < 8) {
-                $args['message']                = fs::t("Minimum password length is 8");
-                $args['invalid']['newPassword'] = $args['invalid']['r-newPassword'] = true;
+            if (!$break && strlen($this->get('newPassword')) < 8) {
+                $data['message']                = "Minimum password length is 8";
+                $data['invalid']['newPassword'] = $data['invalid']['r-newPassword'] = true;
                 $break                          = true;
             }
 
             if (!$break) {
-                $salt     = (string)rand(1111111111, 9999999999);
-                $password = md5($this->get('newPassword') . $salt);
-                if (fs::updatePassword($user['id'], $password, $salt)) {
-                    unset($this->get('newPassword'), $this->get('r-newPassword'));
-                    fs::setOption('reset-password', NULL, $user['id']);
+                if ($user->updatePassword($this->get('newPassword'))) {
+                    $user->setOption('reset-password', NULL);
                 } else {
-                    $args['message'] = fs::t("There was an unexpected error");
+                    $data['message'] = "There was an unexpected error";
                     $break           = true;
                 }
             }
 
             if ($break) {
-                $args['alert'] = "danger";
+                $data['alert'] = "danger";
             }
         }
 
-        return parent::content($args);
+        return parent::content(array_merge($args, $data));
     }
 }

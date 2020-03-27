@@ -15,15 +15,13 @@ if (DEV_MODE) {
     }
 }
 
-//Always use database on main server
-//$DB_HOST = '185.243.55.171';
 //Use local database
 $DB_HOST = 'localhost';
-$DB_NAME = 'cotyp';
+$DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';
 if (DEV_MODE) {
-    $DB_NAME = 'cotyp_test';
+    $DB_NAME = 'przylbicadlamedyka_test';
 }
 
 //Wyświetla się komunikat, że strona w trakcie konstrukcji
@@ -35,14 +33,11 @@ try {
     $mysqli = new mysqli($DB_HOST, $DB_USER, $DB_PSWD, $DB_NAME);
     $mysqli->set_charset("utf8");
 } catch (Exception $e) {
-    fs::log("Error: " . $e->getMessage());
     $CONST_MODE = true;
     $DB_CONN    = false;
 }
 
 define('DB_CONN', $DB_CONN);
-
-CONST VER = "2.0";
 
 $rootDir = dirname(__DIR__);
 chdir($rootDir);
@@ -50,7 +45,6 @@ chdir($rootDir);
 define('ROOT_DIR', $rootDir);
 const MEDIA_DIR = ROOT_DIR . "/media";
 const INC_DIR   = ROOT_DIR . "/includes";
-const TRANS_DIR = ROOT_DIR . "/translations";
 const CONF_DIR  = ROOT_DIR . "/config";
 const LOG_DIR   = ROOT_DIR . "/../logs";
 const AJAX_DIR  = ROOT_DIR . "/ajax";
@@ -58,7 +52,6 @@ const ADMIN_DIR = ROOT_DIR . "/admin";
 
 const IMG_DIR  = MEDIA_DIR . "/img";
 const TMP_DIR  = IMG_DIR . "/tmp";
-const COMP_DIR = IMG_DIR . "/competitions";
 const CSS_DIR  = MEDIA_DIR . "/css";
 const JS_DIR   = MEDIA_DIR . "/js";
 
@@ -76,9 +69,9 @@ if (!empty($_SERVER['REQUEST_SCHEME']) && !empty($_SERVER['HTTP_HOST'])) {
             $ROOT_URL = array_shift($parts) . "//" . $_SERVER['HTTP_HOST'];
         } else {
             if (DEV_MODE) {
-                $ROOT_URL = "https://test.cotyp.pl";
+                $ROOT_URL = "https://test.przylbicadlamedyka.pl";
             } else {
-                $ROOT_URL = "https://cotyp.pl";
+                $ROOT_URL = "https://przylbicadlamedyka.pl";
             }
         }
     }
@@ -94,13 +87,8 @@ const MSC_URL  = MEDIA_URL . "/music";
 const USR_URL  = IMG_URL . "/users";
 const COMP_URL = IMG_URL . "/competitions";
 const TMP_URL  = IMG_URL . "/tmp";
-const SRP_URL  = IMG_URL . "/surprise";
 const CSS_URL  = MEDIA_URL . "/css";
 const JS_URL   = MEDIA_URL . "/js";
-
-const HOME_TEAM = 1;
-const DRAW      = 2;
-const AWAY_TEAM = 3;
 
 if (isset($_SERVER['REQUEST_URI'])) {
     $request_uri = $_SERVER['REQUEST_URI'];
@@ -132,15 +120,8 @@ define('EMAIL', $EMAIL);
 
 //Default values of options (returned by getOption function if no value is set)
 define("DEFAULT_OPTIONS", [
-    'parallax'      => false,
-    'parallaxUrl'   => '',
-    'picturesFound' => [],
-    'avatar'        => 'default.png',
     'changed_name'  => '',
     'login'         => '',
-    'subscription'  => [],
-    'competition'   => 1,
-    'groups'        => [1],
 ]);
 /* ------------------------ /Settings ------------------------- */
 

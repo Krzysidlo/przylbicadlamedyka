@@ -7,7 +7,7 @@ $user = $users ?? [];
 <section class="container mainInfo">
     <div class="row">
         <div class="col-12">
-            <h1><?= fs::t("Privileges"); ?></h1>
+            <h1>Privileges</h1>
         </div>
     </div>
 </section>

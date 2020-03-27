@@ -2,12 +2,12 @@
 
 use classes\Functions as fs;
 
-$this->title = fs::t("Settings");
+$this->title = "Settings";
 ?>
 <section class="container mainInfo">
     <div class="row">
         <div class="col-12">
-            <h1><?= fs::t("Settings"); ?></h1>
+            <h1>Settings</h1>
         </div>
     </div>
 </section>
@@ -16,11 +16,11 @@ $this->title = fs::t("Settings");
     <div class="row">
         <form action="/admin/ajax/save_settings.php" method="post" class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
             <input type="hidden" name="page[CONST_MODE]" value="false">
-            <h4 class="mb-4 text-center"><?= fs::t("Page settings"); ?></h4>
+            <h4 class="mb-4 text-center">Page settings</h4>
             <div class="switch primary-switch mb-3">
                 <label class="row">
 			    <span class="col-8">
-					<?= fs::t("Construction mode"); ?>
+					Construction mode
 					<hr class="d-sm-none divider">
 				</span>
                     <span class="col-4">
@@ -34,7 +34,7 @@ $this->title = fs::t("Settings");
             <div class="form-group">
                 <label class="row">
             <span class="col-4 text-left text-input-label">
-                <?= fs::t("E-mail address"); ?>
+                E-mail address
                 <hr class="d-sm-none divider">
             </span>
                     <span class="col-8">
@@ -43,7 +43,7 @@ $this->title = fs::t("Settings");
                 </label>
             </div>
             <hr class="d-sm-none">
-            <input type="submit" class="btn btn-primary" name="saveSettings" value="<?= fs::t("Save"); ?>">
+            <input type="submit" class="btn btn-primary" name="saveSettings" value="Zapisz">
         </form>
     </div>
 </section>
