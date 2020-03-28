@@ -767,23 +767,41 @@ var index = function () {
                     });
                 };
 
-                var map = L.map('addressMap').setView([51.505, -0.09], 13);
+                // $(":input").inputmask();
+
+                var map = L.map('addressMap').setView([50.0619474, 19.9368564], 13);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                var marker = L.marker([51.5, -0.09], {draggable:'true'}).addTo(map);
+                var marker = L.marker([50.0619474, 19.9368564], {draggable:'true'}).addTo(map);
 
-                var $addressFinder = $register.find("#addressFinder");
+                var $addressFinder = $register.find("#addressFinder"),
+                    addMarker = setTimeout(function(){});
                 $addressFinder.on('keyup', function (e) {
                     var address = $addressFinder.val();
 
-                    setTimeout();
+                    clearTimeout(addMarker);
+                    addMarker = setTimeout(function () {
+                        $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q='+address, function(data){
+                            if (typeof data[0] !== "undefined") {
+                                var lat = data[0].lat,
+                                    lng = data[0].lon;
+
+                                bindMarker(lat, lng);
+                            }
+                        });
+                    }, 1E3);
                 });
 
-                var bindMarker = function(loc) {
-
+                var bindMarker = function(lat, lng) {
+                    var location = new L.LatLng(lat, lng);
+                    map.removeLayer(marker);
+                    marker.setLatLng(location);
+                    marker.addTo(map);
+                    // marker.trigger('dragging');
+                    map.panTo(location);
                 };
             }
         })();
