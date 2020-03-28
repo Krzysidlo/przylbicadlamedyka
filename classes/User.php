@@ -178,7 +178,7 @@ class User
      * @return bool|User
      * @throws Exception
      */
-    public static function newUser(string $email, string $firstName, string $lastName, string $tel, string $address, string $password)
+    public static function newUser(string $email, string $firstName, string $lastName, string $address, string $tel, string $password)
     {
         try {
             new self($email);
@@ -418,5 +418,20 @@ HTML;
         fs::$mysqli->query($sql);
 
         return (fs::$mysqli->affected_rows > 0);
+    }
+
+    public function updateInfo(string $firstName, string $lastName, string $address, string $tel, ?string $nPassword = NULL)
+    {
+        $sql = "UPDATE `users` SET `first_name` = '{$firstName}', `last_name` = '{$lastName}', `address` = '{$address}', `tel` = '{$tel}'";
+
+        if ($nPassword !== NULL) {
+            $salt     = rand(1111111111, 9999999999);
+            $password = md5($nPassword . $salt);
+
+            $sql .= " `password` = '{$password}', `salt` = '{$salt}'";
+        }
+        $sql .= " WHERE `id` = '{$this->id}';";
+
+        return !!fs::$mysqli->query($sql);
     }
 }
