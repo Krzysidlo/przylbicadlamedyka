@@ -205,300 +205,15 @@ var index = function () {
         (function settings() {
             var $settings = $("body.settings");
             if ($settings.length) {
-                var $form = $settings.find(".form form"),
-                    $darkTheme = $form.find("input[name='darkTheme']"),
-                    $pushNotifications = $form.find("input[name='pushNotifications']"),
-                    $parallax = $form.find("input[name='parallax']"),
-                    $parallaxUrl = $form.find("input[name='parallaxUrl']"),
-                    $avatar = $form.find("input[name='avatar']"),
-                    $avatarLabel = $form.find("label[for='avatar']"),
-                    $gravatar = $form.find("input[name='gravatar']"),
-                    $avatarParent = $avatar.parent(),
-                    $profile = $avatarParent.find("#profile"),
-                    $sourceModal = $settings.find("#source");
+                var $form = $settings.find(".form form");
 
                 $form.on('submit', function (e) {
                     e.preventDefault();
-                    saveSettings($form);
-                });
 
-                $darkTheme.on('change', function () {
-                    var $link = $("link.theme");
-                    if ($(this).prop('checked')) {
-                        $link.attr('href', $link.data('dark'));
-                        $("nav.navbar").removeClass("navbar-light bg-light").addClass("navbar-dark bg-dark");
-                    } else {
-                        $link.attr('href', $link.data('light'));
-                        $("nav.navbar").removeClass("navbar-dark bg-dark").addClass("navbar-light bg-light");
-                    }
-                });
-
-                $pushNotifications.on('change', function () {
-                    var $this = $(this);
-                    if ($this.prop('checked')) {
-                        if (!Push.Permission.has() && Push.Permission.get() !== 'denied') {
-                            Push.Permission.request(subscribePushManager(), notifyDenied());
-                        } else if (!Push.Permission.has()) {
-                            $this.prop('checked', false);
-                            notifyDenied();
-                        }
-                    }
-                });
-
-                $parallax.on('change', function () {
-                    if ($(this).prop('checked')) {
-                        $parallaxUrl.parent().fadeIn();
-                    } else {
-                        $parallaxUrl.parent().fadeOut();
-                    }
-                });
-
-                var $iTag = $parallaxUrl.parent().find("i.fa");
-
-                if ($iTag.hasClass("active")) {
-                    $iTag.removeClass("active");
-                }
-
-                $parallaxUrl.on('blur', function () {
-                    $iTag.removeClass("active");
-                });
-
-                $gravatar.on('change', function () {
-                    var $avatarParent = $avatar.parents(".avatarParent");
-                    if ($(this).prop('checked')) {
-                        $avatarParent.fadeOut();
-                    } else {
-                        $avatarParent.fadeIn();
-                    }
-                });
-
-                $avatarLabel.on('click', function (e) {
-                    e.preventDefault();
-
-                    $sourceModal.modal('show');
-                });
-
-                var openCameraModal = false;
-                $sourceModal.on('click', '.option.capture', function (e) {
-                    e.preventDefault();
-
-                    openCameraModal = true;
-                    $sourceModal.modal('hide');
-                })
-                    .on('click', '.option.upload', function (e) {
-                        e.preventDefault();
-
-                        $sourceModal.modal('hide');
-                        $avatar.trigger('click');
-                    })
-                    .on('hidden.bs.modal', function () {
-                        if (openCameraModal) {
-                            $cameraModal.modal("show");
-
-                            //navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
-
-                            navigator.mediaDevices.getUserMedia({
-                                video: true, audio: false
-                            })
-                                .then(function (stream) {
-                                    cameraStream = stream;
-                                    video.srcObject = stream;
-                                    video.play();
-                                })
-                                .catch(function (error) {
-                                    console.log('error', error);
-                                });
-
-                            openCameraModal = false;
-                        }
-                    });
-
-                var uploadedFile = "";
-                $avatar.on('change', function () {
-                    var input = this,
-                        reader = new FileReader();
-
-                    if (input.files && input.files[0]) {
-                        uploadedFile = input.files;
-                        reader.onload = function (e) {
-                            $profile.attr('src', e.target.result);
-
-                            $avatarParent.find('.removePic').removeClass("hidden");
-                            $avatarParent.find("input[name='save_avatar']").val("true");
-                        };
-                        reader.readAsDataURL(uploadedFile[0]);
-                    } else {
-                        $avatar.prop('files', uploadedFile);
-                    }
-                });
-
-                var droppedFiles = false;
-                $avatarParent.on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                })
-                    .on('dragover dragenter', function () {
-                        $avatarParent.addClass('drag');
-                    })
-                    .on('dragleave dragend drop', function () {
-                        $avatarParent.removeClass('drag');
-                    })
-                    .on('drop', function (e) {
-                        droppedFiles = e.originalEvent.dataTransfer.files;
-                        if (droppedFiles.length >= 2) {
-                            removePic($avatarParent.find('.removePic'));
-                            displayToast($avatar.data('tmf'), 'warning');
-                        } else {
-                            $avatar.prop('files', droppedFiles);
-                            $avatar.trigger('change');
-                        }
-                    });
-
-                $avatarParent.find('.removePic').on('click', function () {
-                    removePic($(this));
-                });
-
-                var removePic = function ($removeBtn) {
-                    $removeBtn.addClass("hidden");
-
-                    $avatar.val("");
-                    $avatarParent.find("input[name='save_avatar']").val("");
-                    $profile.attr('src', $avatar.data('default'));
-                    uploadedFile = "";
-                    $avatar.prop('files', uploadedFile);
-                };
-
-                $settings.find("#recountPoints").on('click', function (e) {
-                    e.preventDefault();
-                    $.ajax({
-                        url: "/ajax/recalculate_points.php?ajax=true",
-                        type: "POST",
-                        dataType: "JSON",
-                        beforeSend: function () {
-                            showLoading();
-                        },
-                        success: function (data) {
-                            if (data.alert) {
-                                displayToast(data.message, data.alert);
-                            }
-                        },
-                        error: function () {
-                            displayToast("Nieznany błąd", "danger");
-                        },
-                        complete: function () {
-                            hideLoading();
-                        }
-                    });
-                });
-
-                var $cameraModal = $settings.find("#camera"),
-                    $takenPicture = $cameraModal.find("img.preview"),
-                    video = $cameraModal.find('video.camera_stream')[0],
-                    $videoContainer = $(video).parents(".box"),
-                    $pictureContainer = $takenPicture.parents(".box"),
-                    $takePictureBtn = $cameraModal.find(".capture"),
-                    $tryAgainBtn = $cameraModal.find(".again"),
-                    $saveBtn = $cameraModal.find(".save"),
-                    imageDataURL,
-                    cameraStream;
-
-                $saveBtn.hide();
-                $tryAgainBtn.hide();
-
-                $takePictureBtn.on('click', function (e) {
-                    e.preventDefault();
-
-                    var $takePictureBtn = $(this),
-                        hidden_canvas = $cameraModal.find('canvas.snapshot')[0],
-                        width = video.videoWidth,
-                        height = video.videoHeight,
-                        context = hidden_canvas.getContext('2d');
-
-                    hidden_canvas.width = width;
-                    hidden_canvas.height = height;
-
-                    context.drawImage(video, 0, 0, width, height);
-
-                    imageDataURL = hidden_canvas.toDataURL('image/jpg');
-
-                    $takenPicture.attr('src', imageDataURL);
-                    $videoContainer.hide();
-                    $pictureContainer.show();
-                    $takePictureBtn.hide();
-                    $tryAgainBtn.show();
-                    $saveBtn.show();
-                });
-
-                $tryAgainBtn.on('click', function (e) {
-                    e.preventDefault();
-
-                    $videoContainer.show();
-                    $pictureContainer.hide();
-                    $takePictureBtn.show();
-                    $tryAgainBtn.hide();
-                    $saveBtn.hide();
-                });
-
-                $cameraModal.on('hidden.bs.modal', function () {
-                    var track = cameraStream.getTracks()[0];
-                    $takenPicture.attr('src', "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=");
-                    track.stop();
-                    $tryAgainBtn.trigger('click');
-                });
-
-                $saveBtn.on('click', function (e) {
-                    e.preventDefault();
+                    var formData = new FormData($form.get(0));
 
                     $.ajax({
-                        url: "/ajax/save_picture.php?ajax=true",
-                        type: "POST",
-                        data: {file: imageDataURL},
-                        dataType: "JSON",
-                        beforeSend: function () {
-                            showLoading();
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                $profile.attr('src', data.picture + "?date=" + Date.now());
-                                $avatarParent.find('.removePic').removeClass("hidden");
-                                $avatarParent.find("input[name='save_avatar']").val("capture");
-                            } else {
-                                if (data.alert) {
-                                    displayToast(data.message, data.alert);
-                                }
-                            }
-                            $cameraModal.modal('hide');
-                        },
-                        error: function () {
-                            displayToast("Wystąpił błąd podczas przetwarzania zdjęcia, przepraszamy.", "danger");
-                            $cameraModal.modal('hide');
-                        },
-                        complete: function () {
-                            hideLoading();
-                        }
-                    });
-                });
-
-                var $changePswdModal = $settings.find("#changePasswordModal"),
-                    $changePswdBtn = $settings.find("#changePassword"),
-                    $changePswdForm = $changePswdModal.find('form'),
-                    $saveChngPswdBtn = $changePswdModal.find("button[type='submit']");
-
-                $changePswdBtn.on('click', function (e) {
-                    e.preventDefault();
-
-                    $changePswdModal.modal('show');
-                });
-
-                $saveChngPswdBtn.on('click', function (e) {
-                    e.preventDefault();
-                    var form = $changePswdForm.get(0),
-                        formData = new FormData(form);
-
-                    formData.append('changePassword', true);
-
-                    $.ajax({
-                        url: $changePswdForm.attr('action') + "?ajax=true",
+                        url: $form.attr('action') + "?ajax=true",
                         type: "POST",
                         data: formData,
                         dataType: "JSON",
@@ -508,174 +223,13 @@ var index = function () {
                             showLoading();
                         },
                         success: function (data) {
-                            if (data.success) {
-                                $changePswdModal.modal('hide');
-                            } else {
-                                var fields = data.field.split(",");
-                                $(fields).each(function (i, e) {
-                                    $changePswdForm.find('input[name="' + e + '"]').removeClass('valid').addClass('invalid').trigger('focus');
-                                });
-                            }
                             displayToast(data.message, data.alert);
                         },
                         error: function () {
-                            displayToast("Wystąpił błąd podczas próby zmiany hasła. Proszę odświeżyć stronę i spróbować ponownie", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
-                        }
-                    });
-                });
-
-                $changePswdModal.on('hidden.bs.modal', function (e) {
-                    $changePswdForm.find('input').val("").trigger("blur");
-                });
-
-                var $groupsModal = $settings.find("#groupsModal"),
-                    $groupNameInput = $groupsModal.find("input#groupName"),
-                    $groupCodeInput = $groupsModal.find("input#groupCode"),
-                    $joinCreateBtn = $groupsModal.find("button#createJoin");
-
-                $groupCodeInput.on('keyup', function (e) {
-                    if (e.which === 13) {
-                        e.preventDefault();
-                        $joinCreateBtn.trigger('click');
-                        return false;
-                    }
-                });
-
-                $groupNameInput.on('keyup', function (e) {
-                    if (e.which === 13) {
-                        e.preventDefault();
-                        $joinCreateBtn.trigger('click');
-                        return false;
-                    }
-                    if ($groupNameInput.val() === "") {
-                        $joinCreateBtn.removeClass("create");
-                    } else {
-                        $joinCreateBtn.addClass("create");
-                    }
-                });
-
-                $joinCreateBtn.on('click', function (e) {
-                    e.preventDefault();
-                    var name = $groupNameInput.val(),
-                        code = $groupCodeInput.val();
-
-                    if (name === "") {
-                        if (code === "") {
-                            displayToast("Proszę podać hasło do grupy, aby móc do niej dołączyć", "warning");
-                            return false;
-                        }
-                        $.ajax({
-                            url: "/ajax/groups.php?ajax=true",
-                            type: "POST",
-                            data: {action: "join", code: code},
-                            dataType: "JSON",
-                            beforeSend: function () {
-                                $joinCreateBtn.addClass("loading");
-                            },
-                            success: function (data) {
-                                if (data.success) {
-                                    var $newRow = $(data.newRow).insertBefore($groupsModal.find("table tr.form"));
-                                    $newRow.fadeIn();
-                                    $groupNameInput.val("").trigger('blur');
-                                    $groupCodeInput.val("").trigger('blur');
-                                }
-                                if (data.alert) {
-                                    displayToast(data.message, data.alert);
-                                }
-                            },
-                            error: function () {
-                                displayToast("Nieznany błąd", "danger");
-                            },
-                            complete: function () {
-                                $joinCreateBtn.removeClass("loading");
-                            }
-                        });
-                    } else {
-                        if (code === "") {
-                            displayToast("Proszę podać hasło dla nowej grupy o nazwie '" + name + "'", "warning");
-                            return false;
-                        }
-                        $.ajax({
-                            url: "/ajax/groups.php?ajax=true",
-                            type: "POST",
-                            data: {action: "new", name: name, code: code},
-                            dataType: "JSON",
-                            success: function (data) {
-                                if (data.success) {
-                                    if (data.success) {
-                                        var $newRow = $(data.newRow).insertBefore($groupsModal.find("table tr.form"));
-                                        $newRow.fadeIn();
-                                        $groupNameInput.val("").trigger('blur');
-                                        $groupCodeInput.val("").trigger('blur');
-                                    }
-                                }
-                                if (data.alert) {
-                                    displayToast(data.message, data.alert);
-                                }
-                            },
-                            error: function () {
-                                displayToast("Nieznany błąd", "danger");
-                            }
-                        });
-                    }
-                });
-
-
-                $groupsModal.find("table").on('click', 'button.leave', function (e) {
-                    e.preventDefault();
-                    var $row = $(this).parents('tr'),
-                        id = $row.data('id');
-
-                    $.ajax({
-                        url: "/ajax/groups.php?ajax=true",
-                        type: "POST",
-                        data: {action: "leave", id: id},
-                        dataType: "JSON",
-                        success: function (data) {
-                            if (data.success) {
-                                $row.fadeOut(function () {
-                                    $row.remove();
-                                })
-                            }
-                            if (data.alert) {
-                                displayToast(data.message, data.alert);
-                            }
-                        },
-                        error: function () {
-                            displayToast("Nieznany błąd", "danger");
-                        }
-                    });
-                });
-
-                $groupsModal.find("table").on('click', 'button.delete', function (e) {
-                    e.preventDefault();
-
-                    if (!confirm("UWAGA! Usunięcie grupy jest nieodwracalne. Spoowoduje to, że wszyscy użytkownicy, którzy są do niej przypisani zostaną z niej usunięci. Czy na pewno chcesz to zrobić?")) {
-                        return false;
-                    }
-                    var $row = $(this).parents('tr'),
-                        id = $row.data('id');
-
-                    $.ajax({
-                        url: "/ajax/groups.php?ajax=true",
-                        type: "POST",
-                        data: {action: "delete", id: id},
-                        dataType: "JSON",
-                        success: function (data) {
-                            if (data.success) {
-                                $row.fadeOut(function () {
-                                    $row.remove();
-                                })
-                            }
-                            if (data.alert) {
-                                displayToast(data.message, data.alert);
-                            }
-                        },
-                        error: function () {
-                            displayToast("Nieznany błąd", "danger");
                         }
                     });
                 });
@@ -768,10 +322,16 @@ var index = function () {
                 };
 
                 // $(":input").inputmask();
+            }
+        })();
 
-                var $addressInput = $register.find("#address"),
-                    $addressFinder = $register.find("#addressFinder"),
-                    addMarker = setTimeout(function(){});
+        (function addressMap() {
+            var $body = $("body.register, body.settings");
+            if ($body.length) {
+                var $addressInput = $body.find("#address"),
+                    $addressFinder = $body.find("#addressFinder"),
+                    addMarker = setTimeout(function () {
+                    });
 
                 var center = new L.LatLng(50.0619474, 19.9368564);
                 var map = L.map('addressMap').setView(center, 15);
@@ -780,19 +340,23 @@ var index = function () {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                var marker = L.marker(center, {draggable:'true'}).addTo(map);
+                var marker = L.marker(center, {draggable: 'true'}).addTo(map);
 
-                var bindMarker = function(latLng) {
+                var bindMarker = function (latLng) {
                     map.removeLayer(marker);
                     marker.setLatLng(latLng);
                     marker.addTo(map);
                     map.panTo(latLng);
 
-                    console.log(latLng.lat + "," + latLng.lng);
                     $addressInput.val(latLng.lat + "," + latLng.lng);
                 };
 
-                marker.on('dragend', function(e) {
+                if ($addressInput.val() !== "") {
+                    var latLng = $addressInput.val().split(",");
+                    bindMarker(new L.LatLng(latLng[0], latLng[1]));
+                }
+
+                marker.on('dragend', function (e) {
                     bindMarker(e.target._latlng);
                 });
 
@@ -801,7 +365,7 @@ var index = function () {
 
                     clearTimeout(addMarker);
                     addMarker = setTimeout(function () {
-                        $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q='+address, function(data){
+                        $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q=' + address, function (data) {
                             if (typeof data[0] !== "undefined") {
                                 var lat = data[0].lat,
                                     lng = data[0].lon;
@@ -955,33 +519,6 @@ var index = function () {
         }
 
         return $toast;
-    }
-
-    function saveSettings($form) {
-        var formData = new FormData($form.get(0));
-
-        formData.append('saveSettings', true);
-
-        $.ajax({
-            url: $form.attr('action') + "?ajax=true",
-            type: "POST",
-            data: formData,
-            dataType: "JSON",
-            processData: false,
-            contentType: false,
-            beforeSend: function () {
-                showLoading();
-            },
-            success: function (data) {
-                displayToast(data.message, data.alert);
-            },
-            error: function () {
-                displayToast("Nieznany błąd", "danger");
-            },
-            complete: function () {
-                hideLoading();
-            }
-        });
     }
 
     function mobileAndTabletCheck() {

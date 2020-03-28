@@ -70,7 +70,7 @@ $this->title = "Zarejestruj się";
                             <label for="addressFinder" data-error="Wygląda na to, że adres e-mail jest niepoprawny">
                                 Adres
                             </label>
-                            <input type="text" id="addressFinder" class="form-control">
+                            <input type="text" id="addressFinder" class="form-control" placeholder="Wyszukaj adres na mapie">
                             <input type="hidden" name="address" id="address" required
                                    value="<?= !empty($this->get('address')) ? $this->get('address') : ""; ?>">
                             <div id="addressMap" class="mt-4"></div>
