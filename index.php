@@ -16,7 +16,7 @@ $content = $pageClass->content();
 <body class="<?= $pageClass->view; ?> no_scroll">
 <div id="preloader">
     <div class="imgWrapper">
-        <img src="<?= IMG_URL; ?>/logo.svg">
+        <img src="<?= IMG_URL; ?>/logo.png">
     </div>
 </div>
 <?= $pageClass->menu(); ?>

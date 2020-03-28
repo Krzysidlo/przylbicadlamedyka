@@ -766,6 +766,25 @@ var index = function () {
                         }
                     });
                 };
+
+                var map = L.map('addressMap').setView([51.505, -0.09], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                var marker = L.marker([51.5, -0.09], {draggable:'true'}).addTo(map);
+
+                var $addressFinder = $register.find("#addressFinder");
+                $addressFinder.on('keyup', function (e) {
+                    var address = $addressFinder.val();
+
+                    setTimeout();
+                });
+
+                var bindMarker = function(loc) {
+
+                };
             }
         })();
 

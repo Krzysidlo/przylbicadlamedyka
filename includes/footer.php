@@ -1,7 +1,5 @@
 <?php
 
-use classes\Functions as fs;
-
 ?>
 
     <div id="loading" class="hidden">
@@ -25,16 +23,18 @@ use classes\Functions as fs;
           integrity="sha256-WwAfhb7lVhl1iOpheVulhivZXFmNL6PlUjOCzRBWEl8=" crossorigin="anonymous"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css"
           integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
 
     <script type="text/javascript">
-        var JS_URL = '<?= JS_URL; ?>',
-            IMG_URL = '<?= IMG_URL; ?>',
-            MSC_URL = '<?= MSC_URL; ?>';
+        const JS_URL = '<?= JS_URL; ?>',
+            IMG_URL = '<?= IMG_URL; ?>';
     </script>
 
 <?php if (LOGGED_IN) { ?>
     <script type="text/javascript">
-        var USER_NAME = '<?= USER_NAME; ?>',
+        const USER_NAME = '<?= USER_NAME; ?>',
             USER_PRV = '<?= USER_PRV; ?>';
     </script>
 <?php } ?>
@@ -44,8 +44,7 @@ use classes\Functions as fs;
 
     <script type="text/javascript" src="<?= JS_URL; ?>/index.js" defer></script>
 <?php } else { ?>
-    <link rel="stylesheet" class="theme"
-          href="<?= CSS_URL; ?>/styles.min.css">
+    <link rel="stylesheet" class="theme" href="<?= CSS_URL; ?>/styles.min.css">
 
     <script type="text/javascript" src="<?= JS_URL; ?>/index.min.js" defer></script>
 <?php }

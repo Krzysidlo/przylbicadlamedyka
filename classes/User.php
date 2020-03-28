@@ -4,25 +4,23 @@ namespace classes;
 
 use Exception;
 use classes\Functions as fs;
-use UnexpectedValueException;
-use controllers\PushController;
 use classes\exceptions\UserNotFoundException;
 
 class User
 {
-    const PRIV_NO_ACCESS  = 0;
-    const PRIV_NO_CONFIRM = 1;
-    const PRIV_CONFIRMED  = 2;
-    const PRIV_SUMMARY    = 3;
-    const PRIV_CHECKERR   = 4;
-    const PRIV_ROOT       = 5;
+    const USER_NO_ACCESS  = 0;
+    const USER_NO_CONFIRM = 1;
+    const USER_DRIVER     = 2;
+    const USER_PRODUCENT  = 3;
+    const USER_ADMIN      = 4;
+    const USER_ROOT       = 5;
 
-    public ?string $id         = NULL;
-    public string  $name       = "";
-    public string  $email      = "";
-    public string  $login      = "";
-    public ?string $password   = NULL;
-    public ?string $salt       = NULL;
+    public ?string $id       = NULL;
+    public string  $name     = "";
+    public string  $email    = "";
+    public string  $login    = "";
+    public ?string $password = NULL;
+    public ?string $salt     = NULL;
 
     private array $options        = [];
     private       $privilege      = false;
@@ -91,11 +89,11 @@ class User
     private function init()
     {
         if ($user = $this->getUserInfo()) {
-            $this->name       = $user['name'];
-            $this->login      = $user['login'];
-            $this->email      = $user['email'];
-            $this->password   = $user['password'];
-            $this->salt       = $user['salt'];
+            $this->name     = $user['name'];
+            $this->login    = $user['login'];
+            $this->email    = $user['email'];
+            $this->password = $user['password'];
+            $this->salt     = $user['salt'];
         } else {
             throw new Exception("No user info found with id=[{$this->id}]");
         }
@@ -114,7 +112,7 @@ class User
             if ($changedName = $this->getOption('changed_name')) {
                 $output['name'] = $changedName;
             }
-            $output['login']      = $this->getOption('login');
+            $output['login'] = $this->getOption('login');
         }
 
         return $output;
@@ -189,7 +187,7 @@ class User
 
         [$name, $domain] = explode('@', $email);
         if ($domain == 'tfbnw.net') {
-            $user->setPrivilege(self::PRIV_NO_ACCESS);
+            $user->setPrivilege(User::USER_NO_ACCESS);
         }
 
         $mailMessage = date("Y-m-d H:i:s") . ": [{$user->name}], [{$email}] zarejestrował się właśnie na stronie " . PAGE_NAME . ".\n\n";
@@ -208,7 +206,7 @@ class User
         $text[] = "Dziękujemy za zarejestrowanie się na stronie " . PAGE_NAME;
         $text[] = "Proszę kliknąc w poniższy link, aby potwierdzić adres e-mail";
 
-        $link   = ROOT_URL . "/confirm/" . $hash;
+        $link = ROOT_URL . "/confirm/" . $hash;
 
         $text = implode("<br>", $text);
         // Message
@@ -263,7 +261,7 @@ HTML;
      */
     private static function createUser(string $email, string $name, string $password, string $type = 'normal')
     {
-        $usersID = md5(time());
+        $usersID  = md5(time());
         $salt     = rand(1111111111, 9999999999);
         $password = md5($password . $salt);
         $sql      = "INSERT INTO `users` (`id`, `email`, `name`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$name}', '{$password}', '{$salt}');";

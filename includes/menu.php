@@ -7,7 +7,7 @@ $user = new User;
 ?>
 
 <nav class="navbar navbar-expand-xl scrolling-navbar fixed-top navbar-light bg-light">
-    <a class="navbar-brand" href="/"><img src="<?= IMG_URL; ?>/logo.svg" class="img-nav" alt=""></a>
+    <a class="navbar-brand" href="/"><img src="<?= IMG_URL; ?>/logo.png" class="img-nav" alt=""></a>
     <a class="navbar-brand" href="/"><?= PAGE_NAME; ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

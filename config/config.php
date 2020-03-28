@@ -58,13 +58,13 @@ define("USER_NAME", $USER_NAME);
 
 /* Define IS_ROOT and USER_PRV constants */
 $IS_ROOT  = false;
-$USER_PRV = User::PRIV_NO_CONFIRM;
+$USER_PRV = User::USER_NO_CONFIRM;
 if (LOGGED_IN) {
     $USER_PRV = $user->getPrivilege();
     if ($user->email === ROOT_EMAIL) {
-        $USER_PRV = User::PRIV_ROOT;
+        $USER_PRV = User::USER_ROOT;
     }
-    if ($USER_PRV === User::PRIV_ROOT) {
+    if ($USER_PRV === User::USER_ROOT) {
         $IS_ROOT = true;
     }
 }
