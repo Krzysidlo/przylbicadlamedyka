@@ -4,8 +4,6 @@ use classes\User;
 use classes\Functions as fs;
 
 $user = new User;
-$avatarUrl = $user->getAvatar();
-$avatar    = "<img src='{$avatarUrl}' class='img-responsive img-circle img-menu' alt='avatar'>&nbsp;&nbsp;";
 ?>
 
 <nav class="navbar navbar-expand-xl fixed-top navbar-dark deep-purple accent-4">
@@ -23,31 +21,16 @@ $avatar    = "<img src='{$avatarUrl}' class='img-responsive img-circle img-menu'
                     Ustawienia
                 </a>
             </li>
-            <li class="nav-item<?= $this->menu === "events" ? " active" : ""; ?>">
-                <a class="nav-link preload" href="/admin/index">
-                    Mecze
-                </a>
-            </li>
             <li class="nav-item<?= $this->menu === "privileges" ? " active" : ""; ?>">
                 <a class="nav-link preload" href="/admin/privileges">
                     Uprawnienia
-                </a>
-            </li>
-            <li class="nav-item<?= $this->menu === "competitions" ? " active" : ""; ?>">
-                <a class="nav-link preload" href="/admin/competitions">
-                    Turnieje
-                </a>
-            </li>
-            <li class="nav-item<?= $this->menu === "points" ? " active" : ""; ?>">
-                <a class="nav-link preload" href="/admin/points">
-                    Punkty
                 </a>
             </li>
         </ul>
         <ul class="navbar-nav mr-right">
             <li class="nav-item">
                 <a class="nav-link preload" href="/">
-                    <?= $avatar . " " . USER_NAME; ?>
+                    <?= USER_NAME; ?>
                 </a>
             </li>
         </ul>

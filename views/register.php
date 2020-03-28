@@ -61,7 +61,7 @@ $this->title = "Zarejestruj się";
                                 Numer telefonu
                             </label>
                             <input type="tel" name="tel" id="tel" pattern=".{9,}" required
-                                   data-inputmask="'mask': '+99 999 999 999'"
+                                   <?php //data-inputmask="'mask': '+99 999 999 999'" ?>
                                    class="form-control validate<?= !empty($invalid['tel']) && $invalid['tel'] ? " invalid" : ""; ?>"
                                    title="Długośc numeru powinna wynosić minimu 9 znaków"
                                    value="<?= !empty($this->get('tel')) ? $this->get('tel') : ""; ?>">

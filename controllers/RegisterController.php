@@ -9,16 +9,6 @@ use classes\Functions as fs;
 class RegisterController extends PageController
 {
 
-    public function content(array $args = [])
-    {
-        if (LOGGED_IN) {
-            self::redirect("/");
-            exit(0);
-        }
-
-        return $this->render($args);
-    }
-
     public static function ajax_login($get): void
     {
         $data = [];
@@ -97,46 +87,50 @@ class RegisterController extends PageController
             if (!empty(fs::getACookie('easyLogIn'))) {
                 fs::setACookie('easyLogIn', NULL, -1);
             }
-            if (!empty($get['name']) && !empty($get['password']) && !empty($get['r-password']) && !empty($get['email'])) {
-                if (fs::$mysqli->query("SELECT 1 FROM `users` WHERE `email` = '{$get['email']}';")->num_rows) {
-                    $data['message']          = "This e-mail address already exists" . ". " . "Please use different" . ".";
+            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) && !empty($get['tel']) && !empty($get['address']) && !empty($get['password']) && !empty($get['r-password'])) {
+                $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
+                try {
+                    new User($email);
+                    $data['message']          = "Konto o podanym adresie e-mail już istnieje";
                     $data['alert']            = "warning";
                     $data['invalid']['email'] = true;
-                } else {
+                } catch (Exception $e) {
                     if ($get['password'] === $get['r-password']) {
                         if (strlen($get['password']) >= 8) {
-                            $password = filter_var($get['password'], FILTER_SANITIZE_STRING);
-                            $email    = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
-                            $name     = filter_var($get['name'], FILTER_SANITIZE_STRING);
+                            $password  = filter_var($get['password'], FILTER_SANITIZE_STRING);
+                            $firstName = filter_var($get['firstname'], FILTER_SANITIZE_STRING);
+                            $lastName  = filter_var($get['lastname'], FILTER_SANITIZE_STRING);
+                            $address   = filter_var($get['address'], FILTER_SANITIZE_STRING);
+                            $tel       = filter_var($get['tel'], FILTER_SANITIZE_STRING);
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                                 try {
-                                    $user                 = User::newUser($email, $name, $password);
+                                    $user                 = User::newUser($email, $firstName, $lastName, $address, $tel, $password);
                                     $_SESSION['usersID']  = $user->id;
                                     $_SESSION['userName'] = $user->name;
                                     $data['success']      = true;
                                 } catch (Exception $e) {
                                     fs::log("Error: " . $e->getMessage());
                                     $data['alert']   = "danger";
-                                    $data['message'] = "There was an error while creating new user";
+                                    $data['message'] = "Wystąpił błąd podczas tworzenia użytkownika";
                                 }
                             } else {
-                                $data['message']          = "E-mail address seems to be incorrect";
+                                $data['message']          = "Wygląda na to, że adres e-mail jest niepoprawny";
                                 $data['alert']            = "warning";
                                 $data['invalid']['email'] = true;
                             }
                         } else {
-                            $data['message']             = "Minimum password length is 8";
+                            $data['message']             = "Hasło musi się składać z minimum 8 znaków";
                             $data['alert']               = "warning";
                             $data['invalid']['password'] = $data['invalid']['r-password'] = true;
                         }
                     } else {
-                        $data['message']             = "Confirmed password is not the same";
+                        $data['message']             = "Powótrzone hasło nie jest takie samo";
                         $data['alert']               = "warning";
                         $data['invalid']['password'] = $data['invalid']['r-password'] = true;
                     }
                 }
             } else {
-                $data['message'] = "Please fill in all necessary fields";
+                $data['message'] = "Proszę wypełnić wszystkie pola w formularzu";
                 $data['alert']   = "warning";
             }
         }
@@ -207,10 +201,10 @@ class RegisterController extends PageController
         }
 
         if (!$break) {
-            $success  = $user->updatePassword($get['password']);
-            $message  = ($success ? ("You have successfully updated your password") : ("There was an error. Please refresh the page and try again."));
-            $alert    = ($success ? 'success' : 'warning');
-            $data     = [
+            $success = $user->updatePassword($get['password']);
+            $message = ($success ? ("You have successfully updated your password") : ("There was an error. Please refresh the page and try again."));
+            $alert   = ($success ? 'success' : 'warning');
+            $data    = [
                 'success' => $success,
                 'message' => $message,
                 'alert'   => $alert,
@@ -225,5 +219,15 @@ class RegisterController extends PageController
         }
 
         exit(0);
+    }
+
+    public function content(array $args = [])
+    {
+        if (LOGGED_IN) {
+            self::redirect("/");
+            exit(0);
+        }
+
+        return $this->render($args);
     }
 }

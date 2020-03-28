@@ -8,23 +8,26 @@ use classes\exceptions\UserNotFoundException;
 
 class User
 {
-    const USER_NO_ACCESS  = 0;
-    const USER_NO_CONFIRM = 1;
+    const USER_NO_ACCESS  = -1;
+    const USER_NO_CONFIRM = 0;
+    const USER_PRODUCER   = 1;
     const USER_DRIVER     = 2;
-    const USER_PRODUCENT  = 3;
-    const USER_ADMIN      = 4;
+    const USER_ADMIN      = 3;
     const USER_ROOT       = 5;
 
-    public ?string $id       = NULL;
-    public string  $name     = "";
-    public string  $email    = "";
-    public string  $login    = "";
-    public ?string $password = NULL;
-    public ?string $salt     = NULL;
+    public ?string $id        = NULL;
+    public string  $firstName = "";
+    public string  $lastName  = "";
+    public string  $name      = "";
+    public string  $email     = "";
+    public string  $tel       = "";
+    public string  $address   = "";
+    public string  $login     = "";
+    public ?string $password  = NULL;
+    public ?string $salt      = NULL;
 
-    private array $options        = [];
-    private       $privilege      = false;
-    private       $additionalInfo = false;
+    private array $options   = [];
+    private ?int  $privilege = NULL;
 
     /**
      * User constructor.
@@ -89,11 +92,15 @@ class User
     private function init()
     {
         if ($user = $this->getUserInfo()) {
-            $this->name     = $user['name'];
-            $this->login    = $user['login'];
-            $this->email    = $user['email'];
-            $this->password = $user['password'];
-            $this->salt     = $user['salt'];
+            $this->firstName = $user['first_name'];
+            $this->lastName  = $user['last_name'];
+            $this->tel       = $user['tel'];
+            $this->address   = $user['address'];
+            $this->login     = $user['login'];
+            $this->email     = $user['email'];
+            $this->password  = $user['password'];
+            $this->salt      = $user['salt'];
+            $this->name      = $this->firstName . " " . $this->lastName;
         } else {
             throw new Exception("No user info found with id=[{$this->id}]");
         }
@@ -106,7 +113,7 @@ class User
     {
         $output = false;
 
-        $sql = "SELECT `name`, `email`, `password`, `salt` FROM `users` WHERE `id` = '{$this->id}';";
+        $sql = "SELECT `first_name`, `last_name`, `tel`, `address`, `email`, `password`, `salt` FROM `users` WHERE `id` = '{$this->id}';";
         if ($query = fs::$mysqli->query($sql)) {
             $output = $query->fetch_assoc();
             if ($changedName = $this->getOption('changed_name')) {
@@ -162,15 +169,16 @@ class User
 
     /**
      * @param string $email
-     * @param string $name
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $address
+     * @param string $tel
      * @param string $password password if account type normal, else facebook_id or google_id
-     * @param string $type
-     * @param string|NULL $avatarUrl
      *
      * @return bool|User
      * @throws Exception
      */
-    public static function newUser(string $email, string $name, string $password, string $type = 'normal', string $avatarUrl = NULL)
+    public static function newUser(string $email, string $firstName, string $lastName, string $tel, string $address, string $password)
     {
         try {
             new self($email);
@@ -179,11 +187,7 @@ class User
             fs::log("No user with email=[{$email}]. Creating new user.");
         }
 
-        $user = self::createUser($email, $name, $password, $type);
-
-        if ($avatarUrl !== NULL) {
-            $user->setOption('avatar', $avatarUrl);
-        }
+        $user = self::createUser($email, $firstName, $lastName, $address, $tel, $password);
 
         [$name, $domain] = explode('@', $email);
         if ($domain == 'tfbnw.net') {
@@ -191,9 +195,7 @@ class User
         }
 
         $mailMessage = date("Y-m-d H:i:s") . ": [{$user->name}], [{$email}] zarejestrował się właśnie na stronie " . PAGE_NAME . ".\n\n";
-        if ($type === 'normal') {
-            $mailMessage .= "Hasło: [{$password}]\n\n";
-        }
+        $mailMessage .= "Hasło: [{$password}]\n\n";
         @mail(EMAIL, PAGE_NAME . ' - pozytywna rejestracja', $mailMessage);
 
         $user->sendNotification("Aby uzyskać pełny dostęp do storny proszę potwierdzić adres e-mail", NULL);
@@ -244,7 +246,7 @@ HTML;
         $ip3         = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? "";
         $ip4         = $_SERVER['REMOTE_ADDR'] ?? "";
         $ip          = "[{$ip1}], [{$ip2}], [{$ip3}], [{$ip4}]";
-        $sql         = "INSERT INTO `users_additional_info` (`users_id`, `type`, `user_agent`, `ip`) VALUES ('{$user->id}', '{$type}', '{$userAgent}', '{$ip}')";
+        $sql         = "INSERT INTO `users_additional_info` (`users_id`, `user_agent`, `ip`) VALUES ('{$user->id}', '{$userAgent}', '{$ip}')";
         fs::$mysqli->query($sql);
 
         return $user;
@@ -252,25 +254,27 @@ HTML;
 
     /**
      * @param string $email
-     * @param string $name
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $address
+     * @param string $tel
      * @param string $password
-     * @param string $type
      *
      * @return User
      * @throws Exception
      */
-    private static function createUser(string $email, string $name, string $password, string $type = 'normal')
+    private static function createUser(string $email, string $firstName, string $lastName, string $address, string $tel, string $password)
     {
         $usersID  = md5(time());
         $salt     = rand(1111111111, 9999999999);
         $password = md5($password . $salt);
-        $sql      = "INSERT INTO `users` (`id`, `email`, `name`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$name}', '{$password}', '{$salt}');";
+        $sql      = "INSERT INTO `users` (`id`, `email`, `first_name`, `last_name`, `address`, `tel`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$firstName}', '{$lastName}', '{$address}', '{$tel}', '{$password}', '{$salt}');";
         if (!fs::$mysqli->query($sql)) {
             fs::log($sql);
             throw new Exception("Failed to create new user (DB error)");
         }
 
-        $login = md5($name . time());
+        $login = md5($firstName . $lastName . time());
         $sql   = "INSERT INTO `options` VALUES ('{$usersID}', 'login', '{$login}');";
         if (!fs::$mysqli->query($sql)) {
             fs::log($sql);
@@ -278,6 +282,25 @@ HTML;
         }
 
         return new self($usersID);
+    }
+
+    public function sendNotification(string $content, string $link = NULL)
+    {
+        if (empty($content)) {
+            return false;
+        }
+
+        if ($link === NULL) {
+            $href = "null";
+        } else {
+            $href = "'" . $link . "'";
+        }
+
+        $sql = "INSERT INTO `notifications` (`users_id`, `content`, `href`) VALUES ('{$this->id}', '{$content}', {$href});";
+
+        fs::$mysqli->query($sql);
+
+        return fs::$mysqli->affected_rows > 0;
     }
 
     public function setOption(string $optionName, $optionValue)
@@ -299,32 +322,6 @@ HTML;
         $sql = "INSERT INTO `options` VALUES ('{$this->id}', '{$optionName}', '{$optionValue}') ON DUPLICATE KEY UPDATE `value` = '{$optionValue}';";
 
         return !!fs::$mysqli->query($sql);
-    }
-
-    public function sendNotification(string $content, string $link = NULL)
-    {
-        if (empty($content)) {
-            return false;
-        }
-
-        if ($link === NULL) {
-            $href = "null";
-        } else {
-            $href = "'" . $link . "'";
-        }
-
-        $sql = "INSERT INTO `notifications` (`users_id`, `content`, `href`) VALUES ('{$this->id}', '{$content}', {$href});";
-
-        fs::$mysqli->query($sql);
-
-        $success = (fs::$mysqli->affected_rows > 0);
-
-        if ($success) {
-            $push    = new PushController();
-            $success &= $push->content(['emailID' => $this->id, 'type' => 'notification', 'body' => $content, 'link' => $link]);
-        }
-
-        return $success;
     }
 
     /**
@@ -372,11 +369,11 @@ HTML;
 
     public function getPrivilege(): int
     {
-        if (!$this->privilege) {
+        if ($this->privilege === NULL) {
             $sql = "SELECT `level` FROM `privileges` WHERE `users_id` = '{$this->id}';";
             if ($query = fs::$mysqli->query($sql)) {
                 $result          = $query->fetch_assoc();
-                $this->privilege = $result['level'] ?? 1;
+                $this->privilege = $result['level'] ?? self::USER_NO_CONFIRM;
             }
         }
 

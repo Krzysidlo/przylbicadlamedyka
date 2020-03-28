@@ -2,70 +2,40 @@
 
 namespace admin\controllers;
 
-abstract class AdminController
+use classes\User;
+use controllers\PageController;
+
+abstract class AdminController extends PageController
 {
-    public string  $menu  = "";
-    public string  $view  = "index";
-    public ?string $title = NULL;
-    public string  $style = "";
-    public array   $js    = [];
-
-    protected string $file;
-
-    private array $get;
-
     public function __construct(string $view = NULL)
     {
-        if (LOGGED_IN && USER_PRV < 5) {
-            header("Location: /");
+        parent::__construct($view);
+        if (!LOGGED_IN || USER_PRV !== User::USER_ROOT) {
+            self::redirect("/");
             exit(0);
         }
 
         if ($view === NULL) {
-            header("Location: /error");
+            self::redirect("/error");
             exit(0);
         }
 
         $this->view = $view;
-        $viewsDir   = ADMIN_DIR . "/views";
 
-        if (!file_exists($viewsDir . "/" . $this->view . ".php")) {
-            $viewsDir   = ROOT_DIR . "/views";
-            $this->view = 'error';
-        }
-        $this->file = $viewsDir . "/" . $this->view . ".php";
-
-        $this->get = array_merge($_GET, $_POST);
-
-        $get_post_variables = [
-            'hash'       => NULL,
-            //login
-            'lemail'     => NULL,
-            'lpassword'  => NULL,
-            'lremember'  => NULL,
-            //register
-            'name'       => NULL,
-            'login'      => NULL,
-            'email'      => NULL,
-            'password'   => NULL,
-            'r-password' => NULL,
-            //ajax
-            'file'       => NULL,
-            'method'     => NULL,
-        ];
-        foreach ($get_post_variables as $name => $defaultValue) {
-            $this->get[$name] = $this->get[$name] ?? $defaultValue;
-        }
         $this->menu = $this->view;
-    }
-
-    public function content(array $args = [])
-    {
-        return $this->render($args);
     }
 
     public function render(array $args = [])
     {
+        if ($this->file === NULL) {
+            $viewsDir   = ADMIN_DIR . "/views";
+
+            if (!file_exists($viewsDir . "/" . $this->view . ".php")) {
+                $viewsDir   = ROOT_DIR . "/views";
+                $this->view = 'error';
+            }
+            $this->file = $viewsDir . "/" . $this->view . ".php";
+        }
         ob_start();
         foreach ($args as $name => $value) {
             ${$name} = $value;
@@ -88,24 +58,5 @@ abstract class AdminController
         }
 
         return $this->render($args);
-    }
-
-    public function head(array $args = [])
-    {
-        $this->file = INC_DIR . "/header.php";
-
-        return $this->render($args);
-    }
-
-    public function foot(array $args = [])
-    {
-        $this->file = INC_DIR . "/footer.php";
-
-        return $this->render($args);
-    }
-
-    protected function get($var)
-    {
-        return (isset($this->get[$var]) ? $this->get[$var] : NULL);
     }
 }
