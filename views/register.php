@@ -30,7 +30,7 @@ $this->title = "Zarejestruj się";
                      aria-labelledby="register-tab">
                     <form action="/ajax/register/register" method="post" class="row">
                         <div class="form-group col-12 col-md-6">
-                            <label for="firstName" data-error="Minimum name length is 3">
+                            <label for="firstName" data-error="Imię musi się składać z minimum 3 znaków">
                                 Imię
                             </label>
                             <input type="text" name="firstname" id="firstName" pattern=".{3,}" required
@@ -39,7 +39,7 @@ $this->title = "Zarejestruj się";
                                    value="<?= !empty($this->get('firstname')) ? $this->get('firstname') : ""; ?>">
                         </div>
                         <div class="form-group col-12 col-md-6">
-                            <label for="lastName" data-error="Minimum name length is 3">
+                            <label for="lastName" data-error="Nazwisko musi się składać z minimum 3 znaków">
                                 Nazwisko
                             </label>
                             <input type="text" name="lastname" id="lastName" pattern=".{3,}" required
@@ -57,13 +57,23 @@ $this->title = "Zarejestruj się";
                                    value="<?= !empty($this->get('email')) ? $this->get('email') : ""; ?>">
                         </div>
                         <div class="form-group col-12">
+                            <label for="email" data-error="Długośc numeru powinna wynosić minimu 9 znaków">
+                                Numer telefonu
+                            </label>
+                            <input type="tel" name="tel" id="tel" pattern=".{9,}" required
+                                   data-inputmask="'mask': '+99 999 999 999'"
+                                   class="form-control validate<?= !empty($invalid['tel']) && $invalid['tel'] ? " invalid" : ""; ?>"
+                                   title="Długośc numeru powinna wynosić minimu 9 znaków"
+                                   value="<?= !empty($this->get('tel')) ? $this->get('tel') : ""; ?>">
+                        </div>
+                        <div class="form-group col-12">
                             <label for="addressFinder" data-error="Wygląda na to, że adres e-mail jest niepoprawny">
                                 Adres
                             </label>
                             <input type="text" id="addressFinder" class="form-control">
                             <input type="hidden" name="address" id="address" required
                                    value="<?= !empty($this->get('address')) ? $this->get('address') : ""; ?>">
-                            <div id="addressMap" class="mt-2"></div>
+                            <div id="addressMap" class="mt-4"></div>
                         </div>
                         <div class="form-group col-12">
                             <label for="password" data-error="Hasło powinno mieć przynajmniej 8 znaków">
