@@ -135,7 +135,7 @@ var index = function () {
                                 }
                             },
                             error: function () {
-                                displayToast("Ajax error", "danger");
+                                displayToast("Nieznany błąd", "danger");
                             }
                         });
                     }
@@ -383,7 +383,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
@@ -587,7 +587,7 @@ var index = function () {
                                 }
                             },
                             error: function () {
-                                displayToast("Ajax error", "danger");
+                                displayToast("Nieznany błąd", "danger");
                             },
                             complete: function () {
                                 $joinCreateBtn.removeClass("loading");
@@ -617,7 +617,7 @@ var index = function () {
                                 }
                             },
                             error: function () {
-                                displayToast("Ajax error", "danger");
+                                displayToast("Nieznany błąd", "danger");
                             }
                         });
                     }
@@ -645,7 +645,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         }
                     });
                 });
@@ -675,7 +675,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         }
                     });
                 });
@@ -728,7 +728,7 @@ var index = function () {
                             displayToast(data.message, data.alert);
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
@@ -759,7 +759,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
@@ -769,16 +769,33 @@ var index = function () {
 
                 // $(":input").inputmask();
 
-                var map = L.map('addressMap').setView([50.0619474, 19.9368564], 13);
+                var $addressInput = $register.find("#address"),
+                    $addressFinder = $register.find("#addressFinder"),
+                    addMarker = setTimeout(function(){});
+
+                var center = new L.LatLng(50.0619474, 19.9368564);
+                var map = L.map('addressMap').setView(center, 15);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                var marker = L.marker([50.0619474, 19.9368564], {draggable:'true'}).addTo(map);
+                var marker = L.marker(center, {draggable:'true'}).addTo(map);
 
-                var $addressFinder = $register.find("#addressFinder"),
-                    addMarker = setTimeout(function(){});
+                var bindMarker = function(latLng) {
+                    map.removeLayer(marker);
+                    marker.setLatLng(latLng);
+                    marker.addTo(map);
+                    map.panTo(latLng);
+
+                    console.log(latLng.lat + "," + latLng.lng);
+                    $addressInput.val(latLng.lat + "," + latLng.lng);
+                };
+
+                marker.on('dragend', function(e) {
+                    bindMarker(e.target._latlng);
+                });
+
                 $addressFinder.on('keyup', function (e) {
                     var address = $addressFinder.val();
 
@@ -789,20 +806,11 @@ var index = function () {
                                 var lat = data[0].lat,
                                     lng = data[0].lon;
 
-                                bindMarker(lat, lng);
+                                bindMarker(new L.LatLng(lat, lng));
                             }
                         });
                     }, 1E3);
                 });
-
-                var bindMarker = function(lat, lng) {
-                    var location = new L.LatLng(lat, lng);
-                    map.removeLayer(marker);
-                    marker.setLatLng(location);
-                    marker.addTo(map);
-                    // marker.trigger('dragging');
-                    map.panTo(location);
-                };
             }
         })();
 
@@ -900,7 +908,7 @@ var index = function () {
                             displayToast(data.message, data.alert);
                         },
                         error: function () {
-                            displayToast("Ajax error", "danger");
+                            displayToast("Nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
@@ -968,7 +976,7 @@ var index = function () {
                 displayToast(data.message, data.alert);
             },
             error: function () {
-                displayToast("Ajax error", "danger");
+                displayToast("Nieznany błąd", "danger");
             },
             complete: function () {
                 hideLoading();

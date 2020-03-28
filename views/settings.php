@@ -34,8 +34,16 @@ $this->title = "Ustawienia";
             <hr class="d-sm-none">
             <div class="row">
                 <div class="col-12">
+                    <button type="button" class="btn btn-secondary" id="changeAddress">
+                        Zmień adres&nbsp;&nbsp;&nbsp;<i class="fas fa-map-marked-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <hr class="d-sm-none">
+            <div class="row">
+                <div class="col-12">
                     <button type="button" class="btn btn-secondary" id="changePassword">
-                        Zmień hasło <i class="fas fa-key"></i>
+                        Zmień hasło&nbsp;&nbsp;&nbsp;<i class="fas fa-key"></i>
                     </button>
                 </div>
             </div>

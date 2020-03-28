@@ -60,10 +60,14 @@ define("USER_NAME", $USER_NAME);
 $IS_ROOT  = false;
 $USER_PRV = User::USER_NO_CONFIRM;
 if (LOGGED_IN) {
-    $USER_PRV = $user->getPrivilege();
+    if ($user->getOption('confirm-email') === NULL) {
+        $USER_PRV = $user->getPrivilege();
+    }
+
     if ($user->email === ROOT_EMAIL) {
         $USER_PRV = User::USER_ROOT;
     }
+
     if ($USER_PRV === User::USER_ROOT) {
         $IS_ROOT = true;
     }
@@ -91,7 +95,7 @@ if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';
 }
 
-if (USER_PRV < 1) {
+if (USER_PRV == User::USER_NO_ACCESS) {
     $view = 'noaccess';
 }
 

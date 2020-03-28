@@ -6,13 +6,13 @@ use classes\Functions as fs;
 
 abstract class PageController
 {
-    public string  $menu    = "";
-    public string  $view    = "index";
-    public ?string $title   = NULL;
+    public string  $menu  = "";
+    public string  $view  = "index";
+    public ?string $title = NULL;
 
     protected ?string $file = NULL;
 
-    private array $get;
+    protected array $get;
 
     public function __construct($view = NULL)
     {
@@ -45,6 +45,8 @@ abstract class PageController
             'name'       => NULL,
             'login'      => NULL,
             'email'      => NULL,
+            'tel'        => NULL,
+            'address'    => NULL,
             'password'   => NULL,
             'r-password' => NULL,
             //ajax
@@ -55,6 +57,12 @@ abstract class PageController
             $this->get[$name] = $this->get[$name] ?? $defaultValue;
         }
         $this->menu = $this->view;
+    }
+
+    public static function redirect($path)
+    {
+        header("Location: " . $path);
+        exit(0);
     }
 
     private function logout()
@@ -116,12 +124,6 @@ abstract class PageController
         $this->file = INC_DIR . "/footer.php";
 
         return $this->render($args);
-    }
-
-    public static function redirect($path)
-    {
-        header("Location: " . $path);
-        exit(0);
     }
 
     protected function get($var = NULL)

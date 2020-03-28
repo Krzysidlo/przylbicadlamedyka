@@ -8,7 +8,7 @@ class SettingsController extends PageController
 {
     public function content(array $args = [])
     {
-        if (USER_PRV < 2) {
+        if (USER_PRV <= User::USER_NO_CONFIRM) {
             self::redirect("/error");
         }
 

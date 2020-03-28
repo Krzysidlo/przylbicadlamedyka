@@ -18,7 +18,7 @@ $user = new User;
         <ul class="navbar-nav mr-auto">
             <li class="nav-item<?= $this->menu === "index" ? " active" : ""; ?>">
                 <a class="nav-link preload" href="/">
-                    <?= "My bets" . ($this->menu === "index" ? " <span class='sr-only'>(current)</span>" : ""); ?>
+                    <?= "Strona główna" . ($this->menu === "index" ? " <span class='sr-only'>(current)</span>" : ""); ?>
                 </a>
             </li>
         </ul>
@@ -47,23 +47,21 @@ $user = new User;
                 </div>
             </li>
             <li class="nav-item dropdown profile<?= in_array($this->view, ["settings"]) ? " active" : ""; ?>">
-                <a class="nav-link dropdown-toggle" href="/<?= USER_PRV >= 2 ? "settings" : ""; ?>" id="profile"
+                <a class="nav-link dropdown-toggle" href="/<?= USER_PRV > User::USER_NO_CONFIRM ? "settings" : ""; ?>" id="profile"
                    role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <?= USER_NAME; ?>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="profile">
-                    <?php if (USER_PRV >= 2) { ?>
+                    <?php if (USER_PRV > User::USER_NO_CONFIRM) { ?>
                         <a class="dropdown-item preload<?= $this->view === "settings" ? " active" : ""; ?>"
                            href="/settings">
                             Ustawienia
                         </a>
-                        <?php if (USER_PRV >= 4) { ?>
+                        <?php if (IS_ROOT) { ?>
                             <div class="dropdown-divider"></div>
-                            <?php if (IS_ROOT) { ?>
-                                <a class="dropdown-item preload" href="/admin/">
-                                    Admin
-                                </a>
-                            <?php } ?>
+                            <a class="dropdown-item preload" href="/admin/">
+                                Admin
+                            </a>
                         <?php } ?>
                         <div class="dropdown-divider"></div>
                     <?php } ?>
