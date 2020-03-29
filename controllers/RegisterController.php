@@ -41,17 +41,17 @@ class RegisterController extends PageController
                             }
                             $data['success'] = true;
                         } else {
-                            $data['message']              = "Incorrect password";
+                            $data['message']              = "Niepoprawne hasło";
                             $data['alert']                = "warning";
                             $data['invalid']['lpassword'] = true;
                         }
                     } catch (Exception $e) {
-                        $data['message']           = "Incorrect e-mail address";
+                        $data['message']           = "Podany adres e-mail nie został znaleziony";
                         $data['alert']             = "warning";
                         $data['invalid']['lemail'] = true;
                     }
                 } else {
-                    $data['message']           = "Incorrect e-mail address";
+                    $data['message']           = "Niepoprawny adres e-mail";
                     $data['alert']             = "warning";
                     $data['invalid']['lemail'] = true;
                 }
@@ -87,7 +87,7 @@ class RegisterController extends PageController
             if (!empty(fs::getACookie('easyLogIn'))) {
                 fs::setACookie('easyLogIn', NULL, -1);
             }
-            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) && !empty($get['tel']) && !empty($get['address']) && !empty($get['password']) && !empty($get['r-password'])) {
+            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) && !empty($get['tel']) && !empty($get['password']) && !empty($get['r-password'])) {
                 $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
                 try {
                     new User($email);
@@ -100,11 +100,10 @@ class RegisterController extends PageController
                             $password  = filter_var($get['password'], FILTER_SANITIZE_STRING);
                             $firstName = filter_var($get['firstname'], FILTER_SANITIZE_STRING);
                             $lastName  = filter_var($get['lastname'], FILTER_SANITIZE_STRING);
-                            $address   = filter_var($get['address'], FILTER_SANITIZE_STRING);
                             $tel       = filter_var($get['tel'], FILTER_SANITIZE_STRING);
                             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                                 try {
-                                    $user                 = User::newUser($email, $firstName, $lastName, $address, $tel, $password);
+                                    $user                 = User::newUser($email, $firstName, $lastName, $tel, $password);
                                     $_SESSION['usersID']  = $user->id;
                                     $_SESSION['userName'] = $user->name;
                                     $data['success']      = true;

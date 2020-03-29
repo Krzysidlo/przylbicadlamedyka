@@ -88,7 +88,7 @@ define('CONST_MODE', $CONST_MODE);
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
 
-$noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax'];
+$noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax', 'regulations'];
 
 if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';

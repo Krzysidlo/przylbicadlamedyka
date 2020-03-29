@@ -21,8 +21,8 @@ class User
     public string  $name      = "";
     public string  $email     = "";
     public string  $tel       = "";
-    public string  $address   = "";
     public string  $login     = "";
+    public ?string $address   = NULL;
     public ?string $password  = NULL;
     public ?string $salt      = NULL;
 
@@ -178,7 +178,7 @@ class User
      * @return bool|User
      * @throws Exception
      */
-    public static function newUser(string $email, string $firstName, string $lastName, string $address, string $tel, string $password)
+    public static function newUser(string $email, string $firstName, string $lastName, string $tel, string $password)
     {
         try {
             new self($email);
@@ -187,7 +187,7 @@ class User
             fs::log("No user with email=[{$email}]. Creating new user.");
         }
 
-        $user = self::createUser($email, $firstName, $lastName, $address, $tel, $password);
+        $user = self::createUser($email, $firstName, $lastName, $tel, $password);
 
         [$name, $domain] = explode('@', $email);
         if ($domain == 'tfbnw.net') {
@@ -263,12 +263,12 @@ HTML;
      * @return User
      * @throws Exception
      */
-    private static function createUser(string $email, string $firstName, string $lastName, string $address, string $tel, string $password)
+    private static function createUser(string $email, string $firstName, string $lastName, string $tel, string $password)
     {
         $usersID  = md5(time());
         $salt     = rand(1111111111, 9999999999);
         $password = md5($password . $salt);
-        $sql      = "INSERT INTO `users` (`id`, `email`, `first_name`, `last_name`, `address`, `tel`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$firstName}', '{$lastName}', '{$address}', '{$tel}', '{$password}', '{$salt}');";
+        $sql      = "INSERT INTO `users` (`id`, `email`, `first_name`, `last_name`, `tel`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$firstName}', '{$lastName}', '{$tel}', '{$password}', '{$salt}');";
         if (!fs::$mysqli->query($sql)) {
             fs::log($sql);
             throw new Exception("Failed to create new user (DB error)");
@@ -433,5 +433,10 @@ HTML;
         $sql .= " WHERE `id` = '{$this->id}';";
 
         return !!fs::$mysqli->query($sql);
+    }
+
+    public function noAddress(): bool
+    {
+        return $this->address === NULL;
     }
 }

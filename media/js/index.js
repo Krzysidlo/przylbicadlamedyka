@@ -7,128 +7,6 @@ var index = function () {
 
     $(function () {
 
-        (function maps() {
-            var $maps = $("body.maps");
-            if ($maps.length) {
-                var mymap = L.map('map').setView([50.0647, 19.9450], 25);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(mymap);
-
-                $.ajax({
-                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
-                    type: "POST",
-                    data: "",
-                    dataType: "JSON",
-                    success: function (data) {
-                        if (data.success) {
-                            onMapClick(data)
-                        }
-                    },
-                    error: function () {
-                        alert("Problem z zaladowaniem pinezek");
-                    }
-                });
-
-                function createMyIcon(iconUrl) {
-                    return L.icon({
-                        iconUrl: iconUrl,
-                        iconSize: [38, 95],
-                        iconAnchor: [22, 94],
-                        popupAnchor: [-3, -76],
-                    });
-                }
-
-                function createBindPopup(lat, lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
-                    var htmlElement = "";
-                    if (readyBascinetsNo) {
-                        htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
-                    }
-                    if (MaterialsNeededNo) {
-                        htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
-                    }
-                    if (additional_comments) {
-                        htmlElement += '<div><b>Komentarz</b><br>' + additional_comments + '<br></div>';
-                    }
-                    htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
-                        'POTWIERDŹ' +
-                        '</button></div>';
-                    var googleMapsLink = generateGoogleMapsLink(lat, lng);
-                    htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
-                        'MAPS LINK' +
-                        '</button></div>';
-                    console.log(htmlElement);
-                    return htmlElement
-                }
-
-                $("#driver-confirmation").on('click', function () {
-                    $('#modalPopup').modal('hide');
-                    var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
-                    var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-                    alert('Potwierdziles: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo);
-                });
-
-                function generateGoogleMapsLink(lat, lng) {
-                    //  https://maps.google.com/maps?q=50.0647,19.9450
-                    return "https://maps.google.com/maps?q=" + lat + "," + lng;
-                }
-
-                function onMapClick(data) {
-                    data = data.requests;
-                    for (var user_id in data) {
-                        var latLng = data[user_id].latLng.split(','),
-                            readyBascinetsNo = data[user_id].bascinet,
-                            MaterialsNeededNo = data[user_id].material,
-                            additional_comments = data[user_id].comments,
-                            frozen = data[user_id].frozen,
-                            iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
-                            myIcon = createMyIcon(iconUrl),
-                            htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
-                            marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
-                    }
-                }
-
-                function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
-                    if (frozen) {
-                        //    GREY
-                        return 'http://www.clker.com/cliparts/r/v/2/5/G/t/map-pin-dark-grey.svg.med.png'
-                    } else if (readyBascinetsNo && MaterialsNeededNo) {
-                        //    GREEN / RED
-                        return 'https://s3-ap-southeast-1.amazonaws.com/images.marketing-interactive.com/wp-content/uploads/2020/02/07133043/Google-Maps_Pin_Full-Color.png'
-                    } else if (readyBascinetsNo && !MaterialsNeededNo) {
-                        //    GREEN
-                        return 'https://www.seekpng.com/png/full/48-480206_marker-for-residencelamontagne-clip-google-map-pin-green.png'
-                    } else if (!readyBascinetsNo && MaterialsNeededNo) {
-                        //    RED
-                        return 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Map_pin_icon.svg'
-                    }
-                }
-
-                //mymap.on('click', drawPinsOnMap(listOfPins));
-
-                function database_query(lat, lng, user_id) {
-                    $.ajax({
-                        url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
-                        type: "POST",
-                        data: {lat: lat, lng: lng, user_id: user_id},
-                        dataType: "JSON",
-                        success: function (data) {
-                            console.log(data);
-                            if (data.success) {
-
-                            } else {
-                            }
-                        },
-                        error: function () {
-                            console.log('error!!!!!')
-                        }
-                    });
-                }
-            }
-        })();
-
         var $body = $("body"),
             winFocus = true,
             online = true;
@@ -244,59 +122,41 @@ var index = function () {
         (function register() {
             var $register = $("body.register");
             if ($register.length) {
-                var $forgotPasswordModal = $("#forgotPassword"),
-                    $resetPasswordForm = $forgotPasswordModal.find("form"),
-                    $logRegForm = $register.find(".logRegForm form");
+                var $chngView = $register.find("a.chngView"),
+                    $forms = $register.find(".leftContainer form");
 
-                $logRegForm.on('submit', function (e) {
+                $chngView.on('click', function (e) {
                     e.preventDefault();
-                    logRegAjax($(this));
+
+                    var view = $(this).data('view'),
+                        $loginView = $register.find(".leftContainer.login"),
+                        $registerView = $register.find(".leftContainer.register"),
+                        $forgotView = $register.find(".leftContainer.forgot");
+                    switch(view) {
+                        case 'login':
+                            $registerView.fadeOut(function () {
+                                $loginView.fadeIn();
+                            });
+                            break;
+                        case 'register':
+                            $loginView.fadeOut(function () {
+                                $registerView.fadeIn();
+                            });
+                            break;
+                        case 'forgot':
+                            $forgotView.find('input[type="email"]').val($loginView.find('input[type="email"]').val());
+                            $loginView.fadeOut(function () {
+                                $forgotView.fadeIn();
+                            });
+                            break;
+                    }
                 });
 
-                $forgotPasswordModal.on('show.bs.modal', function () {
-                    var email = $register.find("input[name='lemail']").val();
-                    if (email.length) {
-                        $forgotPasswordModal.find("#femail").val(email);
-                    }
-                })
-                    .on('shown.bs.modal', function () {
-                        $forgotPasswordModal.find("#femail").trigger('focus');
-                    });
-
-                $resetPasswordForm.on('submit', function (e) {
+                $forms.on('submit', function (e) {
                     e.preventDefault();
+
                     var $form = $(this),
                         formData = new FormData($form.get(0));
-
-                    formData.append('forgotPassword', true);
-
-                    $.ajax({
-                        url: $form.attr('action') + "?ajax=true",
-                        type: "POST",
-                        data: formData,
-                        dataType: "JSON",
-                        processData: false,
-                        contentType: false,
-                        beforeSend: function () {
-                            showLoading();
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                $forgotPasswordModal.modal('hide');
-                            }
-                            displayToast(data.message, data.alert);
-                        },
-                        error: function () {
-                            displayToast("Nieznany błąd", "danger");
-                        },
-                        complete: function () {
-                            hideLoading();
-                        }
-                    });
-                });
-
-                var logRegAjax = function ($form) {
-                    var formData = new FormData($form.get(0));
 
                     $.ajax({
                         url: $form.attr('action') + "?ajax=true",
@@ -324,62 +184,185 @@ var index = function () {
                             hideLoading();
                         }
                     });
-                };
+                });
 
-                // $(":input").inputmask();
+            }
+        })();
+
+        (function maps() {
+            var $maps = $("body.maps");
+            if ($maps.length) {
+                var mymap = L.map('map').setView([50.0647, 19.9450], 25);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(mymap);
+
+                $.ajax({
+                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.success) {
+                            onMapClick(data)
+                        }
+                    },
+                    error: function () {
+                        alert("Problem z zaladowaniem pinezek");
+                    }
+                });
+
+                function createMyIcon(iconUrl) {
+                    return L.icon({
+                        iconUrl: iconUrl,
+                        iconSize: [43, 59],
+                        iconAnchor: [21, 59],
+                        popupAnchor: [0, -58],
+                    });
+                }
+
+                function createBindPopup(lat, lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
+                    var htmlElement = "";
+                    if (readyBascinetsNo) {
+                        htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
+                    }
+                    if (MaterialsNeededNo) {
+                        htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
+                    }
+                    if (additional_comments) {
+                        htmlElement += '<div><b>Komentarz</b><br>' + additional_comments + '<br></div>';
+                    }
+                    htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
+                        'POTWIERDŹ' +
+                        '</button></div>';
+                    var googleMapsLink = generateGoogleMapsLink(lat, lng);
+                    htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
+                        'MAPS LINK' +
+                        '</button></div>';
+                    console.log(htmlElement);
+                    return htmlElement
+                }
+
+                $("#driver-confirmation").on('click', function () {
+                    $('#modalPopup').modal('hide');
+                    var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
+                    var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
+                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo);
+                });
+
+                function generateGoogleMapsLink(lat, lng) {
+                    //  https://maps.google.com/maps?q=50.0647,19.9450
+                    return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                }
+
+                function onMapClick(data) {
+                    data = data.requests;
+                    for (var user_id in data) {
+                        var latLng = data[user_id].latLng.split(','),
+                            readyBascinetsNo = data[user_id].bascinet,
+                            MaterialsNeededNo = data[user_id].material,
+                            additional_comments = data[user_id].comments,
+                            frozen = data[user_id].frozen,
+                            iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
+                            myIcon = createMyIcon(iconUrl),
+                            htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
+                            marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
+                    }
+                }
+
+                function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
+                    if (frozen) {
+                        //    GREY
+                        return IMG_URL + '/pin_frozen.png';
+                    } else if (readyBascinetsNo && MaterialsNeededNo) {
+                        //    GREEN / RED
+                        return IMG_URL + '/pin_both.png';
+                    } else if (readyBascinetsNo && !MaterialsNeededNo) {
+                        //    GREEN
+                        return IMG_URL + '/pin_bascinet.png';
+                    } else if (!readyBascinetsNo && MaterialsNeededNo) {
+                        //    RED
+                        return IMG_URL + '/pin_material.png';
+                    }
+                }
+
+                //mymap.on('click', drawPinsOnMap(listOfPins));
+
+                function database_query(lat, lng, user_id) {
+                    $.ajax({
+                        url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
+                        type: "POST",
+                        data: {lat: lat, lng: lng, user_id: user_id},
+                        dataType: "JSON",
+                        success: function (data) {
+                            console.log(data);
+                            if (data.success) {
+
+                            } else {
+                            }
+                        },
+                        error: function () {
+                            console.log('error!!!!!')
+                        }
+                    });
+                }
             }
         })();
 
         (function addressMap() {
             var $body = $("body.register, body.settings");
             if ($body.length) {
-                var $addressInput = $body.find("#address"),
-                    $addressFinder = $body.find("#addressFinder"),
-                    addMarker = setTimeout(function () {
+                if ($body.find("#addressMap").length) {
+                    var $addressInput = $body.find("#address"),
+                        $addressFinder = $body.find("#addressFinder"),
+                        addMarker = setTimeout(function () {
+                        });
+
+                    var center = new L.LatLng(50.0619474, 19.9368564);
+                    var map = L.map('addressMap').setView(center, 15);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    var marker = L.marker(center, {draggable: 'true'}).addTo(map);
+
+                    var bindMarker = function (latLng) {
+                        map.removeLayer(marker);
+                        marker.setLatLng(latLng);
+                        marker.addTo(map);
+                        map.panTo(latLng);
+
+                        $addressInput.val(latLng.lat + "," + latLng.lng);
+                    };
+
+                    if ($addressInput.val() !== "") {
+                        var latLng = $addressInput.val().split(",");
+                        bindMarker(new L.LatLng(latLng[0], latLng[1]));
+                    }
+
+                    marker.on('dragend', function (e) {
+                        bindMarker(e.target._latlng);
                     });
 
-                var center = new L.LatLng(50.0619474, 19.9368564);
-                var map = L.map('addressMap').setView(center, 15);
+                    $addressFinder.on('keyup', function (e) {
+                        var address = $addressFinder.val();
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
+                        clearTimeout(addMarker);
+                        addMarker = setTimeout(function () {
+                            $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q=' + address, function (data) {
+                                if (typeof data[0] !== "undefined") {
+                                    var lat = data[0].lat,
+                                        lng = data[0].lon;
 
-                var marker = L.marker(center, {draggable: 'true'}).addTo(map);
-
-                var bindMarker = function (latLng) {
-                    map.removeLayer(marker);
-                    marker.setLatLng(latLng);
-                    marker.addTo(map);
-                    map.panTo(latLng);
-
-                    $addressInput.val(latLng.lat + "," + latLng.lng);
-                };
-
-                if ($addressInput.val() !== "") {
-                    var latLng = $addressInput.val().split(",");
-                    bindMarker(new L.LatLng(latLng[0], latLng[1]));
+                                    bindMarker(new L.LatLng(lat, lng));
+                                }
+                            });
+                        }, 1E3);
+                    });
                 }
-
-                marker.on('dragend', function (e) {
-                    bindMarker(e.target._latlng);
-                });
-
-                $addressFinder.on('keyup', function (e) {
-                    var address = $addressFinder.val();
-
-                    clearTimeout(addMarker);
-                    addMarker = setTimeout(function () {
-                        $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q=' + address, function (data) {
-                            if (typeof data[0] !== "undefined") {
-                                var lat = data[0].lat,
-                                    lng = data[0].lon;
-
-                                bindMarker(new L.LatLng(lat, lng));
-                            }
-                        });
-                    }, 1E3);
-                });
             }
         })();
 
