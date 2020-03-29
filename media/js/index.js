@@ -245,11 +245,20 @@ var index = function () {
                     return htmlElement
                 }
 
+                var openPopupUserId;
+
+                mymap.on('popupopen', function (e) {
+                    openPopupUserId = e.popup._source._myId;
+                });
+
                 $("#driver-confirmation").on('click', function () {
                     $('#modalPopup').modal('hide');
                     var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
                     var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo);
+                    var driverDate = ${"#driverDate"}.val();
+                    //    TODO HANDLE WITH RESPONSE - what if success wht if error
+                    sendConfirmedDriverData(openPopupUserId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate)
+                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo + "i wysylam do:" + openPopupUserId);
                 });
 
                 function generateGoogleMapsLink(lat, lng) {
@@ -269,6 +278,7 @@ var index = function () {
                             myIcon = createMyIcon(iconUrl),
                             htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
+                            marker._myId = user_id;
                     }
                 }
 
@@ -288,13 +298,11 @@ var index = function () {
                     }
                 }
 
-                //mymap.on('click', drawPinsOnMap(listOfPins));
-
-                function database_query(lat, lng, user_id) {
+                function sendConfirmedDriverData(userId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate) {
                     $.ajax({
-                        url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
+                        url: "https://przylbicadlamedyka.pl/ajax/map/driverConfirmation?ajax=true",
                         type: "POST",
-                        data: {lat: lat, lng: lng, user_id: user_id},
+                        data: {userId: userId, bascinets: driverBascinetsConfirmedNo, materials: driverMaterialsConfirmedNo, date:driverDate},
                         dataType: "JSON",
                         success: function (data) {
                             console.log(data);
@@ -304,7 +312,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            console.log('error!!!!!')
+                        console.log('error!!!!!')
                         }
                     });
                 }

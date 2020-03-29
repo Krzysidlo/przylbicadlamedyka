@@ -13,6 +13,9 @@
 
                 <p class="md-form mb-1">Ile materiałów?</p>
                 <input type="text" id="MaterialsNeededNo">
+
+                <p class="md-form mb-1">Termin</p>
+                <input type="text" id="driverDate">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
