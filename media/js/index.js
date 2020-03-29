@@ -258,7 +258,7 @@ var index = function () {
                     var driverDate = ${"#driverDate"}.val();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
                     sendConfirmedDriverData(openPopupUserId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate)
-                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo + "i wysylam do:" + openPopupUserId);
+                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo + 'i wysylam do:' + openPopupUserId);
                 });
 
                 function generateGoogleMapsLink(lat, lng) {
