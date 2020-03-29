@@ -34,7 +34,6 @@ body .wfi.scaled {
 }
 body main {
   min-height: calc(100vh - (83px + 64px));
-  margin-bottom: 50px;
 }
 @media only screen and (max-width: 992px) {
   body nav.navbar.scrolling-navbar {
@@ -944,6 +943,11 @@ footer a {
 }
 footer a:hover {
   color: #0056b3;
+}
+
+body.maps #map {
+  width: 100%;
+  height: calc(100vh - 97px);
 }
 
 body.error, body.construction, body.noaccess {

@@ -228,6 +228,8 @@ class RegisterController extends PageController
             exit(0);
         }
 
+        $this->title = "Zarejestruj się";
+
         return $this->render($args);
     }
 }
