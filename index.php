@@ -1,6 +1,5 @@
 <?php
 
-use classes\Functions as fs;
 
 require_once __DIR__ . "/config/config.php";
 global $pageClass;

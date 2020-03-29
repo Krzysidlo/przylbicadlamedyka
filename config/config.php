@@ -2,7 +2,6 @@
 
 use classes\Functions as fs;
 use classes\User;
-
 require_once __DIR__ . "/autoload.php";
 
 setlocale(LC_ALL, "pl_PL.utf-8");
