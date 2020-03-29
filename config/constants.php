@@ -8,7 +8,7 @@ use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
 //TODO: Zmienić na false
-define('DEV_MODE', true);
+define('DEV_MODE', false);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
@@ -18,8 +18,8 @@ if (DEV_MODE) {
 
 //TODO: Zmienić na ip
 //Use local database
-$DB_HOST = 'localhost';
-//$DB_HOST = '185.243.55.171';
+//$DB_HOST = 'localhost';
+$DB_HOST = '185.243.55.171';
 $DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';
