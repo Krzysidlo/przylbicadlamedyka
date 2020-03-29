@@ -46,40 +46,36 @@ function createMyIcon(iconUrl) {
         function createBindPopup(lat,lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
             var htmlElement = "";
             if (readyBascinetsNo) {
-                htmlElement += `<div><b>Gotowe przyłbice:</b><br>${readyBascinetsNo}<br></div>`
+                htmlElement += `<div><b>Gotowe przyłbice:</b><br>${readyBascinetsNo}<br></div>`;
             }
             if (MaterialsNeededNo){
-                htmlElement += `<div><b>Potrzebne materiały</b><br>${MaterialsNeededNo}<br></div>`
+                htmlElement += `<div><b>Potrzebne materiały</b><br>${MaterialsNeededNo}<br></div>`;
             }
             if (additional_comments) {
-                htmlElement += `<div><b>Komentarz</b><br>${additional_comments}<br></div>`
+                htmlElement += `<div><b>Komentarz</b><br>${additional_comments}<br></div>`;
             }
-            htmlElement += `<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalpopup">
+            htmlElement += `<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">
                   POTWIERDŹ
-                </button></div>`
+                </button></div>`;
             googleMapsLink = generateGoogleMapsLink(lat, lng)
             htmlElement += `<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href='${googleMapsLink}';">
                   MAPS LINK
-                </button></div>`
+                </button></div>`;
             console.log(htmlElement)
             return htmlElement
         }
 
         $("#driver-confirmation").on('click', function () {
-            $('#modalpopup').modal('hide');
+            $('#modalPopup').modal('hide');
             driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
             driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-            alert(`Potwierdziles:
-            Przylbice: ${driverBascinetsConfirmedNo}
-            Materialy: ${driverMaterialsConfirmedNo}
-            `);
+            alert(`Potwierdziles: Przylbice: ${driverBascinetsConfirmedNo} Materialy: ${driverMaterialsConfirmedNo}`);
         });
 
         function generateGoogleMapsLink(lat, lng) {
         //  https://maps.google.com/maps?q=50.0647,19.9450
             return "https://maps.google.com/maps?q=" + lat + "," + lng
         }
-
 
         function onMapClick(data) {
             data = data.requests
@@ -114,7 +110,6 @@ function createMyIcon(iconUrl) {
 
         //mymap.on('click', drawPinsOnMap(listOfPins));
 
-
         function database_query(lat, lng, user_id) {
             $.ajax({
                 url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
@@ -133,6 +128,7 @@ function createMyIcon(iconUrl) {
                 }
             });
         }
+
         var $body = $("body"),
             winFocus = true,
             online = true;
@@ -194,124 +190,6 @@ function createMyIcon(iconUrl) {
                     }
                 }
             });
-        })();
-
-        (function chooseCompetition() {
-            $(".dropdown #change + .dropdown-menu .dropdown-item").on('click', function () {
-                $(this).closest("form").submit();
-            });
-        })();
-
-        (function hiddenSurprise() {
-            if ($("section.loginRegister").length <= 0) {
-                var $modal = $("#surpriseModal"),
-                    $cheatingModal = $("#cheatingModal"),
-                    $modalImg = $modal.find("img.img-responsive"),
-                    $srp = $("[class^=srp]"),
-                    allowChange = false;
-
-                $cheatingModal.on('show.bs.modal', function () {
-                    var $modalImage = $cheatingModal.find(".modal-content .modal-body .img-responsive"),
-                        min = 1,
-                        max = 2,
-                        random = Math.floor(Math.random() * (max - min + 1)) + min;
-
-                    $modalImage.attr('src', $modalImage.data('src') + random + $modalImage.data('ext'));
-                });
-
-                $srp.on('click', function (e) {
-                    e.preventDefault();
-
-                    var $this = $(this);
-
-                    if ($this.hasClass("active")) {
-                        var className = $this.attr('class').split(" ")[0],
-                            number = className.substr(3);
-
-                        allowChange = true;
-                        $modalImg.attr("src", $modalImg.data("srp") + number + $modalImg.data("ext"));
-                        $modal.modal('show');
-
-                        $.ajax({
-                            url: "/ajax/picture_found.php?ajax=true",
-                            data: {number: number},
-                            type: "POST",
-                            dataType: "JSON",
-                            success: function (data) {
-                                if (data.success) {
-                                    if (data.modal && data.modalId) {
-                                        var $newModal = $("#" + data.modalId);
-
-                                        $modal.on('hidden.bs.modal', function () {
-                                            if ($newModal.length <= 0) {
-                                                $body.append($(data.modal));
-                                                $newModal = $("#" + data.modalId);
-                                            }
-                                            $newModal.modal('show');
-                                            $newModal.on('shown.bs.modal', function () {
-                                                $modal.off('hidden.bs.modal');
-                                            });
-                                        });
-                                    }
-                                }
-                                switch (data.success) {
-                                    case 'foundAll':
-                                        allowChange = true;
-                                        $(".pagin .pagination .page-item [class^=srp]").addClass('active');
-                                        break;
-                                }
-                            },
-                            error: function () {
-                                displayToast("Nieznany błąd", "danger");
-                            }
-                        });
-                    }
-                });
-
-                var srpLinkObserver = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            if (mutation.attributeName === "class") {
-                                var $element = $(mutation.target);
-
-                                if (allowChange) {
-                                    allowChange = false;
-                                } else {
-                                    $element.removeClass("active");
-
-                                    $cheatingModal.modal('show');
-                                }
-                            }
-                        });
-                    }),
-                    srpImageObserver = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            if (mutation.attributeName === "src") {
-                                if (allowChange) {
-                                    allowChange = false;
-                                } else {
-                                    allowChange = true;
-                                    $modalImg.attr('src', "");
-                                    $modal.modal('hide');
-                                    setTimeout(function () {
-                                        $cheatingModal.modal('show');
-                                    }, 6E2);
-                                }
-                            }
-                        });
-                    });
-
-                if (typeof $modalImg[0] === 'Node') {
-                    srpImageObserver.observe($modalImg[0], {
-                        attributes: true
-                    });
-                }
-
-                $srp.each(function (i, e) {
-                    srpLinkObserver.observe(e, {
-                        attributes: true
-                    });
-                });
-            }
         })();
 
         (function showPreload() {
