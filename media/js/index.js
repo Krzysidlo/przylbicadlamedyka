@@ -241,7 +241,6 @@ var index = function () {
                     htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
                         'MAPS LINK' +
                         '</button></div>';
-                    console.log(htmlElement);
                     return htmlElement
                 }
 
@@ -249,6 +248,7 @@ var index = function () {
 
                 mymap.on('popupopen', function (e) {
                     openPopupUserId = e.popup._source._myId;
+                    console.log(openPopupUserId)
                 });
 
                 $("#driver-confirmation").on('click', function () {
@@ -279,6 +279,7 @@ var index = function () {
                             htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = user_id;
+                         console.log("PUPCIA" + marker._myId)
                     }
                 }
 
