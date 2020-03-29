@@ -6,133 +6,129 @@ var index = function () {
     });
 
     $(function () {
-        var mymap = L.map('mapid').setView([50.0647, 19.9450], 25);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-         {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(mymap);
+        (function maps() {
+            var $maps = $("body.maps");
+            if ($maps.length) {
+                var mymap = L.map('map').setView([50.0647, 19.9450], 25);
 
-$.ajax({
-    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
-    type: "POST",
-    data: "",
-    dataType: "JSON",
-    success: function (data) {
-        if (data.success) {
-            onMapClick(data)
-        }
-    },
-    error: function () {
-    alert("Problem z zaladowaniem pinezek");
-    }
-});
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(mymap);
 
-
-function createMyIcon(iconUrl) {
-
-        var myIcon = L.icon({
-                iconUrl: iconUrl,
-                iconSize: [38, 95],
-                iconAnchor: [22, 94],
-                popupAnchor: [-3, -76],
-        //        shadowUrl: 'my-icon-shadow.png',
-        //        shadowSize: [68, 95],
-        //        shadowAnchor: [22, 94]
-            });
-            return myIcon
-        }
-
-
-        function createBindPopup(lat,lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
-            var htmlElement = "";
-            if (readyBascinetsNo) {
-                htmlElement += `<div><b>Gotowe przyłbice:</b><br>${readyBascinetsNo}<br></div>`
-            }
-            if (MaterialsNeededNo){
-                htmlElement += `<div><b>Potrzebne materiały</b><br>${MaterialsNeededNo}<br></div>`
-            }
-            if (additional_comments) {
-                htmlElement += `<div><b>Komentarz</b><br>${additional_comments}<br></div>`
-            }
-            htmlElement += `<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalpopup">
-                  POTWIERDŹ
-                </button></div>`
-            googleMapsLink = generateGoogleMapsLink(lat, lng)
-            htmlElement += `<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href='${googleMapsLink}';">
-                  MAPS LINK
-                </button></div>`
-            console.log(htmlElement)
-            return htmlElement
-        }
-
-        $("#driver-confirmation").on('click', function () {
-            $('#modalpopup').modal('hide');
-            driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
-            driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-            alert(`Potwierdziles:
-            Przylbice: ${driverBascinetsConfirmedNo}
-            Materialy: ${driverMaterialsConfirmedNo}
-            `);
-        });
-
-        function generateGoogleMapsLink(lat, lng) {
-        //  https://maps.google.com/maps?q=50.0647,19.9450
-            return "https://maps.google.com/maps?q=" + lat + "," + lng
-        }
-
-
-        function onMapClick(data) {
-            data = data.requests
-            for (user_id in data) {
-                var [lat,lng] = data[user_id].latLng.split(',')
-                readyBascinetsNo = data[user_id].bascinet
-                MaterialsNeededNo = data[user_id].material
-                additional_comments = data[user_id].comments
-                frozen = data[user_id].frozen
-                iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen)
-                myIcon = createMyIcon(iconUrl)
-                htmlElement = createBindPopup(lat,lng, readyBascinetsNo, MaterialsNeededNo, additional_comments)
-                marker = L.marker([lat,lng], {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
-            }
-        }
-
-        function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
-            if (frozen) {
-        //    GREY
-              return 'http://www.clker.com/cliparts/r/v/2/5/G/t/map-pin-dark-grey.svg.med.png'
-            } else if (readyBascinetsNo && MaterialsNeededNo) {
-        //    GREEN / RED
-              return 'https://s3-ap-southeast-1.amazonaws.com/images.marketing-interactive.com/wp-content/uploads/2020/02/07133043/Google-Maps_Pin_Full-Color.png'
-            } else if (readyBascinetsNo && !MaterialsNeededNo) {
-        //    GREEN
-              return 'https://www.seekpng.com/png/full/48-480206_marker-for-residencelamontagne-clip-google-map-pin-green.png'
-            } else if (!readyBascinetsNo && MaterialsNeededNo) {
-        //    RED
-              return 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Map_pin_icon.svg'
-            }
-        }
-
-        //mymap.on('click', drawPinsOnMap(listOfPins));
-
-
-        function database_query(lat, lng, user_id) {
-            $.ajax({
-                url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
-                type: "POST",
-                data: {lat: lat, lng: lng, user_id: user_id},
-                dataType: "JSON",
-                success: function (data) {
-                    console.log(data);
-                    if (data.success) {
-
-                    } else {
+                $.ajax({
+                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.success) {
+                            onMapClick(data)
+                        }
+                    },
+                    error: function () {
+                        alert("Problem z zaladowaniem pinezek");
                     }
-                },
-                error: function () {
-                console.log('error!!!!!')
+                });
+
+                function createMyIcon(iconUrl) {
+                    return L.icon({
+                        iconUrl: iconUrl,
+                        iconSize: [38, 95],
+                        iconAnchor: [22, 94],
+                        popupAnchor: [-3, -76],
+                    });
                 }
-            });
-        }
+
+                function createBindPopup(lat, lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
+                    var htmlElement = "";
+                    if (readyBascinetsNo) {
+                        htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
+                    }
+                    if (MaterialsNeededNo) {
+                        htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
+                    }
+                    if (additional_comments) {
+                        htmlElement += '<div><b>Komentarz</b><br>' + additional_comments + '<br></div>';
+                    }
+                    htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
+                        'POTWIERDŹ' +
+                        '</button></div>';
+                    var googleMapsLink = generateGoogleMapsLink(lat, lng);
+                    htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
+                        'MAPS LINK' +
+                        '</button></div>';
+                    console.log(htmlElement);
+                    return htmlElement
+                }
+
+                $("#driver-confirmation").on('click', function () {
+                    $('#modalPopup').modal('hide');
+                    var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
+                    var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
+                    alert('Potwierdziles: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo);
+                });
+
+                function generateGoogleMapsLink(lat, lng) {
+                    //  https://maps.google.com/maps?q=50.0647,19.9450
+                    return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                }
+
+                function onMapClick(data) {
+                    data = data.requests;
+                    for (var user_id in data) {
+                        var latLng = data[user_id].latLng.split(','),
+                            readyBascinetsNo = data[user_id].bascinet,
+                            MaterialsNeededNo = data[user_id].material,
+                            additional_comments = data[user_id].comments,
+                            frozen = data[user_id].frozen,
+                            iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
+                            myIcon = createMyIcon(iconUrl),
+                            htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
+                            marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
+                    }
+                }
+
+                function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
+                    if (frozen) {
+                        //    GREY
+                        return 'http://www.clker.com/cliparts/r/v/2/5/G/t/map-pin-dark-grey.svg.med.png'
+                    } else if (readyBascinetsNo && MaterialsNeededNo) {
+                        //    GREEN / RED
+                        return 'https://s3-ap-southeast-1.amazonaws.com/images.marketing-interactive.com/wp-content/uploads/2020/02/07133043/Google-Maps_Pin_Full-Color.png'
+                    } else if (readyBascinetsNo && !MaterialsNeededNo) {
+                        //    GREEN
+                        return 'https://www.seekpng.com/png/full/48-480206_marker-for-residencelamontagne-clip-google-map-pin-green.png'
+                    } else if (!readyBascinetsNo && MaterialsNeededNo) {
+                        //    RED
+                        return 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Map_pin_icon.svg'
+                    }
+                }
+
+                //mymap.on('click', drawPinsOnMap(listOfPins));
+
+                function database_query(lat, lng, user_id) {
+                    $.ajax({
+                        url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
+                        type: "POST",
+                        data: {lat: lat, lng: lng, user_id: user_id},
+                        dataType: "JSON",
+                        success: function (data) {
+                            console.log(data);
+                            if (data.success) {
+
+                            } else {
+                            }
+                        },
+                        error: function () {
+                            console.log('error!!!!!')
+                        }
+                    });
+                }
+            }
+        })();
+
         var $body = $("body"),
             winFocus = true,
             online = true;
@@ -194,124 +190,6 @@ function createMyIcon(iconUrl) {
                     }
                 }
             });
-        })();
-
-        (function chooseCompetition() {
-            $(".dropdown #change + .dropdown-menu .dropdown-item").on('click', function () {
-                $(this).closest("form").submit();
-            });
-        })();
-
-        (function hiddenSurprise() {
-            if ($("section.loginRegister").length <= 0) {
-                var $modal = $("#surpriseModal"),
-                    $cheatingModal = $("#cheatingModal"),
-                    $modalImg = $modal.find("img.img-responsive"),
-                    $srp = $("[class^=srp]"),
-                    allowChange = false;
-
-                $cheatingModal.on('show.bs.modal', function () {
-                    var $modalImage = $cheatingModal.find(".modal-content .modal-body .img-responsive"),
-                        min = 1,
-                        max = 2,
-                        random = Math.floor(Math.random() * (max - min + 1)) + min;
-
-                    $modalImage.attr('src', $modalImage.data('src') + random + $modalImage.data('ext'));
-                });
-
-                $srp.on('click', function (e) {
-                    e.preventDefault();
-
-                    var $this = $(this);
-
-                    if ($this.hasClass("active")) {
-                        var className = $this.attr('class').split(" ")[0],
-                            number = className.substr(3);
-
-                        allowChange = true;
-                        $modalImg.attr("src", $modalImg.data("srp") + number + $modalImg.data("ext"));
-                        $modal.modal('show');
-
-                        $.ajax({
-                            url: "/ajax/picture_found.php?ajax=true",
-                            data: {number: number},
-                            type: "POST",
-                            dataType: "JSON",
-                            success: function (data) {
-                                if (data.success) {
-                                    if (data.modal && data.modalId) {
-                                        var $newModal = $("#" + data.modalId);
-
-                                        $modal.on('hidden.bs.modal', function () {
-                                            if ($newModal.length <= 0) {
-                                                $body.append($(data.modal));
-                                                $newModal = $("#" + data.modalId);
-                                            }
-                                            $newModal.modal('show');
-                                            $newModal.on('shown.bs.modal', function () {
-                                                $modal.off('hidden.bs.modal');
-                                            });
-                                        });
-                                    }
-                                }
-                                switch (data.success) {
-                                    case 'foundAll':
-                                        allowChange = true;
-                                        $(".pagin .pagination .page-item [class^=srp]").addClass('active');
-                                        break;
-                                }
-                            },
-                            error: function () {
-                                displayToast("Nieznany błąd", "danger");
-                            }
-                        });
-                    }
-                });
-
-                var srpLinkObserver = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            if (mutation.attributeName === "class") {
-                                var $element = $(mutation.target);
-
-                                if (allowChange) {
-                                    allowChange = false;
-                                } else {
-                                    $element.removeClass("active");
-
-                                    $cheatingModal.modal('show');
-                                }
-                            }
-                        });
-                    }),
-                    srpImageObserver = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            if (mutation.attributeName === "src") {
-                                if (allowChange) {
-                                    allowChange = false;
-                                } else {
-                                    allowChange = true;
-                                    $modalImg.attr('src', "");
-                                    $modal.modal('hide');
-                                    setTimeout(function () {
-                                        $cheatingModal.modal('show');
-                                    }, 6E2);
-                                }
-                            }
-                        });
-                    });
-
-                if (typeof $modalImg[0] === 'Node') {
-                    srpImageObserver.observe($modalImg[0], {
-                        attributes: true
-                    });
-                }
-
-                $srp.each(function (i, e) {
-                    srpLinkObserver.observe(e, {
-                        attributes: true
-                    });
-                });
-            }
         })();
 
         (function showPreload() {
