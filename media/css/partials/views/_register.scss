@@ -1,22 +1,57 @@
 body.register {
-  margin-top: 40px;
+  margin: 0;
   min-height: unset;
 
   main {
-    min-height: calc(100vh - 123px);
-  }
-
-  .col-12.alert {
-    margin: 1rem 0 2rem;
-
-    &.alert-danger {
-      background-color: rgba(255, 0, 0, .5);
-      border-color: rgba(255, 0, 0, .4);
+    .pinky {
+      min-height: calc(100vh - 33px);
+      background: rgba(183, 39, 75, 0.08);
     }
+    .leftContainer, .rightContainer {
+      padding-top: 140px;
+    }
+    .leftContainer {
+      &.login, &.forgot {
+        display: none;
+      }
 
-    &.alert-success {
-      background-color: rgba(0, 255, 0, .5);
-      border-color: rgba(0, 255, 0, .4);
+      .title {
+        color: $color-red;
+      }
+
+      .title, p, label, a {
+        font-weight: 400;
+      }
+
+      input {
+        border: none;
+        padding: 17px 16px;
+        height: 50px;
+        &:-webkit-autofill {
+          animation-name: autofill;
+          animation-fill-mode: both;
+        }
+      }
+      a {
+        color: $color-red;
+        &:hover {
+          color: darken($color-red, 20%);
+        }
+      }
+      .btn-red {
+        background-color: $color-red!important;
+        border-radius: 6px;
+        width: 100%;
+        display: block;
+      }
+      hr {
+        margin: 40px 0;
+      }
+    }
+    .rightContainer {
+      .img-logo {
+        width: 5rem;
+      }
     }
   }
 
@@ -45,18 +80,6 @@ body.register {
     }
 
     color: #FFF;
-  }
-
-  .logRegForm {
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    border-radius: $border-radius;
-
-    input {
-      &:-webkit-autofill {
-        animation-name: autofill;
-        animation-fill-mode: both;
-      }
-    }
   }
 
   #logRegTabs {
@@ -102,6 +125,7 @@ body.register {
           margin-bottom: 10px;
         }
       }
+
       form {
         [type='submit'] {
           border-radius: $border-radius;
@@ -119,6 +143,6 @@ body.register {
 @keyframes autofill {
   to {
     color: #495057;
-    background: transparent;
+    background: #FFF;
   }
 }

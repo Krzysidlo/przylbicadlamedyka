@@ -6,13 +6,12 @@ use classes\Functions as fs;
 $user = new User;
 ?>
 
-<nav class="navbar navbar-expand-xl scrolling-navbar fixed-top navbar-light bg-light">
-    <a class="navbar-brand" href="/"><img src="<?= IMG_URL; ?>/logo.png" class="img-nav" alt=""></a>
-    <a class="navbar-brand" href="/"><?= PAGE_NAME; ?></a>
+<nav class="navbar navbar-dark fixed-top navbar-light bg-dark">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
+    <span class="navbar-brand mr-auto"><?= PAGE_NAME; ?></span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
@@ -20,53 +19,6 @@ $user = new User;
                 <a class="nav-link preload" href="/">
                     <?= "Strona główna" . ($this->menu === "index" ? " <span class='sr-only'>(current)</span>" : ""); ?>
                 </a>
-            </li>
-        </ul>
-        <ul class="navbar-nav mr-right">
-            <?php [$new, $notifications] = fs::getNotifications(10);
-            $count = count($notifications); ?>
-            <li class="nav-item dropdown notifications<?= $this->view === "notifications" ? " active" : ""; ?>">
-                <a class="nav-link dropdown-toggle" href="/notifications" id="notifications" role="button"
-                   data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false" title="Powiadomienia">
-                    <i class="fas fa-bell"></i> <span class="num<?= $new > 0 ? " new" : ""; ?>"><?= $new; ?></span>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="notifications">
-                    <?php foreach ($notifications as $notification) { ?>
-                        <a class="dropdown-item<?= !is_null($notification['href']) ? " preload" : ""; ?><?= $notification['new'] ? " active" : ""; ?>"
-                           href="<?= !is_null($notification['href']) ? $notification['href'] : "#"; ?>">
-                            <?= $notification['content']; ?>
-                        </a>
-                    <?php }
-                    if ($count >= 10) { ?>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item preload" href="/notifications">
-                            Zobacz wszystkie
-                        </a>
-                    <?php } ?>
-                </div>
-            </li>
-            <li class="nav-item dropdown profile<?= in_array($this->view, ["settings"]) ? " active" : ""; ?>">
-                <a class="nav-link dropdown-toggle" href="/<?= USER_PRV > User::USER_NO_CONFIRM ? "settings" : ""; ?>" id="profile"
-                   role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <?= USER_NAME; ?>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="profile">
-                    <?php if (USER_PRV > User::USER_NO_CONFIRM) { ?>
-                        <a class="dropdown-item preload<?= $this->view === "settings" ? " active" : ""; ?>"
-                           href="/settings">
-                            Ustawienia
-                        </a>
-                        <?php if (IS_ROOT) { ?>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item preload" href="/admin/">
-                                Admin
-                            </a>
-                        <?php } ?>
-                        <div class="dropdown-divider"></div>
-                    <?php } ?>
-                    <a class="dropdown-item preload" href="/logout">Wyloguj się</a>
-                </div>
             </li>
         </ul>
     </div>

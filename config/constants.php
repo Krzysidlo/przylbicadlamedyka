@@ -7,7 +7,8 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
-define('DEV_MODE', false);
+//TODO: Zmienić na false
+define('DEV_MODE', true);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
@@ -15,15 +16,16 @@ if (DEV_MODE) {
     error_reporting(E_ALL);
 }
 
+//TODO: Zmienić na ip
 //Use local database
-//$DB_HOST = 'localhost';
-$DB_HOST = '185.243.55.171';
+$DB_HOST = 'localhost';
+//$DB_HOST = '185.243.55.171';
 $DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';
-if (DEV_MODE) {
-    $DB_NAME = 'przylbicadlamedyka_test';
-}
+//if (DEV_MODE) {
+//    $DB_NAME = 'przylbicadlamedyka_test';
+//}
 
 //Wyświetla się komunikat, że strona w trakcie konstrukcji
 $CONST_MODE = false;
