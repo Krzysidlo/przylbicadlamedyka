@@ -255,7 +255,7 @@ var index = function () {
                     $('#modalPopup').modal('hide');
                     var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
                     var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-                    var driverDate = ${"#driverDate"}.val();
+                    var driverDate = $("#driverDate").val();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
                     sendConfirmedDriverData(openPopupUserId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate)
                     alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo + 'i wysylam do:' + openPopupUserId);
