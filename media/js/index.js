@@ -278,7 +278,7 @@ var index = function () {
                             myIcon = createMyIcon(iconUrl),
                             htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
-                            marker._myId = user_id;
+                         marker._myId = user_id;
                     }
                 }
 
