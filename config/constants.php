@@ -8,7 +8,7 @@ use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
 //TODO: Zmienić na false
-define('DEV_MODE', false);
+define('DEV_MODE', true);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
