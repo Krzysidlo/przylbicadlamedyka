@@ -2,7 +2,7 @@ body.register {
   margin: 0;
   min-height: unset;
 
-  main {
+  .container-fluid {
     .pinky {
       min-height: calc(100vh - 33px);
       background: rgba(183, 39, 75, 0.08);

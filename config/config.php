@@ -94,6 +94,10 @@ if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';
 }
 
+if (LOGGED_IN && $user->noAddress() && !in_array($view, $noLoggedIn)) {
+    $view = 'address';
+}
+
 if (USER_PRV == User::USER_NO_ACCESS) {
     $view = 'noaccess';
 }

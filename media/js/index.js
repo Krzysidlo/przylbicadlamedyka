@@ -17,6 +17,43 @@ var index = function () {
             $body.addClass('desktop');
         }
 
+        (function modals() {
+            var $modals = $(".modal.functionModal");
+            $modals.find("form").on('submit', function (e) {
+                e.preventDefault();
+
+                var $form = $(this),
+                    formData = new FormData($form.get(0)),
+                    $modal = $form.parents(".modal");
+
+                $.ajax({
+                    url: $form.attr('action') + "?ajax=true",
+                    type: "POST",
+                    data: formData,
+                    dataType: "JSON",
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        showLoading();
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            $modal.modal('hide');
+                        }
+                        if (data.alert) {
+                            displayToast(data.message, data.alert);
+                        }
+                    },
+                    error: function () {
+                        displayToast("Nieznany błąd", "danger");
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+            });
+        })();
+
         (function menu() {
             var $navbarTop = $("nav.navbar.fixed-top"),
                 $navbarLeft = $("nav.navbar.fixed-left"),
@@ -53,8 +90,15 @@ var index = function () {
                 var $form = $settings.find("form"),
                     $editBtn = $form.find(".edit"),
                     $cancelBtn = $form.find(".cancel"),
+                    $noConfirmBtn = $form.find(".no-confirm"),
                     $saveBtn = $form.find("[type='submit']"),
                     originalValues = [];
+
+                $noConfirmBtn.on('click', function (e) {
+                    e.preventDefault();
+
+                    displayToast("Aby móc edytować informacje, proszę potwierdzić adres e-mail");
+                });
 
                 $editBtn.on('click', function (e) {
                     e.preventDefault();
@@ -110,7 +154,16 @@ var index = function () {
                             showLoading();
                         },
                         success: function (data) {
-                            displayToast(data.message, data.alert);
+                            if (data.success) {
+                                $form.find('input:not(.locked)').attr('readonly', true);
+                                $cancelBtn.fadeOut();
+                                $saveBtn.fadeOut(function () {
+                                    $editBtn.fadeIn();
+                                });
+                            }
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
+                            }
                         },
                         error: function () {
                             displayToast("Nieznany błąd", "danger");
@@ -193,9 +246,9 @@ var index = function () {
             }
         })();
 
-        (function maps() {
-            var $maps = $("body.maps");
-            if ($maps.length) {
+        (function map() {
+            var $map = $("body.map");
+            if ($map.length) {
                 var mymap = L.map('map').setView([50.0647, 19.9450], 25);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',

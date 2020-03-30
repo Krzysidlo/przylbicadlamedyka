@@ -2,14 +2,19 @@
 
 use classes\User;
 
-//var_dump($user->getAddress()->location);
-//die();
-
 ?>
 <section class="container">
     <div class="row justify-content-center">
+        <?php if (USER_PRV === User::USER_NO_CONFIRM) { ?>
+            <div class="col-12 col-md-8 mt-5">
+                <div class="alert alert-danger">Adres e-mail nie został potwierdzony. Nie można obecnie edytować danych.
+                    Jeżeli wiadomość potwierdzająca nie dotarła, proszę kliklnąć
+                    <a href="/ajax/register/sendConfirm" id="sendConfirm">tutaj</a>, aby wsłać ją ponownie.
+                </div>
+            </div>
+        <?php } ?>
         <div class="col-12 col-md-8 mt-5">
-            <form action="/ajax/register/address">
+            <form action="/ajax/settings/save" class="settings">
                 <div class="row">
                     <div class="col-12 mt-4 mb-3">
                         <h4 class="title">Twoje dane</h4>
@@ -107,9 +112,13 @@ use classes\User;
                         </div>
                     </div>
                     <div class="col-12 mt-3 mb-5">
-                        <button class="btn btn-red right edit mx-0">Edytuj</button>
-                        <button type="submit" class="btn btn-red right mx-0">Zapisz</button>
-                        <button class="btn btn-white right cancel mr-3">Anuluj</button>
+                        <?php if (USER_PRV === User::USER_NO_CONFIRM) { ?>
+                            <button class="btn btn-red right no-confirm mx-0">Edytuj</button>
+                        <?php } else { ?>
+                            <button class="btn btn-red right edit mx-0">Edytuj</button>
+                            <button type="submit" class="btn btn-red right mx-0">Zapisz</button>
+                            <button class="btn btn-white right cancel mr-3">Anuluj</button>
+                        <?php } ?>
                     </div>
                 </div>
             </form>

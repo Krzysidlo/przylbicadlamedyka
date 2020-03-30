@@ -1,8 +1,8 @@
-body.address, body.settings {
+body.address .container, body.settings .container {
   p {
     font-weight: normal;
   }
-  form {
+  form.settings, form.address {
     input[type="radio"]:checked + label.type {
       color: #FFF;
       background: $color-red;

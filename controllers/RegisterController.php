@@ -9,7 +9,7 @@ use classes\Functions as fs;
 class RegisterController extends PageController
 {
 
-    public static function ajax_login($get): void
+    public static function ajax_login($get = []): array
     {
         $data = [];
         if (DB_CONN && !empty($get)) {
@@ -61,16 +61,10 @@ class RegisterController extends PageController
             }
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_register($get): void
+    public static function ajax_register($get = []): array
     {
         $data = [];
         if (DB_CONN && !empty($get)) {
@@ -111,6 +105,7 @@ class RegisterController extends PageController
                                     fs::log("Error: " . $e->getMessage());
                                     $data['alert']   = "danger";
                                     $data['message'] = "Wystąpił błąd podczas tworzenia użytkownika";
+                                    $data['exception'] = $e->getMessage();
                                 }
                             } else {
                                 $data['message']          = "Wygląda na to, że adres e-mail jest niepoprawny";
@@ -134,16 +129,10 @@ class RegisterController extends PageController
             }
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_chgpswd($get): void
+    public static function ajax_chgpswd($get = []): array
     {
         $data = [];
 
@@ -211,16 +200,10 @@ class RegisterController extends PageController
 
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_address($get): void
+    public static function ajax_address($get = []): array
     {
         $invalid = [];
         foreach ($get as $name => $value) {
@@ -237,7 +220,8 @@ class RegisterController extends PageController
             'invalid' => $invalid,
         ];
 
-        $priv = intval($get['type']);
+        $priv = $get['type'] ?? USER_PRV;
+        $priv = intval($priv);
 
         if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
             $data = [
@@ -291,13 +275,50 @@ class RegisterController extends PageController
             }
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
+        return $data;
+    }
 
-        exit(0);
+    public static function ajax_sendConfirm($get = []): array
+    {
+        $data = [];
+        $user = $get['user'] ?? new User;
+
+        $hash = md5($user->email . time());
+        $user->setOption('confirm-email', $hash);
+
+        $subject = PAGE_NAME . " - " . "Potwierdzenie rejestracji";
+
+        $text[] = "Dziękujemy za zarejestrowanie się na stronie " . PAGE_NAME;
+        $text[] = "Proszę kliknąc w poniższy link, aby potwierdzić adres e-mail";
+
+        $link = ROOT_URL . "/confirm/" . $hash;
+
+        $text = implode("<br>", $text);
+        // Message
+        $message = <<< HTML
+        <html lang="pl">
+        <head>
+            <title>{$subject}</title>
+        </head>
+        <body>
+            <p>{$text}</p>
+            <a href="{$link}">{$link}</a>
+        </body>
+        </html>
+HTML;
+
+        $replyTo = EMAIL;
+        // To send HTML mail, the Content-type header must be set
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        // Additional headers
+        $headers[] = "To: {$user->email}";
+        $headers[] = "From: " . PAGE_NAME . "<no-reply@przylbicadlamedyka.pl>";
+        $headers[] = "Reply-To: {$replyTo}";
+
+        $data['success'] = mail($user->email, $subject, $message, implode("\r\n", $headers));
+
+        return $data;
     }
 
     public function content(array $args = [])

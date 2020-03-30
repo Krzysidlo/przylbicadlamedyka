@@ -1,5 +1,8 @@
-body.settings {
-  form {
+body.settings .container {
+  .alert {
+    margin-bottom: -20px;
+  }
+  form.settings {
     label {
       font-size: 12px;
       margin-bottom: 4px;
