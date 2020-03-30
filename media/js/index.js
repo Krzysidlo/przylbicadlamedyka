@@ -18,54 +18,16 @@ var index = function () {
         }
 
         (function menu() {
-            var $body = $("body"),
-                $navbar = $("nav.navbar"),
-                $toggler = $navbar.find(".navbar-toggler"),
-                $collapse = $navbar.find(".navbar-collapse"),
-                $notifications = $navbar.find(".notifications"),
-                clearNew;
+            var $navbarTop = $("nav.navbar.fixed-top"),
+                $navbarLeft = $("nav.navbar.fixed-left"),
+                $toggler = $navbarTop.find(".navbar-toggler");
 
             $toggler.on('click', function () {
-                if ($collapse.hasClass('show')) {
-                    $body.removeClass("collapsed");
+                $navbarLeft.toggleClass('small');
+                if ($navbarLeft.hasClass('small')) {
+                    setCookie("leftMenu", true, 365);
                 } else {
-                    $body.addClass("collapsed");
-                }
-            });
-
-            $notifications.find("#notifications").on('click', function () {
-                clearNew = setTimeout(function () {
-                    $.ajax({
-                        url: "/ajax/notifications.php?ajax=true",
-                        data: {action: "read"},
-                        type: "POST",
-                        dataType: "JSON",
-                        success: function (data) {
-                            if (data.success) {
-                                $notifications.find("#notifications .num").html("0").removeClass('new');
-                            }
-                        }
-                    });
-                }, 15E2);
-            })
-                .on('blur', function () {
-                    clearTimeout(clearNew);
-                });
-            $notifications.find('.dropdown-menu a.dropdown-item').on('click', function (e) {
-                var href = $(this).attr('href'),
-                    path = window.location.pathname,
-                    parts = href.split("#");
-
-                shouldPrevent = (href === "#");
-                if (shouldPrevent) {
-                    e.preventDefault();
-                }
-                shouldPrevent |= (href.indexOf("#") >= 0 && parts[0] == path);
-                if (shouldPrevent) {
-                    e.stopPropagation();
-                    if ($body.hasClass('collapsed')) {
-                        $toggler.trigger('click');
-                    }
+                    setCookie("leftMenu", null);
                 }
             });
         })();
@@ -88,7 +50,49 @@ var index = function () {
         (function settings() {
             var $settings = $("body.settings");
             if ($settings.length) {
-                var $form = $settings.find(".form form");
+                var $form = $settings.find("form"),
+                    $editBtn = $form.find(".edit"),
+                    $cancelBtn = $form.find(".cancel"),
+                    $saveBtn = $form.find("[type='submit']"),
+                    originalValues = [];
+
+                $editBtn.on('click', function (e) {
+                    e.preventDefault();
+
+                    $.each($form.find('input:not(.locked)'), function () {
+                        var $input = $(this),
+                            name = $input.attr('name'),
+                            value = $input.val();
+
+                        $input.attr('readonly', false);
+
+                        originalValues.push({
+                            name: name,
+                            value: value
+                        });
+                    });
+
+                    $(this).fadeOut(function () {
+                        $cancelBtn.fadeIn();
+                        $saveBtn.fadeIn();
+                    });
+                });
+
+                $cancelBtn.on('click', function (e) {
+                    e.preventDefault();
+
+                    $.each(originalValues, function (i, e) {
+                        var $input = $form.find("input[name='" + e.name + "']");
+
+                        $input.val(e.value);
+                        $input.attr('readonly', true);
+                    });
+
+                    $saveBtn.fadeOut();
+                    $(this).fadeOut(function () {
+                        $editBtn.fadeIn();
+                    });
+                });
 
                 $form.on('submit', function (e) {
                     e.preventDefault();
@@ -132,7 +136,7 @@ var index = function () {
                         $loginView = $register.find(".leftContainer.login"),
                         $registerView = $register.find(".leftContainer.register"),
                         $forgotView = $register.find(".leftContainer.forgot");
-                    switch(view) {
+                    switch (view) {
                         case 'login':
                             $registerView.fadeOut(function () {
                                 $loginView.fadeIn();
@@ -311,90 +315,134 @@ var index = function () {
             }
         })();
 
-        (function addressMap() {
-            var $body = $("body.register, body.settings");
+        (function address() {
+            var $body = $("body.address");
             if ($body.length) {
-                if ($body.find("#addressMap").length) {
-                    var $addressInput = $body.find("#address"),
-                        $addressFinder = $body.find("#addressFinder"),
-                        addMarker = setTimeout(function () {
-                        });
+                var $pinNameInput = $body.find("#pinName"),
+                    $form = $body.find("form");
 
-                    var center = new L.LatLng(50.0619474, 19.9368564);
-                    var map = L.map('addressMap').setView(center, 15);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-
-                    var marker = L.marker(center, {draggable: 'true'}).addTo(map);
-
-                    var bindMarker = function (latLng) {
-                        map.removeLayer(marker);
-                        marker.setLatLng(latLng);
-                        marker.addTo(map);
-                        map.panTo(latLng);
-
-                        $addressInput.val(latLng.lat + "," + latLng.lng);
-                    };
-
-                    if ($addressInput.val() !== "") {
-                        var latLng = $addressInput.val().split(",");
-                        bindMarker(new L.LatLng(latLng[0], latLng[1]));
+                $("input[type='radio']").on("change", function () {
+                    var num = parseInt($("input[type='radio']:checked").val());
+                    switch (num) {
+                        case 1:
+                            $pinNameInput.attr('required', true);
+                            $pinNameInput.parent().fadeIn();
+                            break;
+                        case 2:
+                            $pinNameInput.attr('required', false);
+                            $pinNameInput.parent().fadeOut();
+                            break;
                     }
+                });
 
-                    marker.on('dragend', function (e) {
-                        bindMarker(e.target._latlng);
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+
+                    var formData = new FormData($form.get(0));
+
+                    $.ajax({
+                        url: $form.attr('action') + "?ajax=true",
+                        type: "POST",
+                        data: formData,
+                        dataType: "JSON",
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function () {
+                            showLoading();
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                location.href = "/";
+                            }
+
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
+                            }
+                        },
+                        error: function () {
+                            displayToast("Nieznany błąd", "danger");
+                        },
+                        complete: function () {
+                            hideLoading();
+                        }
                     });
-
-                    $addressFinder.on('keyup', function (e) {
-                        var address = $addressFinder.val();
-
-                        clearTimeout(addMarker);
-                        addMarker = setTimeout(function () {
-                            $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q=' + address, function (data) {
-                                if (typeof data[0] !== "undefined") {
-                                    var lat = data[0].lat,
-                                        lng = data[0].lon;
-
-                                    bindMarker(new L.LatLng(lat, lng));
-                                }
-                            });
-                        }, 1E3);
-                    });
-                }
+                });
             }
         })();
 
-        (function notifications() {
-            setInterval(function () {
-                $.ajax({
-                    url: "/ajax/notifications.php?ajax=true",
-                    type: "POST",
-                    data: {action: 'get'},
-                    dataType: "JSON",
-                    success: function (data) {
-                        if (data.success) {
-                            var notifications = data.data;
-                            for (var i in notifications) {
-                                var $newNotification = $("<a>");
-                                $newNotification.addClass("dropdown-item waves-effect waves-light active");
-                                if (notifications[i].href != null) {
-                                    $newNotification.attr('href', notifications[i].href);
-                                    $newNotification.addClass("preload");
-                                } else {
-                                    $newNotification.attr('href', "#");
-                                }
-                                $newNotification.html(notifications[i].content);
-                                $newNotification.prependTo("nav.navbar .notifications .dropdown-menu");
-                                var $newNotificationsNum = $("nav.navbar #notifications span.num");
-                                $newNotificationsNum.html(parseInt($newNotificationsNum.html()) + 1);
-                                $newNotificationsNum.addClass("new");
-                            }
-                        }
-                    }
+        (function addressMap() {
+            var $body = $("body.address, body.settings");
+            if ($body.length) {
+                var $locationInput = $body.find("[name='location']"),
+                    $addressInputs = $body.find("input.address"),
+                    addMarker = setTimeout(function () {
+                    }),
+                    $mapContainer = $body.find("#addressMap"),
+                    lat, lng;
+
+                var center = new L.LatLng(50.0619474, 19.9368564);
+                var map = L.map('addressMap').setView(center, 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                var marker = L.marker(center, {draggable: 'true'}).addTo(map);
+
+                var bindMarker = function (latLng) {
+                    map.removeLayer(marker);
+                    marker.setLatLng(latLng);
+                    marker.addTo(map);
+                    map.panTo(latLng);
+
+                    $locationInput.val(latLng.lat + "," + latLng.lng);
+                };
+
+                if ($locationInput.val() !== "") {
+                    [lat, lng] = $locationInput.val().split(",");
+                    bindMarker(new L.LatLng(lat, lng));
+                }
+
+                $locationInput.on('change', function () {
+                    [lat, lng] = $locationInput.val().split(",");
+                    bindMarker(new L.LatLng(lat, lng));
                 });
-            }, 1E4);
+
+                marker.on('dragend', function (e) {
+                    bindMarker(e.target._latlng);
+                });
+
+                $addressInputs.on('keyup', function (e) {
+                    var address = [],
+                        stringAddress = "";
+
+                    $addressInputs.each(function (i, e) {
+                        var addrPart = $(e).val();
+                        if (addrPart !== "") {
+                            address.push(addrPart);
+                        }
+                    });
+
+                    stringAddress = address.join(" ");
+                    $mapContainer.addClass("loading");
+
+                    clearTimeout(addMarker);
+                    addMarker = setTimeout(function () {
+                        $.get(location.protocol + '//nominatim.openstreetmap.org/search?format=json&q=' + stringAddress, function (data) {
+                            if (typeof data[0] !== "undefined") {
+                                var lat = data[0].lat,
+                                    lng = data[0].lon;
+
+                                bindMarker(new L.LatLng(lat, lng));
+                                $mapContainer.removeClass("loading");
+                            } else {
+                                displayToast("Nie znaleziono adresu, proszę wybrać odpowiedni punkt na mapie", "warning");
+                                $mapContainer.removeClass("loading");
+                            }
+                        });
+                    }, 2E3);
+                });
+            }
         })();
 
         (function adminPrivileges() {
@@ -470,6 +518,20 @@ var index = function () {
             }
         })();
     });
+
+    function setCookie(name, val, days) {
+        var expires;
+
+        if (days) {
+            var data = new Date();
+            data.setTime(data.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + data.toGMTString();
+        } else {
+            expires = "";
+        }
+
+        document.cookie = name + "=" + val + expires + "; path=/";
+    }
 
     function displayToast(message, alert, offset) {
         alert = alert || "danger";

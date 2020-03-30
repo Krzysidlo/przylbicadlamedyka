@@ -245,15 +245,15 @@ nav.navbar .dropdown-menu {
 
 .navbar-toggler {
   .animated-icon {
-    width: 30px;
-    height: 20px;
+    width: 20px;
+    height: 15px;
     position: relative;
     margin: 0;
     cursor: pointer;
 
     span {
       position: absolute;
-      height: 3px;
+      height: 2px;
       width: 100%;
       border-radius: 9px;
       opacity: 1;
@@ -266,11 +266,11 @@ nav.navbar .dropdown-menu {
     }
 
     span:nth-child(2) {
-      top: 10px;
+      top: 6px;
     }
 
     span:nth-child(3) {
-      top: 20px;
+      top: 12px;
     }
   }
 }
