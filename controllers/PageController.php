@@ -6,13 +6,13 @@ use classes\Functions as fs;
 
 abstract class PageController
 {
-    public string  $menu  = "";
-    public string  $view  = "index";
-    public ?string $title = NULL;
+    public array   $allowedNoLog = [];
+    public string  $menu         = "";
+    public string  $view         = "index";
+    public ?string $title        = NULL;
 
     protected ?string $file = NULL;
-
-    protected array $get;
+    protected array   $get;
 
     public function __construct($view = NULL)
     {
@@ -53,6 +53,11 @@ abstract class PageController
             'file'       => NULL,
             'method'     => NULL,
         ];
+
+        $this->allowedNoLog = [
+            'register',
+        ];
+
         foreach ($get_post_variables as $name => $defaultValue) {
             $this->get[$name] = $this->get[$name] ?? $defaultValue;
         }

@@ -2,6 +2,7 @@
 
 namespace classes;
 
+use stdClass;
 use Exception;
 use classes\Functions as fs;
 use classes\exceptions\UserNotFoundException;
@@ -22,12 +23,12 @@ class User
     public string  $email     = "";
     public string  $tel       = "";
     public string  $login     = "";
-    public ?string $address   = NULL;
     public ?string $password  = NULL;
     public ?string $salt      = NULL;
 
-    private array $options   = [];
-    private ?int  $privilege = NULL;
+    private array   $options   = [];
+    private ?int    $privilege = NULL;
+    private ?stdClass $address   = NULL;
 
     /**
      * User constructor.
@@ -95,12 +96,12 @@ class User
             $this->firstName = $user['first_name'];
             $this->lastName  = $user['last_name'];
             $this->tel       = $user['tel'];
-            $this->address   = $user['address'];
             $this->login     = $user['login'];
             $this->email     = $user['email'];
             $this->password  = $user['password'];
             $this->salt      = $user['salt'];
             $this->name      = $this->firstName . " " . $this->lastName;
+            $this->address   = $this->getAddress();
         } else {
             throw new Exception("No user info found with id=[{$this->id}]");
         }
@@ -433,6 +434,34 @@ HTML;
         $sql .= " WHERE `id` = '{$this->id}';";
 
         return !!fs::$mysqli->query($sql);
+    }
+
+    public function updateAddress(string $city, string $street, int $building, $flat, string $location, ?string $pinName = NULL): bool
+    {
+        if ($pinName === NULL) {
+            $pinName = "NULL";
+        } else {
+            $pinName = "'{$pinName}'";
+        }
+        $sql = <<< SQL
+        INSERT INTO `address` (`users_id`, `pin_name`, `city`, `street`, `building`, `flat`, `location`) VALUES
+            ('{$this->id}', {$pinName}, '{$city}', '{$street}', {$building}, {$flat}, '{$location}')
+            ON DUPLICATE KEY UPDATE `pin_name` = '{$pinName}', `city` = '{$city}', `street` = '{$street}', `building` = {$building}, `flat` = {$flat}, `location` = '{$location}';
+SQL;
+//        var_dump($sql);
+        return !!fs::$mysqli->query($sql);
+    }
+
+    public function getAddress()
+    {
+        if (empty($this->address)) {
+            $sql = "SELECT `pin_name`, `city`, `street`, `building`, `flat`, `location` FROM `address` WHERE `users_id` = '{$this->id}';";
+            if ($query = fs::$mysqli->query($sql)) {
+                $this->address = $query->fetch_object();
+            }
+        }
+
+        return $this->address;
     }
 
     public function noAddress(): bool

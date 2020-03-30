@@ -1,0 +1,96 @@
+body {
+  nav {
+    &.navbar {
+      &.fixed-top {
+        min-height: 62px;
+
+        &.bg-red {
+          background-color: $color-red;
+        }
+
+        .navbar-brand {
+          font-size: 16px;
+        }
+
+        .btn {
+          &.btn-outline-white {
+            border: solid 1px #FFF !important;
+          }
+        }
+      }
+
+      &.fixed-left {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 240px;
+        background-color: #FAFAFA;
+        z-index: 1020;
+        transition: width .25s ease-in-out;
+
+        .navbar-nav {
+          position: absolute;
+          top: 80px;
+
+          &.navbar-bottom {
+            top: unset;
+            bottom: 10px;
+          }
+        }
+
+        .nav-item {
+          .nav-link {
+            color: #757575;
+
+            &:hover {
+              color: $color-red;
+            }
+
+            span {
+              vertical-align: bottom;
+              margin-right: 15px;
+              &.material-icons {
+                transition: font-size .25s ease-in-out, padding .25s ease-in-out;
+              }
+            }
+          }
+
+          &.active {
+            .nav-link {
+              color: $color-red;
+            }
+          }
+        }
+
+        &.small {
+          width: 62px;
+
+          .nav-item {
+            .nav-link {
+              span:not(.material-icons) {
+                display: none;
+              }
+              span.material-icons {
+                font-size: 30px;
+                padding: 5px 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &.modal-open {
+    nav {
+      &.navbar {
+        padding-right: 16px !important;
+
+        .navbar-nav.mr-right {
+          padding-right: 17px;
+        }
+      }
+    }
+  }
+}

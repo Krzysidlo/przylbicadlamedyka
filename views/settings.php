@@ -1,101 +1,118 @@
 <?php
 
-use classes\Functions as fs;
+use classes\User;
 
-$this->title = "Ustawienia";
+//var_dump($user->getAddress()->location);
+//die();
 
 ?>
-<section class="container mainInfo">
-    <div class="row">
-        <div class="col-12">
-            <h1>Ustawienia</h1>
+<section class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 mt-5">
+            <form action="/ajax/register/address">
+                <div class="row">
+                    <div class="col-12 mt-4 mb-3">
+                        <h4 class="title">Twoje dane</h4>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="firstName">
+                            Imię
+                        </label>
+                        <input type="text" name="firstName" id="firstName" placeholder="Imię" required
+                               class="form-control" readonly
+                               title='Pole "Imię" jest wymagane'
+                               value="<?= $user->firstName; ?>">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="lastName">
+                            Nazwisko
+                        </label>
+                        <input type="text" name="lastName" id="lastName" placeholder="Nazwisko" required
+                               class="form-control" readonly
+                               title='Pole "Nazwisko" jest wymagane'
+                               value="<?= $user->lastName; ?>">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="tel">
+                            Numer telefonu
+                        </label>
+                        <input type="text" name="tel" id="tel" placeholder="Numer telefonu" required
+                               class="form-control" readonly
+                               value="<?= $user->tel; ?>">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="email">
+                            E-mail
+                        </label>
+                        <input type="email" name="email" id="email" placeholder="E-mail" required
+                               class="form-control locked" readonly
+                               value="<?= $user->email; ?>">
+                    </div>
+                </div>
+                <div class="row">
+                    <?php if (USER_PRV === User::USER_PRODUCER) { ?>
+                        <div class="form-group col-12 mb-4">
+                            <label for="pinName">
+                                Nazwa Producenta
+                            </label>
+                            <input type="text" name="pinName" id="pinName" placeholder="Nazwa" required
+                                   class="form-control validate" readonly
+                                   title='Pole "Nazwa" jest wymagane'
+                                   value="<?= $user->getAddress()->pin_name ?? ""; ?>">
+                        </div>
+                    <?php } ?>
+                    <div class="form-group col-6">
+                        <label for="city">
+                            Miasto
+                        </label>
+                        <input type="text" name="city" id="city" placeholder="Miasto" required
+                               class="form-control address" readonly
+                               title='Pole "Miasto" jest wymagane'
+                               value="<?= $user->getAddress()->city; ?>">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="street">
+                            Ulica
+                        </label>
+                        <input type="text" name="street" id="street" placeholder="Ulica" required
+                               class="form-control address" readonly
+                               title='Pole "Ulica" jest wymagane'
+                               value="<?= $user->getAddress()->street; ?>">
+                    </div>
+                    <div class="form-group col-6 mt-2">
+                        <label for="building">
+                            Numer Budynku
+                        </label>
+                        <input type="text" name="building" id="building" placeholder="Numer Budynku" required
+                               class="form-control address" readonly
+                               title='Pole "Numer Budynku" jest wymagane'
+                               value="<?= $user->getAddress()->building; ?>">
+                    </div>
+                    <div class="form-group col-6 mt-2">
+                        <label for="flat">
+                            Numer Lokalu
+                        </label>
+                        <input type="text" name="flat" id="flat" placeholder="Numer Lokalu"
+                               class="form-control validate>" readonly
+                               value="<?= $user->getAddress()->flat; ?>">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <h4 class="title">Twoja lokalizacja</h4>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <input type="hidden" name="location" value="<?= $user->getAddress()->location; ?>">
+                        <div id="addressMap"></div>
+                        <div class="load">
+                            <img src="<?= IMG_URL; ?>/loading.gif" alt="loading">
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3 mb-5">
+                        <button class="btn btn-red right edit mx-0">Edytuj</button>
+                        <button type="submit" class="btn btn-red right mx-0">Zapisz</button>
+                        <button class="btn btn-white right cancel mr-3">Anuluj</button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </div>
-</section>
-
-<section class="container form">
-    <div class="row">
-        <form action="/ajax/settings/save" method="post" class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Imię
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-						<input type="text" name="firstname" value="<?= $user->firstName; ?>" class="form-control">
-					</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Nazwisko
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-						<input type="text" name="lastname" value="<?= $user->lastName; ?>" class="form-control">
-					</span>
-                </label>
-            </div>
-            <hr class="d-sm-none">
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Numer telefonu
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-                        <input type="tel" name="tel" pattern=".{9,}" value="<?= $user->tel; ?>" class="form-control">
-                    </span>
-                </label>
-            </div>
-            <hr class="d-sm-none">
-            <div class="form-group">
-                <label for="addressFinder">
-                    Adres
-                </label>
-                <input type="text" id="addressFinder" class="form-control" placeholder="Wyszukaj adres na mapie">
-                <input type="hidden" name="address" id="address" required
-                       value="<?= $user->address; ?>">
-                <div id="addressMap" class="mt-4"></div>
-            </div>
-            <hr class="d-sm-none">
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Obecne hasło
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-						<input type="password" name="password" class="form-control">
-					</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Nowe hasło
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-						<input type="password" name="npassword" class="form-control">
-					</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="row">
-					<span class="col-7 text-input-label">
-                        Powtórz nowe hasło
-						<hr class="d-sm-none divider">
-					</span>
-                    <span class="col-5">
-						<input type="password" name="rnpassword" class="form-control">
-					</span>
-                </label>
-            </div>
-            <hr>
-            <input type="submit" class="btn btn-primary" name="saveSettings" value="Zapisz">
-        </form>
     </div>
 </section>
