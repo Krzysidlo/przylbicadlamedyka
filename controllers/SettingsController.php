@@ -8,7 +8,7 @@ use classes\Functions as fs;
 
 class SettingsController extends PageController
 {
-    public static function ajax_save($get)
+    public static function ajax_save($get = []): array
     {
         $invalid = [];
         foreach ($get as $name => $value) {
@@ -35,25 +35,13 @@ class SettingsController extends PageController
         }
 
         if ($data['success']) {
-            if (empty($get['pinName'])) {
-                $pinName = NULL;
-            } else {
-                $pinName = filter_var($get['pinName'], FILTER_SANITIZE_STRING);
-            }
-            $city     = filter_var($get['city'], FILTER_SANITIZE_STRING);
-            $street   = filter_var($get['street'], FILTER_SANITIZE_STRING);
-            $building = filter_var($get['building'], FILTER_SANITIZE_NUMBER_INT);
-            if (empty($get['flat'])) {
-                $flat = "NULL";
-            } else {
-                $flat = filter_var($get['flat'], FILTER_SANITIZE_NUMBER_INT);
-            }
-            $location = filter_var($get['location'], FILTER_SANITIZE_STRING);
-
+            $firstName = filter_var($get['firstName'], FILTER_SANITIZE_STRING);
+            $lastName  = filter_var($get['lastName'], FILTER_SANITIZE_STRING);
+            $tel       = filter_var($get['tel'], FILTER_SANITIZE_STRING);
             try {
                 $user            = new User;
-                $data['success'] = $user->updateInfo();
-                $data['success'] &= $user->updateAddress($city, $street, $building, $flat, $location, $pinName);
+                $data            = RegisterController::ajax_address($get);
+                $data['success'] &= $user->updateInfo($firstName, $lastName, $tel);
             } catch (Exception $e) {
                 fs::log("Error: " . $e->getMessage());
                 $data = [
@@ -63,19 +51,13 @@ class SettingsController extends PageController
                     'invalid' => $invalid,
                 ];
             }
-
-            if ($data['success']) {
-                $user->setPrivilege($priv);
-            }
+        }
+        if ($data['success']) {
+            $data['alert']   = "success";
+            $data['message'] = "Poprawnie zapisano dane";
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
     public function content(array $args = [])

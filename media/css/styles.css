@@ -1,5 +1,12 @@
 /* --------------- Text color --------------- */
 /* --------------- Text color --------------- */
+body, h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+}
+
+body nav.navbar {
+  font-weight: normal;
+}
 body nav.navbar.fixed-top {
   min-height: 62px;
 }
@@ -40,6 +47,11 @@ body nav.navbar.fixed-left .nav-item .nav-link:hover {
 body nav.navbar.fixed-left .nav-item .nav-link span {
   vertical-align: bottom;
   margin-right: 15px;
+  -webkit-transition: opacity .15s ease-in-out .15s, max-height 0s linear .25s;
+  transition: opacity .15s ease-in-out .15s, max-height 0s linear .25s;
+  display: block;
+  float: left;
+  max-height: 50px;
 }
 body nav.navbar.fixed-left .nav-item .nav-link span.material-icons {
   -webkit-transition: font-size .25s ease-in-out, padding .25s ease-in-out;
@@ -52,7 +64,10 @@ body nav.navbar.fixed-left.small {
   width: 62px;
 }
 body nav.navbar.fixed-left.small .nav-item .nav-link span:not(.material-icons) {
-  display: none;
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  max-height: 0;
 }
 body nav.navbar.fixed-left.small .nav-item .nav-link span.material-icons {
   font-size: 30px;
@@ -103,6 +118,36 @@ body a {
 body a:hover {
   color: #631529;
 }
+body .modal.custom-modal .modal-header {
+  background-color: #B7274B !important;
+  color: #FFF;
+}
+body .modal.custom-modal .modal-header .close {
+  color: #FFF;
+}
+body .modal.custom-modal .modal-body {
+  padding-bottom: 0;
+}
+body .modal.custom-modal .modal-body label {
+  font-weight: 400;
+}
+body .modal.custom-modal .modal-footer {
+  border-top: none;
+}
+body .modal.custom-modal form input, body .modal.custom-modal form textarea {
+  border: solid 1px #e4e5ea;
+  padding: 17px 16px;
+  color: #000;
+}
+body .modal.custom-modal form input:-webkit-autofill, body .modal.custom-modal form textarea:-webkit-autofill {
+  -webkit-animation-name: autofill;
+          animation-name: autofill;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+}
+body .modal.custom-modal form input {
+  height: 50px;
+}
 body .mainInfo, body .errorInfo {
   text-align: center;
 }
@@ -135,51 +180,6 @@ body .right {
 body .img-responsive {
   max-height: 100%;
   max-width: 100%;
-}
-body .img-circle {
-  border-radius: 50%;
-  display: inline-block;
-  vertical-align: middle;
-  overflow: hidden;
-  margin: 0 auto;
-  height: 1.4rem;
-  width: 1.4rem;
-  text-align: center;
-  -o-object-fit: cover;
-     object-fit: cover;
-}
-body .img-circle.img-mini {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-body .img-circle.img-small {
-  vertical-align: sub;
-}
-body .img-circle.img-menu {
-  width: 1.6rem;
-  height: 1.6rem;
-}
-body .img-circle.img-settings {
-  height: 3rem;
-  width: 3rem;
-}
-body .img-circle.img-medium {
-  height: 5rem;
-  width: 5rem;
-}
-body .img-circle.img-login {
-  height: 8rem;
-  width: 8rem;
-  background: #FFF;
-  -webkit-box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-          box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-}
-body .img-circle.no-radius {
-  border-radius: unset;
-}
-body .img-circle .img-responsive {
-  max-height: unset;
-  vertical-align: unset;
 }
 body .not-visible {
   background: transparent !important;
@@ -613,7 +613,7 @@ nav.navbar .dropdown-menu {
             transform: scale3d(1, 1, 1);
   }
 }
-body.maps #map {
+body.map #map {
   width: 100%;
   height: calc(100vh - 97px);
 }
@@ -649,17 +649,59 @@ body.noaccess .errorInfo h1 {
   margin-top: 40vh;
 }
 
-body.address p, body.settings p {
+body.index .container .numbers .numberBox .number {
+  font-size: 30px;
+  color: #B7274B;
+}
+body.index .container .numbers .numberBox .description {
+  font-size: 12px;
+}
+body.index .container .title {
+  color: #B7274B;
+}
+body.index .container .feed .activityBox {
+  background: #FAFAFA;
+  border-left: 5px solid;
+  margin-bottom: 2px;
+}
+body.index .container .feed .activityBox.action {
+  border-color: #B7274B;
+}
+body.index .container .feed .activityBox.notification {
+  border-color: #000;
+}
+body.index .container .feed .activityBox .content {
+  padding: 5px 10px;
+}
+body.index .container .feed .activityBox .content .text {
+  font-size: 16px;
+  color: #757575;
+  display: inline-block;
+  margin-right: auto;
+  padding: 5px 0;
+}
+body.index .container .feed .activityBox .content .btn.btn-transparent {
+  color: #B7274B;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+body.index .container .feed .activityBox .content .date {
+  font-size: 10px;
+  padding: 5px 0;
+  color: #757575;
+}
+
+body.address .container p, body.settings .container p {
   font-weight: normal;
 }
-body.address form input[type="radio"]:checked + label.type, body.settings form input[type="radio"]:checked + label.type {
+body.address .container form.settings input[type="radio"]:checked + label.type, body.address .container form.address input[type="radio"]:checked + label.type, body.settings .container form.settings input[type="radio"]:checked + label.type, body.settings .container form.address input[type="radio"]:checked + label.type {
   color: #FFF;
   background: #B7274B;
 }
-body.address form input[type="radio"]:checked + label.type svg path, body.settings form input[type="radio"]:checked + label.type svg path {
+body.address .container form.settings input[type="radio"]:checked + label.type svg path, body.address .container form.address input[type="radio"]:checked + label.type svg path, body.settings .container form.settings input[type="radio"]:checked + label.type svg path, body.settings .container form.address input[type="radio"]:checked + label.type svg path {
   fill: #FFF !important;
 }
-body.address form label.type, body.settings form label.type {
+body.address .container form.settings label.type, body.address .container form.address label.type, body.settings .container form.settings label.type, body.settings .container form.address label.type {
   display: block;
   border: solid 2px #B7274B;
   border-radius: 6px;
@@ -675,37 +717,37 @@ body.address form label.type, body.settings form label.type {
   -webkit-transition: .25s ease-in-out;
   transition: .25s ease-in-out;
 }
-body.address form label.type svg, body.settings form label.type svg {
+body.address .container form.settings label.type svg, body.address .container form.address label.type svg, body.settings .container form.settings label.type svg, body.settings .container form.address label.type svg {
   width: 3rem;
   height: 5rem;
   padding: 20px 0;
 }
-body.address form label.type svg path, body.settings form label.type svg path {
+body.address .container form.settings label.type svg path, body.address .container form.address label.type svg path, body.settings .container form.settings label.type svg path, body.settings .container form.address label.type svg path {
   fill: #B7274B !important;
 }
-body.address form label.type p, body.settings form label.type p {
+body.address .container form.settings label.type p, body.address .container form.address label.type p, body.settings .container form.settings label.type p, body.settings .container form.address label.type p {
   font-weight: bold;
 }
-body.address form input, body.settings form input {
+body.address .container form.settings input, body.address .container form.address input, body.settings .container form.settings input, body.settings .container form.address input {
   border: solid 1px #e4e5ea;
   padding: 17px 16px;
   height: 50px;
   color: #000;
 }
-body.address form input:-webkit-autofill, body.settings form input:-webkit-autofill {
+body.address .container form.settings input:-webkit-autofill, body.address .container form.address input:-webkit-autofill, body.settings .container form.settings input:-webkit-autofill, body.settings .container form.address input:-webkit-autofill {
   -webkit-animation-name: autofill;
           animation-name: autofill;
   -webkit-animation-fill-mode: both;
           animation-fill-mode: both;
 }
-body.address form #addressMap, body.settings form #addressMap {
+body.address .container form.settings #addressMap, body.address .container form.address #addressMap, body.settings .container form.settings #addressMap, body.settings .container form.address #addressMap {
   height: 400px;
   border-radius: 4px;
 }
-body.address form #addressMap.loading + .load, body.settings form #addressMap.loading + .load {
+body.address .container form.settings #addressMap.loading + .load, body.address .container form.address #addressMap.loading + .load, body.settings .container form.settings #addressMap.loading + .load, body.settings .container form.address #addressMap.loading + .load {
   display: block;
 }
-body.address form .load, body.settings form .load {
+body.address .container form.settings .load, body.address .container form.address .load, body.settings .container form.settings .load, body.settings .container form.address .load {
   display: none;
   position: absolute;
   left: 0;
@@ -715,7 +757,7 @@ body.address form .load, body.settings form .load {
   background: rgba(255, 255, 255, 0.8);
   z-index: 400;
 }
-body.address form .load img, body.settings form .load img {
+body.address .container form.settings .load img, body.address .container form.address .load img, body.settings .container form.settings .load img, body.settings .container form.address .load img {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -727,48 +769,48 @@ body.register {
   margin: 0;
   min-height: unset;
 }
-body.register main .pinky {
+body.register .container-fluid .pinky {
   min-height: calc(100vh - 33px);
   background: rgba(183, 39, 75, 0.08);
 }
-body.register main .leftContainer, body.register main .rightContainer {
+body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer {
   padding-top: 140px;
 }
-body.register main .leftContainer.login, body.register main .leftContainer.forgot {
+body.register .container-fluid .leftContainer.login, body.register .container-fluid .leftContainer.forgot {
   display: none;
 }
-body.register main .leftContainer .title {
+body.register .container-fluid .leftContainer .title {
   color: #B7274B;
 }
-body.register main .leftContainer .title, body.register main .leftContainer p, body.register main .leftContainer label, body.register main .leftContainer a {
+body.register .container-fluid .leftContainer .title, body.register .container-fluid .leftContainer p, body.register .container-fluid .leftContainer label, body.register .container-fluid .leftContainer a {
   font-weight: 400;
 }
-body.register main .leftContainer input {
+body.register .container-fluid .leftContainer input {
   border: none;
   padding: 17px 16px;
   height: 50px;
   color: #000;
 }
-body.register main .leftContainer input:-webkit-autofill {
+body.register .container-fluid .leftContainer input:-webkit-autofill {
   -webkit-animation-name: autofill;
           animation-name: autofill;
   -webkit-animation-fill-mode: both;
           animation-fill-mode: both;
 }
-body.register main .leftContainer a {
+body.register .container-fluid .leftContainer a {
   color: #B7274B;
 }
-body.register main .leftContainer a:hover {
+body.register .container-fluid .leftContainer a:hover {
   color: #631529;
 }
-body.register main .leftContainer .btn-red {
+body.register .container-fluid .leftContainer .btn-red {
   width: 100%;
   display: block;
 }
-body.register main .leftContainer hr {
+body.register .container-fluid .leftContainer hr {
   margin: 40px 0;
 }
-body.register main .rightContainer .img-logo {
+body.register .container-fluid .rightContainer .img-logo {
   width: 5rem;
 }
 body.register .google, body.register .facebook {
@@ -806,25 +848,28 @@ body.register .facebook:hover {
     background: #FFF;
   }
 }
-body.settings form label {
+body.settings .container .alert {
+  margin-bottom: -20px;
+}
+body.settings .container form.settings label {
   font-size: 12px;
   margin-bottom: 4px;
 }
-body.settings form input[readonly] {
+body.settings .container form.settings input[readonly] {
   background: transparent;
   border: none;
   padding-left: 0;
   -webkit-transition: .25s ease-in-out;
   transition: .25s ease-in-out;
 }
-body.settings form .title {
+body.settings .container form.settings .title {
   color: #B7274B;
   font-weight: normal;
 }
-body.settings form [type='submit'], body.settings form .cancel {
+body.settings .container form.settings [type='submit'], body.settings .container form.settings .cancel {
   display: none;
 }
-body.settings #addressMap {
+body.settings .container #addressMap {
   height: 300px;
   border-radius: 4px;
 }

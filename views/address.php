@@ -9,7 +9,7 @@ use classes\User;
             <p>Cześć! Dziękujemy za dołączenie do akcji, na początek ustalmy jak będziesz nam pomagał.</p>
         </div>
         <div class="col-12 col-md-8 mt-2">
-            <form action="/ajax/register/address" class="row">
+            <form action="/ajax/register/address" class="row address">
                 <input type="radio" class="hidden" name="type" id="producer" value="<?= User::USER_PRODUCER; ?>"
                        checked>
                 <label for="producer" class="type col-6">

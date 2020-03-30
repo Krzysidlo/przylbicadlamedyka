@@ -3,12 +3,13 @@
 namespace controllers;
 
 use Exception;
+use classes\User;
 use classes\Request;
 use classes\Functions as fs;
 
 class MapController extends PageController
 {
-    public static function ajax_savePoint($get)
+    public static function ajax_savePoint($get = []): array
     {
         $data = [
             'success' => true,
@@ -26,16 +27,10 @@ class MapController extends PageController
 
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_getInfo($get)
+    public static function ajax_getInfo($get = []): array
     {
         $data = [
             'success' => true,
@@ -62,13 +57,28 @@ class MapController extends PageController
             ];
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
+        return $data;
+    }
+
+    public static function ajax_newRequest($get = []): array
+    {
+        try {
+            $latLng   = $get['latLng'] ?? NULL;
+            $bascinet = $get['bascinet'] ?? NULL;
+            $material = $get['material'] ?? NULL;
+            $comments = $get['comments'] ?? NULL;
+
+            $data = Request::create(USER_ID, $latLng, $bascinet, $material, $comments);
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            $data = [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił błąd przy zapisie do bazy danych proszę spróbować ponownie",
+            ];
         }
 
-        exit(0);
+        return $data;
     }
 
     public function content(array $args = [])

@@ -33,7 +33,13 @@ class AjaxController extends PageController
         if (file_exists($controllerPath)) {
             $newControllerName = "controllers\\" . ucfirst($fileName) . "Controller";
             if (method_exists($newControllerName, $method)) {
-                $newControllerName::$method($this->get());
+
+                if (!empty($this->get('ajax'))) {
+                    $data = $newControllerName::$method($this->get());
+                    echo json_encode($data);
+                } else {
+                    self::redirect("/");
+                }
                 exit(0);
             }
         }
@@ -41,7 +47,7 @@ class AjaxController extends PageController
         $file = AJAX_DIR . "/" . $file;
 
         if (!file_exists($file) || is_dir($file)) {
-            header("Location: /");
+            self::redirect("/");
             exit(0);
         }
         include_once($file);

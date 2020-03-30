@@ -31,11 +31,12 @@ body {
     border-radius: 6px;
     text-transform: none;
     font-size: 16px;
-    padding: 10px 24px!important;
+    padding: 10px 24px !important;
 
     &.btn-red {
       background-color: $color-red !important;
     }
+
     &.btn-white {
       color: $color-red;
     }
@@ -43,8 +44,44 @@ body {
 
   a {
     color: $color-red;
+
     &:hover {
       color: darken($color-red, 20%);
+    }
+  }
+
+  .modal {
+    &.custom-modal {
+      .modal-header {
+        background-color: $color-red !important;
+        color: #FFF;
+        .close {
+          color: #FFF;
+        }
+      }
+      .modal-body {
+        padding-bottom: 0;
+        label {
+          font-weight: 400;
+        }
+      }
+      .modal-footer {
+        border-top: none;
+      }
+      form {
+        input, textarea {
+          border: solid 1px #e4e5ea;
+          padding: 17px 16px;
+          color: #000;
+          &:-webkit-autofill {
+            animation-name: autofill;
+            animation-fill-mode: both;
+          }
+        }
+        input {
+          height: 50px;
+        }
+      }
     }
   }
 
@@ -88,58 +125,6 @@ body {
   .img-responsive {
     max-height: 100%;
     max-width: 100%;
-  }
-
-  .img-circle {
-    border-radius: 50%;
-    display: inline-block;
-    vertical-align: middle;
-    overflow: hidden;
-    margin: 0 auto;
-    height: 1.4rem;
-    width: 1.4rem;
-    text-align: center;
-    object-fit: cover;
-
-    &.img-mini {
-      width: 1.2rem;
-      height: 1.2rem;
-    }
-
-    &.img-small {
-      vertical-align: sub;
-    }
-
-    &.img-menu {
-      width: 1.6rem;
-      height: 1.6rem;
-    }
-
-    &.img-settings {
-      height: 3rem;
-      width: 3rem;
-    }
-
-    &.img-medium {
-      height: 5rem;
-      width: 5rem;
-    }
-
-    &.img-login {
-      height: 8rem;
-      width: 8rem;
-      background: #FFF;
-      box-shadow: 0 0 12px rgba(0, 0, 0, .4);
-    }
-
-    &.no-radius {
-      border-radius: unset;
-    }
-
-    .img-responsive {
-      max-height: unset;
-      vertical-align: unset;
-    }
   }
 
   .not-visible {
