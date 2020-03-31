@@ -25,7 +25,7 @@ body {
         }
 
         @media screen and (max-width: 767px) {
-          [data-toggle='modal'] {
+          .actions {
             display: none;
           }
         }
@@ -39,7 +39,7 @@ body {
         width: 240px;
         background-color: #FAFAFA;
         z-index: 1020;
-        transition: width .25s ease-in-out;
+        transition: width .25s ease-in-out, padding .25s ease-in-out;
 
         .navbar-nav {
           position: absolute;
@@ -52,12 +52,11 @@ body {
         }
 
         .nav-item {
+          &.actions {
+            display: none;
+          }
           .nav-link {
             color: #757575;
-
-            &[data-toggle='modal'] {
-              display: none;
-            }
 
             &:hover {
               color: $color-red;
@@ -84,7 +83,7 @@ body {
           }
         }
 
-        &.small {
+        &.compact {
           width: 62px;
 
           .nav-item {
@@ -105,46 +104,49 @@ body {
         }
 
         @media screen and (max-width: 767px) {
-          width: 100%;
-          height: auto;
-          padding-top: 54px;
+          width: 300px;
           overflow: hidden;
-          position: absolute;
+          position: fixed;
           top: 0;
-          transition: max-height .4s ease-in-out;
+          left: 0;
+          transition: left .25s ease-in-out;
 
           .navbar-nav {
-            position: static;
-            width: 100%;
-            margin-top: 20px;
-          }
+            width: calc(100% - 30px);
 
-          .nav-item {
-            .nav-link {
-              &[data-toggle='modal'] {
+            .nav-item {
+              &.actions {
                 display: block;
+                margin-top: 5px;
               }
+              .nav-link {
+                &[data-toggle='modal'] {
+                  display: block;
+                }
 
-              &.btn-white {
-                color: $color-red;
-              }
+                &.btn-white {
+                  color: $color-red;
+                }
 
-              &.btn-red {
-                color: #FFF;
+                &.btn-red {
+                  color: #FFF;
+                }
               }
             }
           }
 
-          &.small {
-            width: 100%;
-            max-height: 54px;
+          &.compact {
+            //width: 0;
+            //padding-left: 0;
+            //padding-right: 0;
+            width: 300px;
+            left: -300px;
 
             .nav-item {
               .nav-link {
                 span:not(.material-icons) {
                   visibility: visible;
                   opacity: 1;
-                  font-size: 16px;
                   max-height: 50px;
                 }
 

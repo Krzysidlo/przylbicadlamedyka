@@ -103,8 +103,8 @@ class RegisterController extends PageController
                                     $data['success']      = true;
                                 } catch (Exception $e) {
                                     fs::log("Error: " . $e->getMessage());
-                                    $data['alert']   = "danger";
-                                    $data['message'] = "Wystąpił błąd podczas tworzenia użytkownika";
+                                    $data['alert']     = "danger";
+                                    $data['message']   = "Wystąpił błąd podczas tworzenia użytkownika";
                                     $data['exception'] = $e->getMessage();
                                 }
                             } else {
@@ -280,7 +280,11 @@ class RegisterController extends PageController
 
     public static function ajax_sendConfirm($get = []): array
     {
-        $data = [];
+        $data = [
+            'success' => false,
+            'alert'   => "danger",
+            'message' => "Wystąpił błąd podczas wysyłania wiadomości. Proszę odświeżyć stornę i spróbować ponownie.",
+        ];
         $user = $get['user'] ?? new User;
 
         $hash = md5($user->email . time());
@@ -317,6 +321,10 @@ HTML;
         $headers[] = "Reply-To: {$replyTo}";
 
         $data['success'] = mail($user->email, $subject, $message, implode("\r\n", $headers));
+        if ($data['success']) {
+            $data['alert']   = "success";
+            $data['message'] = "Wiadomość została poprawnie wysłana na adres e-mail";
+        }
 
         return $data;
     }

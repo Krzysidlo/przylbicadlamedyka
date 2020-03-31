@@ -8,13 +8,47 @@ var index = function () {
     $(function () {
 
         var $body = $("body"),
-            winFocus = true,
-            online = true;
+            settingsMap,
+            mapMarker;
 
         $(document).trigger('scroll');
 
         if (!mobileAndTabletCheck() && $body.height() > $(window).height()) {
             $body.addClass('desktop');
+        }
+
+        function toggleMapInteraction(enable, map, marker) {
+            enable = enable | false;
+            if (enable) {
+                if (!mobileAndTabletCheck()) {
+                    map.dragging.enable();
+                }
+                if (map.tap) {
+                    map.tap.enable();
+                }
+                map.touchZoom.enable();
+                map.doubleClickZoom.enable();
+                map.scrollWheelZoom.enable();
+                map.boxZoom.enable();
+                map.keyboard.enable();
+                if (typeof marker !== "undefined") {
+                    marker.dragging.enable()
+                }
+            } else {
+                map.dragging.disable();
+                if (map.tap) {
+                    map.tap.disable();
+                }
+                map.touchZoom.disable();
+                map.doubleClickZoom.disable();
+                map.scrollWheelZoom.disable();
+                map.boxZoom.disable();
+                map.keyboard.disable();
+                if (typeof marker !== "undefined") {
+                    marker.dragging.disable()
+                }
+                map.panTo(marker.getLatLng());
+            }
         }
 
         (function index() {
@@ -99,20 +133,35 @@ var index = function () {
         })();
 
         (function menu() {
-            var $navbarTop = $("nav.navbar.fixed-top"),
-                $navbarLeft = $("nav.navbar.fixed-left"),
-                $toggler = $navbarTop.find(".navbar-toggler");
+            var $navbarTop = $("nav.navbar.fixed-top");
+            if ($navbarTop.length) {
+                var $navbarLeft = $("nav.navbar.fixed-left"),
+                    $toggler = $navbarTop.find(".navbar-toggler");
 
-            $toggler.on('click', function () {
-                $navbarLeft.toggleClass('small');
-                if (!mobileAndTabletCheck()) {
-                    if ($navbarLeft.hasClass('small')) {
-                        setCookie("leftMenu", true, 365);
-                    } else {
-                        setCookie("leftMenu", null);
+                $toggler.on('click', function () {
+                    $navbarLeft.toggleClass('compact');
+                    if (!mobileAndTabletCheck()) {
+                        if ($navbarLeft.hasClass('compact')) {
+                            setCookie("leftMenu", true, 365);
+                        } else {
+                            setCookie("leftMenu", null);
+                        }
                     }
+                });
+
+                if (mobileAndTabletCheck()) {
+                    $(document).on('click', function (e) {
+                        if (!$navbarLeft.hasClass("compact")) {
+                            var $target = $(e.target);
+                            if (!$target.hasClass("fixed-left") && !$target.parents(".fixed-left").length && !$target.hasClass("navbar-toggler") && $target.parents(".navbar-toggler").length <= 0) {
+                                $navbarLeft.addClass("compact");
+                            } else {
+                                console.log($target);
+                            }
+                        }
+                    });
                 }
-            });
+            }
         })();
 
         (function showPreload() {
@@ -140,6 +189,10 @@ var index = function () {
                     $saveBtn = $form.find("[type='submit']"),
                     originalValues = [];
 
+                setTimeout(function () {
+                    toggleMapInteraction(false, settingsMap, mapMarker);
+                }, 1E2);
+
                 $noConfirmBtn.on('click', function (e) {
                     e.preventDefault();
 
@@ -162,6 +215,8 @@ var index = function () {
                         });
                     });
 
+                    toggleMapInteraction(true, settingsMap, mapMarker);
+
                     $(this).fadeOut(function () {
                         $cancelBtn.fadeIn();
                         $saveBtn.fadeIn();
@@ -177,6 +232,8 @@ var index = function () {
                         $input.val(e.value);
                         $input.attr('readonly', true);
                     });
+
+                    toggleMapInteraction(false, settingsMap, mapMarker);
 
                     $saveBtn.fadeOut();
                     $(this).fadeOut(function () {
@@ -202,6 +259,7 @@ var index = function () {
                         success: function (data) {
                             if (data.success) {
                                 $form.find('input:not(.locked)').attr('readonly', true);
+                                toggleMapInteraction(false, settingsMap, mapMarker);
                                 $cancelBtn.fadeOut();
                                 $saveBtn.fadeOut(function () {
                                     $editBtn.fadeIn();
@@ -219,6 +277,34 @@ var index = function () {
                         }
                     });
                 });
+
+                var $sendConfirm = $settings.find("#sendConfirm");
+                if ($sendConfirm.length) {
+                    $sendConfirm.on('click', function (e) {
+                        e.preventDefault();
+
+                        $.ajax({
+                            url: $sendConfirm.attr('href') + "?ajax=true",
+                            type: "POST",
+                            data: {},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    });
+                }
             }
         })();
 
@@ -480,19 +566,23 @@ var index = function () {
                     lat, lng;
 
                 var center = new L.LatLng(50.0619474, 19.9368564);
-                var map = L.map('addressMap').setView(center, 15);
+                settingsMap = L.map('addressMap').setView(center, 15);
+                if (mobileAndTabletCheck()) {
+                    settingsMap.dragging.disable();
+                    settingsMap.tap.disable();
+                }
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
+                }).addTo(settingsMap);
 
-                var marker = L.marker(center, {draggable: 'true'}).addTo(map);
+                mapMarker = L.marker(center, {draggable: 'true'}).addTo(settingsMap);
 
                 var bindMarker = function (latLng) {
-                    map.removeLayer(marker);
-                    marker.setLatLng(latLng);
-                    marker.addTo(map);
-                    map.panTo(latLng);
+                    settingsMap.removeLayer(mapMarker);
+                    mapMarker.setLatLng(latLng);
+                    mapMarker.addTo(settingsMap);
+                    settingsMap.panTo(latLng);
 
                     $locationInput.val(latLng.lat + "," + latLng.lng);
                 };
@@ -507,7 +597,7 @@ var index = function () {
                     bindMarker(new L.LatLng(lat, lng));
                 });
 
-                marker.on('dragend', function (e) {
+                mapMarker.on('dragend', function (e) {
                     bindMarker(e.target._latlng);
                 });
 
@@ -539,7 +629,7 @@ var index = function () {
                                 $mapContainer.removeClass("loading");
                             }
                         });
-                    }, 2E3);
+                    }, 15E2);
                 });
             }
         })();
