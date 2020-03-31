@@ -33,10 +33,16 @@
             </div>
         </div>
         <div class="col-12 order-1 col-md-7 order-md-2">
-            <div class="col-12 col-xl-7 rightContainer">
-                <h1 class="text-center">
+            <div class="col-12 col-xl-7 offset-xl-1 rightContainer">
+                <h1>
                     <img class="img-logo" src="<?= IMG_URL; ?>/logo.png" alt="logo"> <?= PAGE_NAME; ?>
                 </h1>
+                <h4 class="mt-5 mb-3">O akcji!</h4>
+                <p class="mb-4">Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros.</p>
+                <h4>Wspólnie stworzyliśmy</h4>
+                <p class="number"><span>3425</span> Przyłbic</p>
+                <h4 class="mb-3">Jak możesz nam pomóc?</h4>
+                <p>Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros. </p>
             </div>
         </div>
     </div>

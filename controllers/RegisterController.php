@@ -150,7 +150,7 @@ class RegisterController extends PageController
                 $hash = md5($user->lastName . time());
                 $user->setOption('reset-password', $hash);
 
-                $subject = PAGE_NAME . " - " . "Potwierdzenie rejestracji";
+                $subject = PAGE_NAME . " - " . "Reset hasła";
 
                 $text = "Aby zresetować hasło na stronie " . PAGE_NAME . " proszę kliknąć w poniższy link";
                 $link = ROOT_URL . "/reset/" . $hash;
