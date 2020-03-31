@@ -75,9 +75,9 @@ class Frozen
         $return = [];
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_row()) {
-                $requestID = $result[0] ?? false;
-                if ($requestID) {
-                    $return[] = new self($requestID);
+                $requestsID = $result[0] ?? false;
+                if ($requestsID) {
+                    $return[] = new self($requestsID);
                 }
             }
         }
@@ -85,9 +85,9 @@ class Frozen
         return $return;
     }
 
-    public static function create(string $usersID, int $requestID, ?DateTime $date = NULL, ?int $bascinet = NULL, ?int $material = NULL): array
+    public static function create(string $usersID, int $requestsID, DateTime $date, ?int $bascinet = NULL, ?int $material = NULL): array
     {
-        $requestedQuantity = self::checkRequestedQuantity($requestID);
+        $requestedQuantity = self::checkRequestedQuantity($requestsID);
         if ($bascinet === NULL && $material === NULL) {
             return [
                 'success' => false,
@@ -118,11 +118,8 @@ class Frozen
             }
         }
 
-        if ($date === NULL) {
-            $date = date("Y-m-d H:i:s");
-        } else {
-            $date = $date->format("Y-m-d H:i:s");
-        }
+        $date = $date->format("Y-m-d H:i:s");
+
         if ($bascinet === NULL) {
             $bascinet = 'NULL';
         }
@@ -130,7 +127,7 @@ class Frozen
             $material = 'NULL';
         }
 
-        $sql = "INSERT INTO `requests` (`users_id`, `date`, `request_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestID}, {$bascinet}, {$material});";
+        $sql = "INSERT INTO `requests` (`users_id`, `date`, `requests_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestsID}, {$bascinet}, {$material});";
 
         if (!!fs::$mysqli->query($sql)) {
             $data = [
@@ -148,17 +145,17 @@ class Frozen
         return $data;
     }
 
-    public static function checkRequestedQuantity(int $requestID)
+    public static function checkRequestedQuantity(int $requestsID)
     {
         $frozen = NULL;
 
-        $sql = "SELECT `bascinet`, `material` FROM `frozen` WHERE `request_id` = {$requestID};";
+        $sql = "SELECT `bascinet`, `material` FROM `frozen` WHERE `requests_id` = {$requestsID};";
 
         if ($query = fs::$mysqli->query($sql)) {
             $frozen = $query->fetch_assoc();
         }
 
-        $sql = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = '{$requestID}';";
+        $sql = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = '{$requestsID}';";
 
         $requested = NULL;
         if ($query = fs::$mysqli->query($sql)) {

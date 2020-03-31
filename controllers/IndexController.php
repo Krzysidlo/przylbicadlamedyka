@@ -6,6 +6,7 @@ use Exception;
 use classes\User;
 use classes\Frozen;
 use classes\Request;
+use classes\Activity;
 
 class IndexController extends PageController
 {
@@ -18,23 +19,42 @@ class IndexController extends PageController
         }
 
         try {
-            $requests = Request::getAll(USER_ID);
+            $rows = Activity::getAll(USER_ID);
         } catch (Exception $e) {
-            $requests = [];
+            $rows = [];
         }
-        try {
-            $frozen = Frozen::getAll(USER_ID);
-        } catch (Exception $e) {
-            $frozen = [];
-        }
-
-        $data = array_merge($requests, $frozen);
-        usort($data, fn($a, $b) => strcmp($b->created_at->format("Y-m-d H:i:s"), $a->created_at->format("Y-m-d H:i:s")));
 
         $activities = [];
 
+        foreach ($rows as $row) {
+
+            $type   = $row->type;
+            $text   = $row->message;
+            $date   = $row->date->format("d.m.Y - H:i");
+            $button = "";
+            if ($row->request !== NULL) {
+                if ($row->request->frozen === NULL) {
+                    $button = "<button class=\"btn btn-transparent my-0 cancel right\">Anuluj</button>";
+                }
+            }
+            $dataId       = ($row->request !== NULL ? "data-id='{$row->request->id}'" : "");
+            $activities[] = <<< HTML
+            <div class="activityBox {$type}" {$dataId}>
+                <div class="content">
+                    <div class="text">{$text}</div>
+                    {$button}
+                    <div class="date">{$date}</div>
+                </div>
+            </div>
+HTML;
+
+        }
+
         $data = [
             'activities' => $activities,
+            'material' => Request::count(USER_ID, "material"),
+            'ready' => Request::count(USER_ID, "ready"),
+            'delivered' => Request::count(USER_ID, "delivered"),
         ];
 
         return parent::content(array_merge($args, $data));
