@@ -17,6 +17,50 @@ var index = function () {
             $body.addClass('desktop');
         }
 
+        (function index() {
+            var $index = $("body.index");
+            if ($index.length) {
+                var $cancelBtn = $index.find(".activityBox .cancel");
+
+                $cancelBtn.on('click', function (e) {
+                    e.preventDefault();
+
+                    if (confirm("Czy na pewno chcesz anulować tę akcję?")) {
+                        var $btn = $(this),
+                            id = $btn.data('id'),
+                            type = $btn.data('type'),
+                            url = $btn.attr('href');
+
+                        $.ajax({
+                            url: url + "?ajax=true",
+                            type: "POST",
+                            data: {id: id, type: type},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    $btn.parents(".activityBox").fadeOut(function () {
+                                        $(this).remove();
+                                    });
+                                }
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    }
+                });
+            }
+        })();
+
         (function modals() {
             var $modals = $(".modal.functionModal");
             $modals.find("form").on('submit', function (e) {
@@ -61,10 +105,12 @@ var index = function () {
 
             $toggler.on('click', function () {
                 $navbarLeft.toggleClass('small');
-                if ($navbarLeft.hasClass('small')) {
-                    setCookie("leftMenu", true, 365);
-                } else {
-                    setCookie("leftMenu", null);
+                if (!mobileAndTabletCheck()) {
+                    if ($navbarLeft.hasClass('small')) {
+                        setCookie("leftMenu", true, 365);
+                    } else {
+                        setCookie("leftMenu", null);
+                    }
                 }
             });
         })();

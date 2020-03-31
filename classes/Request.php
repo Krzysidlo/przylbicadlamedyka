@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Request
+class Request extends Action
 {
     public int      $id;
     public User     $user;
@@ -26,6 +26,7 @@ class Request
      */
     public function __construct(int $requestsID)
     {
+        parent::__construct("requests");
         $info = false;
 
         $sql = "SELECT * FROM `requests` WHERE `id` = '{$requestsID}'";

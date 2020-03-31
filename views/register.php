@@ -1,7 +1,7 @@
 <section class="container-fluid">
     <div class="row">
-        <div class="col-5 pinky">
-            <div class="col-7 offset-5 leftContainer register">
+        <div class="col-12 order-2 col-md-5 order-md-1 pinky">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer register">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Rejestracja</h3>
@@ -75,7 +75,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-7 offset-5 leftContainer login">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer login">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Logowanie</h3>
@@ -118,7 +118,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-7 offset-5 leftContainer forgot">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer forgot">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Odzyskiwanie hasła</h3>
@@ -142,8 +142,8 @@
                 </form>
             </div>
         </div>
-        <div class="col-7">
-            <div class="col-7 rightContainer">
+        <div class="col-12 order-1 col-md-7 order-md-2">
+            <div class="col-12 col-xl-7 rightContainer">
                 <h1 class="text-center">
                     <img class="img-logo" src="<?= IMG_URL; ?>/logo.png" alt="logo"> <?= PAGE_NAME; ?>
                 </h1>

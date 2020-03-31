@@ -1,6 +1,7 @@
 body, h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 }
+
 body {
   nav {
     &.navbar {
@@ -20,6 +21,12 @@ body {
         .btn {
           &.btn-outline-white {
             border: solid 1px #FFF !important;
+          }
+        }
+
+        @media screen and (max-width: 767px) {
+          [data-toggle='modal'] {
+            display: none;
           }
         }
       }
@@ -47,6 +54,10 @@ body {
         .nav-item {
           .nav-link {
             color: #757575;
+
+            &[data-toggle='modal'] {
+              display: none;
+            }
 
             &:hover {
               color: $color-red;
@@ -88,6 +99,58 @@ body {
               span.material-icons {
                 font-size: 30px;
                 padding: 5px 0;
+              }
+            }
+          }
+        }
+
+        @media screen and (max-width: 767px) {
+          width: 100%;
+          height: auto;
+          padding-top: 54px;
+          overflow: hidden;
+          max-height: 500px;
+          transition: max-height .5s ease-in-out;
+
+          .navbar-nav {
+            position: static;
+            width: 100%;
+            margin-top: 20px;
+          }
+
+          .nav-item {
+            .nav-link {
+              &[data-toggle='modal'] {
+                display: block;
+              }
+
+              &.btn-white {
+                color: $color-red;
+              }
+
+              &.btn-red {
+                color: #FFF;
+              }
+            }
+          }
+
+          &.small {
+            width: 100%;
+            max-height: 54px;
+
+            .nav-item {
+              .nav-link {
+                span:not(.material-icons) {
+                  visibility: visible;
+                  opacity: 1;
+                  font-size: 16px;
+                  max-height: 50px;
+                }
+
+                span.material-icons {
+                  font-size: 24px;
+                  padding: 0;
+                }
               }
             }
           }

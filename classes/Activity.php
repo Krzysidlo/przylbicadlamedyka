@@ -6,12 +6,13 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Activity
+class Activity extends Action
 {
     public int      $id;
     public User     $user;
     public string   $type;
     public ?Request $request;
+    public ?Frozen  $frozen;
     public DateTime $date;
     public string   $message;
 
@@ -23,6 +24,7 @@ class Activity
      */
     public function __construct(int $activityID)
     {
+        parent::__construct("activities");
         $info = false;
 
         $sql = "SELECT * FROM `activities` WHERE `id` = '{$activityID}'";
@@ -32,10 +34,10 @@ class Activity
         }
 
         if ($info) {
-            $this->id   = intval($info['id']);
-            $this->user = new User($info['users_id']);
-            $this->type = $info['type'];
-            $this->date = new DateTime($info['date']);
+            $this->id      = intval($info['id']);
+            $this->user    = new User($info['users_id']);
+            $this->type    = $info['type'];
+            $this->date    = new DateTime($info['date']);
             $this->message = $info['message'];
 
             if (!empty($info['requests_id'])) {
@@ -43,19 +45,28 @@ class Activity
             } else {
                 $this->request = NULL;
             }
+
+            if (!empty($info['frozen_id'])) {
+                $this->frozen = new Frozen($info['frozen_id']);
+            } else {
+                $this->frozen = NULL;
+            }
         } else {
             throw new Exception("No activity info found with id=[{$activityID}]");
         }
     }
 
-    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL): array
+    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?int $frozenID = NULL): array
     {
         if ($requestsID === NULL) {
-            $requestsID = 'NULL';
+            $requestsID = "NULL";
+        }
+        if ($frozenID === NULL) {
+            $frozenID = "NULL";
         }
         $date = $date->format("Y-m-d H:i:s");
 
-        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, '{$date}', '{$message}');";
+        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenID}, '{$date}', '{$message}');";
 
         if (!!fs::$mysqli->query($sql)) {
             $data = [
@@ -84,9 +95,9 @@ class Activity
      */
     public static function getAll(?string $usersID = NULL): array
     {
-        $sql      = "SELECT `id` FROM `activities`";
+        $sql = "SELECT `id` FROM `activities` WHERE `deleted` = 0";
         if ($usersID !== NULL) {
-            $sql      .= " WHERE `users_id` = '{$usersID}'";
+            $sql .= " AND `users_id` = '{$usersID}'";
         }
 
         $sql .= " ORDER BY date DESC;";

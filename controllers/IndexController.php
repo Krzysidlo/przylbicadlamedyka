@@ -4,7 +4,6 @@ namespace controllers;
 
 use Exception;
 use classes\User;
-use classes\Frozen;
 use classes\Request;
 use classes\Activity;
 
@@ -28,21 +27,33 @@ class IndexController extends PageController
 
         foreach ($rows as $row) {
 
-            $type   = $row->type;
-            $text   = $row->message;
-            $date   = $row->date->format("d.m.Y - H:i");
-            $button = "";
+            $type     = $row->type;
+            $text     = $row->message;
+            $date     = $row->date->format("d.m.Y - H:i");
+            $button   = false;
+            $dataId   = "";
+            $dataType = "";
             if ($row->request !== NULL) {
+                $dataId   = "data-id='{$row->request->id}'";
+                $dataType = "data-type='request'";
                 if ($row->request->frozen === NULL) {
-                    $button = "<button class=\"btn btn-transparent my-0 cancel right\">Anuluj</button>";
+                    $button = true;
+                }
+            } else {
+                if ($row->frozen !== NULL) {
+                    $dataId   = "data-id='{$row->frozen->id}'";
+                    $dataType = "data-type='frozen'";
+                    if ($row->request->frozen === NULL) {
+                        $button = true;
+                    }
                 }
             }
-            $dataId       = ($row->request !== NULL ? "data-id='{$row->request->id}'" : "");
+            $button       = ($button ? "<a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel' {$dataId} {$dataType}>Anuluj</a>" : "");
             $activities[] = <<< HTML
-            <div class="activityBox {$type}" {$dataId}>
-                <div class="content">
-                    <div class="text">{$text}</div>
-                    {$button}
+            <div class="activityBox {$type} container">
+                <div class="content row">
+                    <div class="text col-9">{$text}</div>
+                    <div class="button col-3">{$button}</div>
                     <div class="date">{$date}</div>
                 </div>
             </div>
@@ -52,9 +63,9 @@ HTML;
 
         $data = [
             'activities' => $activities,
-            'material' => Request::count(USER_ID, "material"),
-            'ready' => Request::count(USER_ID, "ready"),
-            'delivered' => Request::count(USER_ID, "delivered"),
+            'material'   => Request::count(USER_ID, "material"),
+            'ready'      => Request::count(USER_ID, "ready"),
+            'delivered'  => Request::count(USER_ID, "delivered"),
         ];
 
         return parent::content(array_merge($args, $data));

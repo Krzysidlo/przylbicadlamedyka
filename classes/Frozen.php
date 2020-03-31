@@ -6,9 +6,8 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Frozen
+class Frozen extends Action
 {
-    public int      $id;
     public User     $user;
     public DateTime $date;
     public Request  $request;
@@ -25,6 +24,7 @@ class Frozen
      */
     public function __construct(int $frozenID)
     {
+        parent::__construct("frozen");
         $info = false;
 
         $sql = "SELECT * FROM `frozen` WHERE `id` = '{$frozenID}'";
@@ -176,5 +176,30 @@ class Frozen
         } else {
             return false;
         }
+    }
+
+    public static function count(string $usersID, string $type = "delivered"): int
+    {
+        $return = 0;
+//        switch ($type) {
+//            case "material":
+//                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
+//                break;
+//            case "ready":
+//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+//                break;
+//            case "delivered":
+//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
+//                break;
+//            default:
+//                $sql = "SELECT 0";
+//                break;
+//        }
+//
+//        if ($query = fs::$mysqli->query($sql)) {
+//            $return = intval($query->fetch_row()[0] ?? 0);
+//        }
+
+        return $return;
     }
 }

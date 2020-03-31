@@ -4,7 +4,8 @@ use classes\User;
 
 $user = new User;
 
-$show = (($_COOKIE['leftMenu'] ?? "null") === "null" ? "" : " small");
+$small = " small";
+$small = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" : $small);
 ?>
 
     <nav class="navbar fixed-top navbar-dark bg-red">
@@ -31,7 +32,7 @@ $show = (($_COOKIE['leftMenu'] ?? "null") === "null" ? "" : " small");
     </nav>
 
 <?php if (!$user->noAddress()) { ?>
-    <nav class="navbar fixed-left<?= $show; ?>">
+    <nav class="navbar fixed-left<?= $small; ?>">
         <ul class="navbar-nav">
             <li class="nav-item<?= $this->menu === "index" ? " active" : ""; ?>">
                 <a href="/" class="nav-link">
@@ -51,6 +52,27 @@ $show = (($_COOKIE['leftMenu'] ?? "null") === "null" ? "" : " small");
                     <span>Ustawienia</span>
                 </a>
             </li>
+            <?php if (!$user->noAddress() && USER_PRV === User::USER_PRODUCER) { ?>
+                <li class="nav-item">
+                    <a href="#" class="btn btn-white nav-link" data-toggle="modal" data-target="#bascinetModal">Zgłoś gotowe przyłbice</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="btn btn-red nav-link" data-toggle="modal" data-target="#materialModal">Zgłoś zapotrzebowanie</a>
+                </li>
+            <?php }
+            if (!$user->noAddress() && USER_PRV === User::USER_DRIVER) { ?>
+                <li class="nav-item">
+                    <a href="#" class="btn btn-white nav-link" data-toggle="modal" data-target="#deliveredModal">Zgłoś dostarczenie</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="btn btn-outline-white btn-red nav-link" data-toggle="modal" data-target="#collectionModal">Zgłoś odbiór</a>
+                </li>
+            <?php }
+            if (!$user->noAddress() && USER_PRV === User::USER_NO_CONFIRM) { ?>
+                <li class="nav-item">
+                    <span class="navbar-brand">Aby móc wykonywać akcje proszę potwierdzić adres e-mail</span>
+                </li>
+            <?php } ?>
         </ul>
         <ul class="navbar-nav navbar-bottom">
             <li class="nav-item">

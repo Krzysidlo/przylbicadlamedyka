@@ -4,6 +4,7 @@ namespace controllers;
 
 use Exception;
 use classes\User;
+use classes\Frozen;
 use classes\Request;
 use classes\Functions as fs;
 
@@ -76,6 +77,48 @@ class MapController extends PageController
                 'alert'   => "danger",
                 'message' => "Wystąpił błąd przy zapisie do bazy danych proszę spróbować ponownie",
             ];
+        }
+
+        return $data;
+    }
+
+    public static function ajax_delete($get = []): array
+    {
+        $data = [
+            'success' => true,
+            'alert'   => false,
+            'message' => "",
+        ];
+
+        $error = [
+            'success' => false,
+            'alert'   => "warning",
+            'message' => "Wystąpił błąd. Proszę odświeżyć stronę i spróbować ponownie",
+        ];
+
+        if (!empty($get['id']) && !empty($get['type'])) {
+            try {
+                $element = NULL;
+                switch($get['type']) {
+                    case "request":
+                        $element = new Request($get['id']);
+                        break;
+                    case "frozen":
+                        $element = new Frozen($get['id']);
+                        break;
+                    default:
+                        $data = $error;
+                        break;
+                }
+                if ($data['success'] && !$element->delete()) {
+                    $data = $error;
+                }
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+                $data = $error;
+            }
+        } else {
+            $data = $error;
         }
 
         return $data;
