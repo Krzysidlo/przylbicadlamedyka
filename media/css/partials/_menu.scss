@@ -109,8 +109,9 @@ body {
           height: auto;
           padding-top: 54px;
           overflow: hidden;
-          max-height: 500px;
-          transition: max-height .5s ease-in-out;
+          position: absolute;
+          top: 0;
+          transition: max-height .4s ease-in-out;
 
           .navbar-nav {
             position: static;

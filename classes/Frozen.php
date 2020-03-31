@@ -181,7 +181,7 @@ class Frozen extends Action
     public static function count(string $usersID, string $type = "delivered"): int
     {
         $return = 0;
-//        switch ($type) {
+        switch ($type) {
 //            case "material":
 //                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
 //                break;
@@ -191,14 +191,17 @@ class Frozen extends Action
 //            case "delivered":
 //                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
 //                break;
-//            default:
-//                $sql = "SELECT 0";
-//                break;
-//        }
-//
-//        if ($query = fs::$mysqli->query($sql)) {
-//            $return = intval($query->fetch_row()[0] ?? 0);
-//        }
+            case "trips":
+                $sql = "SELECT count(`id`) FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+                break;
+            default:
+                $sql = "SELECT 0";
+                break;
+        }
+
+        if ($query = fs::$mysqli->query($sql)) {
+            $return = intval($query->fetch_row()[0] ?? 0);
+        }
 
         return $return;
     }

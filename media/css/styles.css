@@ -87,9 +87,10 @@ body nav.navbar.fixed-left.small .nav-item .nav-link span.material-icons {
     height: auto;
     padding-top: 54px;
     overflow: hidden;
-    max-height: 500px;
-    -webkit-transition: max-height .5s ease-in-out;
-    transition: max-height .5s ease-in-out;
+    position: absolute;
+    top: 0;
+    -webkit-transition: max-height .4s ease-in-out;
+    transition: max-height .4s ease-in-out;
   }
   body nav.navbar.fixed-left .navbar-nav {
     position: static;

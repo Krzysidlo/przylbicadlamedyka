@@ -82,6 +82,11 @@ class MapController extends PageController
         return $data;
     }
 
+    public static function ajax_newFrozen($get = []): array
+    {
+
+    }
+
     public static function ajax_delete($get = []): array
     {
         $data = [

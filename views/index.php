@@ -1,5 +1,8 @@
 <?php
 $activities ??= [];
+$material   ??= 0;
+$ready      ??= 0;
+$delivered  ??= 0;
 ?>
 <section class="container">
     <div class="row justify-content-center">
@@ -27,19 +30,6 @@ $activities ??= [];
             <?php foreach ($activities as $html) {
                 echo $html;
             } ?>
-<!--            <div class="activityBox action">-->
-<!--                <div class="content">-->
-<!--                    <div class="text">Zgłoszono zapotrzebowanie na 50 materiału</div>-->
-<!--                    <button class="btn btn-transparent my-0 right">Anuluj</button>-->
-<!--                    <div class="date">23.04.2020 - 15:36</div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="activityBox notification">-->
-<!--                <div class="content">-->
-<!--                    <div class="text">Imię Naziwsko (tel. 000 000 00) odbierze od Ciebie 300 przyłbic o 18:20 -  23.04.2020</div>-->
-<!--                    <div class="date">23.04.2020 - 15:36</div>-->
-<!--                </div>-->
-<!--            </div>-->
         </div>
     </div>
 </section>

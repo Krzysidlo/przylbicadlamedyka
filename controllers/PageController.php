@@ -2,6 +2,8 @@
 
 namespace controllers;
 
+use Exception;
+use classes\Frozen;
 use classes\Functions as fs;
 
 abstract class PageController
@@ -127,6 +129,22 @@ abstract class PageController
     public function foot(array $args = [])
     {
         $this->file = INC_DIR . "/footer.php";
+
+        return $this->render($args);
+    }
+
+    public function modals(array $args = [])
+    {
+        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess'])) {
+            $this->file = INC_DIR . "/modals.php";
+
+            try {
+                $frozen = Frozen::getAll(USER_ID);
+                $args['frozen'] = $frozen;
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+            }
+        }
 
         return $this->render($args);
     }
