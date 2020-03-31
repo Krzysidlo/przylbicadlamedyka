@@ -98,7 +98,7 @@ class MapController extends PageController
         $error = [
             'success' => false,
             'alert'   => "warning",
-            'message' => "Wystąpił błąd. Proszę odświeżyć stronę i spróbować ponownie",
+            'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie",
         ];
 
         if (!empty($get['id']) && !empty($get['type'])) {

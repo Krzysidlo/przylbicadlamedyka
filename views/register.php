@@ -65,7 +65,7 @@
                         </label>
                     </div>
                     <div class="col-12 text-center">
-                        <button class="btn btn-red" type="submit">Zarejestruj się</button>
+                        <button class="btn btn-red mx-0" type="submit">Zarejestruj się</button>
                     </div>
                     <div class="col-12">
                         <hr>
@@ -108,7 +108,7 @@
                         </label>
                     </div>
                     <div class="col-12 text-center">
-                        <button class="btn btn-red" type="submit">Zaloguj się</button>
+                        <button class="btn btn-red mx-0" type="submit">Zaloguj się</button>
                     </div>
                     <div class="col-12">
                         <hr>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <p>Cześć! Dziękujemy za dołączenie do akcji, na początek ustalmy jak będziesz nam pomagał.</p>
+                        <p>Podaj adres e-mail, za pomoca którego się rejestrowałeś. Doastaniesz na niego wiadomość z linkiem do zresetowania hasła.</p>
                     </div>
                 </div>
                 <form action="/ajax/register/forgot" class="row">
@@ -137,16 +137,22 @@
                                value="<?= !empty($this->get('femail')) ? $this->get('femail') : ""; ?>">
                     </div>
                     <div class="col-12 text-center">
-                        <button class="btn btn-red" type="submit">Restartuj</button>
+                        <button class="btn btn-red mx-0" type="submit">Wyślij</button>
                     </div>
                 </form>
             </div>
         </div>
         <div class="col-12 order-1 col-md-7 order-md-2">
-            <div class="col-12 col-xl-7 rightContainer">
-                <h1 class="text-center">
+            <div class="col-12 col-xl-7 offset-xl-1 rightContainer">
+                <h1>
                     <img class="img-logo" src="<?= IMG_URL; ?>/logo.png" alt="logo"> <?= PAGE_NAME; ?>
                 </h1>
+                <h4 class="mt-5 mb-3">O akcji!</h4>
+                <p class="mb-4">Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros.</p>
+                <h4>Wspólnie stworzyliśmy</h4>
+                <p class="number"><span>3425</span> Przyłbic</p>
+                <h4 class="mb-3">Jak możesz nam pomóc?</h4>
+                <p>Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros. </p>
             </div>
         </div>
     </div>

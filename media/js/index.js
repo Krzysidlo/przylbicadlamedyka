@@ -309,7 +309,7 @@ var index = function () {
         })();
 
         (function register() {
-            var $register = $("body.register");
+            var $register = $("body.register, body.reset");
             if ($register.length) {
                 var $chngView = $register.find("a.chngView"),
                     $forms = $register.find(".leftContainer form");
@@ -345,7 +345,9 @@ var index = function () {
                     e.preventDefault();
 
                     var $form = $(this),
-                        formData = new FormData($form.get(0));
+                        formData = new FormData($form.get(0)),
+                        parts = $form.attr('action').split("/"),
+                        method = parts[3];
 
                     $.ajax({
                         url: $form.attr('action') + "?ajax=true",
@@ -358,7 +360,7 @@ var index = function () {
                             showLoading();
                         },
                         success: function (data) {
-                            if (data.success) {
+                            if (data.success && method !== "forgot") {
                                 location.href = "/";
                             }
 

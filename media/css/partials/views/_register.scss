@@ -1,4 +1,4 @@
-body.register {
+body.register, body.reset {
   margin: 0;
   min-height: unset;
 
@@ -62,8 +62,28 @@ body.register {
       @media screen and(max-width: 767px) {
         padding-bottom: 30px;
       }
+
       .img-logo {
         width: 5rem;
+      }
+
+      h4 {
+        font-weight: bold;
+      }
+
+      p {
+        color: #747D8C;
+
+        &.number {
+          font-size: 24px;
+          color: #2F3542;
+
+          span {
+            font-size: 62px;
+            font-weight: bold;
+            color: $color-red;
+          }
+        }
       }
     }
   }
