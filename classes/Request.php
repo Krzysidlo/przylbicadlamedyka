@@ -6,9 +6,8 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Request
+class Request extends Action
 {
-    public int      $id;
     public User     $user;
     public string   $latLng;
     public ?int     $bascinet;
@@ -20,15 +19,16 @@ class Request
 
     /**
      * Request constructor.
-     * @param int $requestID
+     * @param int $requestsID
      *
      * @throws Exception
      */
-    public function __construct(int $requestID)
+    public function __construct(int $requestsID)
     {
+        parent::__construct("requests");
         $info = false;
 
-        $sql = "SELECT * FROM `requests` WHERE `id` = '{$requestID}'";
+        $sql = "SELECT * FROM `requests` WHERE `id` = '{$requestsID}'";
 
         if ($query = fs::$mysqli->query($sql)) {
             $info = $query->fetch_assoc() ?? false;
@@ -51,10 +51,20 @@ class Request
                 $this->frozen = new Frozen($frozen);
             }
         } else {
-            throw new Exception("No request info found with id=[{$requestID}]");
+            throw new Exception("No request info found with id=[{$requestsID}]");
         }
     }
 
+    /**
+     * @param string $usersID
+     * @param string|null $latLng
+     * @param int|null $bascinet
+     * @param int|null $material
+     * @param string|null $comments
+     *
+     * @return array
+     * @throws Exception
+     */
     public static function create(string $usersID, ?string $latLng = NULL, ?int $bascinet = NULL, ?int $material = NULL, ?string $comments = NULL): array
     {
         if ($latLng === NULL) {
@@ -86,9 +96,26 @@ class Request
             $data = [
                 'success' => false,
                 'alert'   => "danger",
-                'message' => "Błąd przy zapisie do bazy danych. Proszę spróbować ponownie.",
+                'message' => "Błąd przy zapisie do bazy danych. Proszę odświeżyć stronę i spróbować ponownie.",
             ];
         }
+
+        if ($data['success']) {
+            $requestsID = fs::$mysqli->insert_id;
+            $sql = "SELECT `created_at` FROM `requests` WHERE `id`={$requestsID};";
+            $date = fs::$mysqli->query($sql)->fetch_row()[0] ?? NULL;
+            if ($date !== NULL) {
+                $date = new DateTime($date);
+                $message = "";
+                if ($bascinet !== "NULL") {
+                    $message = "Zgłoszono {$bascinet} gotowych przyłbic do odbioru";
+                } else if ($material !== "NULL") {
+                    $message = "Zgłoszono zapotrzebowanie na {$material} materiału";
+                }
+                Activity::create($usersID, $date, $message, "action", $requestsID);
+            }
+        }
+
         return $data;
     }
 
@@ -121,11 +148,36 @@ class Request
         $return = [];
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_row()) {
-                $requestID = $result[0] ?? false;
-                if ($requestID) {
-                    $return[] = new self($requestID);
+                $requestsID = $result[0] ?? false;
+                if ($requestsID) {
+                    $return[] = new self($requestsID);
                 }
             }
+        }
+
+        return $return;
+    }
+
+    public static function count(string $usersID, string $type = "delivered"): int
+    {
+        $return = 0;
+        switch ($type) {
+            case "material":
+                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
+                break;
+            case "ready":
+                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+                break;
+            case "delivered":
+                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
+                break;
+            default:
+                $sql = "SELECT 0";
+                break;
+        }
+
+        if ($query = fs::$mysqli->query($sql)) {
+            $return = intval($query->fetch_row()[0] ?? 0);
         }
 
         return $return;

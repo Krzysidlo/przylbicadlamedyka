@@ -7,8 +7,12 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
+<<<<<<< HEAD
 //TODO: Zmienić na false
 define('DEV_MODE', true);
+=======
+define('DEV_MODE', false);
+>>>>>>> 673f27a23d2633808d85bb57a6edbd5768575d4a
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
@@ -16,16 +20,12 @@ if (DEV_MODE) {
     error_reporting(E_ALL);
 }
 
-//TODO: Zmienić na ip
 //Use local database
 //$DB_HOST = 'localhost';
 $DB_HOST = '185.243.55.171';
 $DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';
-//if (DEV_MODE) {
-//    $DB_NAME = 'przylbicadlamedyka_test';
-//}
 
 //Wyświetla się komunikat, że strona w trakcie konstrukcji
 $CONST_MODE = false;
@@ -48,15 +48,11 @@ chdir($rootDir);
 define('ROOT_DIR', $rootDir);
 const MEDIA_DIR = ROOT_DIR . "/media";
 const INC_DIR   = ROOT_DIR . "/includes";
-const CONF_DIR  = ROOT_DIR . "/config";
 const LOG_DIR   = ROOT_DIR . "/../logs";
 const AJAX_DIR  = ROOT_DIR . "/ajax";
 const ADMIN_DIR = ROOT_DIR . "/admin";
 
 const IMG_DIR  = MEDIA_DIR . "/img";
-const TMP_DIR  = IMG_DIR . "/tmp";
-const CSS_DIR  = MEDIA_DIR . "/css";
-const JS_DIR   = MEDIA_DIR . "/js";
 
 /* ---- Urls ---- */
 $ROOT_URL = "";
@@ -86,10 +82,6 @@ const MEDIA_URL = ROOT_URL . "/media";
 const INC_URL   = ROOT_URL . "/includes";
 
 const IMG_URL  = MEDIA_URL . "/img";
-const MSC_URL  = MEDIA_URL . "/music";
-const USR_URL  = IMG_URL . "/users";
-const COMP_URL = IMG_URL . "/competitions";
-const TMP_URL  = IMG_URL . "/tmp";
 const CSS_URL  = MEDIA_URL . "/css";
 const JS_URL   = MEDIA_URL . "/js";
 
@@ -109,9 +101,10 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
 }
 
 /* -------------- Settings (you can change that) -------------- */
+//User with this e-mail has always root access
+const ROOT_EMAIL = "";
 //E-mail address from which messages should be sent
 //Default e-mail address (if not changed in website setiings)
-const ROOT_EMAIL = "krzychu.janiszewski@gmail.com";
 $EMAIL = ROOT_EMAIL;
 
 if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE `name` = 'EMAIL';")) {

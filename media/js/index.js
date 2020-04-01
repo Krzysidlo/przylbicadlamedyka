@@ -8,14 +8,92 @@ var index = function () {
     $(function () {
 
         var $body = $("body"),
-            winFocus = true,
-            online = true;
+            settingsMap,
+            mapMarker;
 
         $(document).trigger('scroll');
 
         if (!mobileAndTabletCheck() && $body.height() > $(window).height()) {
             $body.addClass('desktop');
         }
+
+        function toggleMapInteraction(enable, map, marker) {
+            enable = enable | false;
+            if (enable) {
+                if (!mobileAndTabletCheck()) {
+                    map.dragging.enable();
+                }
+                if (map.tap) {
+                    map.tap.enable();
+                }
+                map.touchZoom.enable();
+                map.doubleClickZoom.enable();
+                map.scrollWheelZoom.enable();
+                map.boxZoom.enable();
+                map.keyboard.enable();
+                if (typeof marker !== "undefined") {
+                    marker.dragging.enable()
+                }
+            } else {
+                map.dragging.disable();
+                if (map.tap) {
+                    map.tap.disable();
+                }
+                map.touchZoom.disable();
+                map.doubleClickZoom.disable();
+                map.scrollWheelZoom.disable();
+                map.boxZoom.disable();
+                map.keyboard.disable();
+                if (typeof marker !== "undefined") {
+                    marker.dragging.disable()
+                }
+                map.panTo(marker.getLatLng());
+            }
+        }
+
+        (function index() {
+            var $index = $("body.index");
+            if ($index.length) {
+                var $cancelBtn = $index.find(".activityBox .cancel");
+
+                $cancelBtn.on('click', function (e) {
+                    e.preventDefault();
+
+                    if (confirm("Czy na pewno chcesz anulować tę akcję?")) {
+                        var $btn = $(this),
+                            id = $btn.data('id'),
+                            type = $btn.data('type'),
+                            url = $btn.attr('href');
+
+                        $.ajax({
+                            url: url + "?ajax=true",
+                            type: "POST",
+                            data: {id: id, type: type},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    $btn.parents(".activityBox").fadeOut(function () {
+                                        $(this).remove();
+                                    });
+                                }
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    }
+                });
+            }
+        })();
 
         (function modals() {
             var $modals = $(".modal.functionModal");
@@ -55,18 +133,35 @@ var index = function () {
         })();
 
         (function menu() {
-            var $navbarTop = $("nav.navbar.fixed-top"),
-                $navbarLeft = $("nav.navbar.fixed-left"),
-                $toggler = $navbarTop.find(".navbar-toggler");
+            var $navbarTop = $("nav.navbar.fixed-top");
+            if ($navbarTop.length) {
+                var $navbarLeft = $("nav.navbar.fixed-left"),
+                    $toggler = $navbarTop.find(".navbar-toggler");
 
-            $toggler.on('click', function () {
-                $navbarLeft.toggleClass('small');
-                if ($navbarLeft.hasClass('small')) {
-                    setCookie("leftMenu", true, 365);
-                } else {
-                    setCookie("leftMenu", null);
+                $toggler.on('click', function () {
+                    $navbarLeft.toggleClass('compact');
+                    if (!mobileAndTabletCheck()) {
+                        if ($navbarLeft.hasClass('compact')) {
+                            setCookie("leftMenu", true, 365);
+                        } else {
+                            setCookie("leftMenu", null);
+                        }
+                    }
+                });
+
+                if (mobileAndTabletCheck()) {
+                    $(document).on('click', function (e) {
+                        if (!$navbarLeft.hasClass("compact")) {
+                            var $target = $(e.target);
+                            if (!$target.hasClass("fixed-left") && !$target.parents(".fixed-left").length && !$target.hasClass("navbar-toggler") && $target.parents(".navbar-toggler").length <= 0) {
+                                $navbarLeft.addClass("compact");
+                            } else {
+                                console.log($target);
+                            }
+                        }
+                    });
                 }
-            });
+            }
         })();
 
         (function showPreload() {
@@ -94,6 +189,10 @@ var index = function () {
                     $saveBtn = $form.find("[type='submit']"),
                     originalValues = [];
 
+                setTimeout(function () {
+                    toggleMapInteraction(false, settingsMap, mapMarker);
+                }, 1E2);
+
                 $noConfirmBtn.on('click', function (e) {
                     e.preventDefault();
 
@@ -116,6 +215,8 @@ var index = function () {
                         });
                     });
 
+                    toggleMapInteraction(true, settingsMap, mapMarker);
+
                     $(this).fadeOut(function () {
                         $cancelBtn.fadeIn();
                         $saveBtn.fadeIn();
@@ -131,6 +232,8 @@ var index = function () {
                         $input.val(e.value);
                         $input.attr('readonly', true);
                     });
+
+                    toggleMapInteraction(false, settingsMap, mapMarker);
 
                     $saveBtn.fadeOut();
                     $(this).fadeOut(function () {
@@ -156,6 +259,7 @@ var index = function () {
                         success: function (data) {
                             if (data.success) {
                                 $form.find('input:not(.locked)').attr('readonly', true);
+                                toggleMapInteraction(false, settingsMap, mapMarker);
                                 $cancelBtn.fadeOut();
                                 $saveBtn.fadeOut(function () {
                                     $editBtn.fadeIn();
@@ -173,47 +277,100 @@ var index = function () {
                         }
                     });
                 });
+
+                var $sendConfirm = $settings.find("#sendConfirm");
+                if ($sendConfirm.length) {
+                    $sendConfirm.on('click', function (e) {
+                        e.preventDefault();
+
+                        $.ajax({
+                            url: $sendConfirm.attr('href') + "?ajax=true",
+                            type: "POST",
+                            data: {},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    });
+                }
             }
         })();
 
         (function register() {
-            var $register = $("body.register");
+            var $register = $("body.register, body.reset");
             if ($register.length) {
                 var $chngView = $register.find("a.chngView"),
                     $forms = $register.find(".leftContainer form");
 
-                $chngView.on('click', function (e) {
-                    e.preventDefault();
+                var changeView = function (view, pushState) {
+                    pushState = pushState | false;
 
-                    var view = $(this).data('view'),
-                        $loginView = $register.find(".leftContainer.login"),
-                        $registerView = $register.find(".leftContainer.register"),
-                        $forgotView = $register.find(".leftContainer.forgot");
+                    if (view === "null") {
+                        view = "register";
+                    }
+
+                    var $loginView = $register.find(".leftContainer.login"),
+                        $forgotView = $register.find(".leftContainer.forgot"),
+                        $currentView = $register.find(".leftContainer:visible"),
+                        $targetView = $register.find(".leftContainer." + view),
+                        pageName = document.title.split(" - ")[1];
+
+                    if (pushState) {
+                        window.history.pushState(view, '', '/' + view);
+                    }
+
                     switch (view) {
                         case 'login':
-                            $registerView.fadeOut(function () {
-                                $loginView.fadeIn();
-                            });
+                            document.title = "Zaloguj się - " + pageName;
                             break;
                         case 'register':
-                            $loginView.fadeOut(function () {
-                                $registerView.fadeIn();
-                            });
+                            document.title = "Zarejestruj się - " + pageName;
                             break;
                         case 'forgot':
+                            document.title = "Zapomniałem hasła - " + pageName;
                             $forgotView.find('input[type="email"]').val($loginView.find('input[type="email"]').val());
-                            $loginView.fadeOut(function () {
+                            $currentView.fadeOut(function () {
                                 $forgotView.fadeIn();
                             });
                             break;
                     }
+
+                    if (view !== "forgot") {
+                        $currentView.fadeOut(function () {
+                            $targetView.fadeIn();
+                        });
+                    }
+                };
+
+                $chngView.on('click', function (e) {
+                    e.preventDefault();
+
+                    changeView($(this).data('view'), true);
                 });
+
+                window.onpopstate = function(event) {
+                    changeView(JSON.stringify(event.state).replace(/['"]+/g, ''));
+                };
 
                 $forms.on('submit', function (e) {
                     e.preventDefault();
 
                     var $form = $(this),
-                        formData = new FormData($form.get(0));
+                        formData = new FormData($form.get(0)),
+                        parts = $form.attr('action').split("/"),
+                        method = parts[3];
 
                     $.ajax({
                         url: $form.attr('action') + "?ajax=true",
@@ -227,7 +384,11 @@ var index = function () {
                         },
                         success: function (data) {
                             if (data.success) {
-                                location.href = "/";
+                                if (method === "resetPassword") {
+                                    location.href = "/login";
+                                } else if (method !== "forgot") {
+                                    location.href = "/";
+                                }
                             }
 
                             if (data.alert) {
@@ -443,19 +604,23 @@ var index = function () {
                     lat, lng;
 
                 var center = new L.LatLng(50.0619474, 19.9368564);
-                var map = L.map('addressMap').setView(center, 15);
+                settingsMap = L.map('addressMap').setView(center, 15);
+                if (mobileAndTabletCheck()) {
+                    settingsMap.dragging.disable();
+                    settingsMap.tap.disable();
+                }
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
+                }).addTo(settingsMap);
 
-                var marker = L.marker(center, {draggable: 'true'}).addTo(map);
+                mapMarker = L.marker(center, {draggable: 'true'}).addTo(settingsMap);
 
                 var bindMarker = function (latLng) {
-                    map.removeLayer(marker);
-                    marker.setLatLng(latLng);
-                    marker.addTo(map);
-                    map.panTo(latLng);
+                    settingsMap.removeLayer(mapMarker);
+                    mapMarker.setLatLng(latLng);
+                    mapMarker.addTo(settingsMap);
+                    settingsMap.panTo(latLng);
 
                     $locationInput.val(latLng.lat + "," + latLng.lng);
                 };
@@ -470,7 +635,7 @@ var index = function () {
                     bindMarker(new L.LatLng(lat, lng));
                 });
 
-                marker.on('dragend', function (e) {
+                mapMarker.on('dragend', function (e) {
                     bindMarker(e.target._latlng);
                 });
 
@@ -502,7 +667,7 @@ var index = function () {
                                 $mapContainer.removeClass("loading");
                             }
                         });
-                    }, 2E3);
+                    }, 15E2);
                 });
             }
         })();

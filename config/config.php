@@ -88,7 +88,7 @@ define('CONST_MODE', $CONST_MODE);
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
 
-$noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax', 'regulations'];
+$noLoggedIn = ['admin', 'confirm', 'error', 'register', 'login', 'forgot', 'reset', 'ajax', 'regulations'];
 
 if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';
@@ -111,7 +111,11 @@ if ($page == 'admin') {
     $controllersPath = 'admin\controllers\\';
 }
 
-$controllerName = $controllersPath . ucfirst($view) . 'Controller';
+if (in_array($view, ['login', 'forgot', 'reset'])) {
+    $controllerName = $controllersPath . 'RegisterController';
+} else {
+    $controllerName = $controllersPath . ucfirst($view) . 'Controller';
+}
 if (!class_exists($controllerName) || $view === 'error') {
     $controllerName = $controllersPath . 'DefaultController';
 }

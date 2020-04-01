@@ -6,9 +6,8 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Frozen
+class Frozen extends Action
 {
-    public int      $id;
     public User     $user;
     public DateTime $date;
     public Request  $request;
@@ -25,6 +24,7 @@ class Frozen
      */
     public function __construct(int $frozenID)
     {
+        parent::__construct("frozen");
         $info = false;
 
         $sql = "SELECT * FROM `frozen` WHERE `id` = '{$frozenID}'";
@@ -35,8 +35,9 @@ class Frozen
 
         if ($info) {
             $this->id         = intval($info['id']);
-            $this->request = new Request(intval($info['frozen']));
+            $this->request    = new Request(intval($info['frozen']));
             $this->user       = new User($info['users_id']);
+            $this->date       = new DateTime($info['date']);
             $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
             $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->delivered  = (bool)$info['delivered'];
@@ -75,9 +76,9 @@ class Frozen
         $return = [];
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_row()) {
-                $requestID = $result[0] ?? false;
-                if ($requestID) {
-                    $return[] = new self($requestID);
+                $requestsID = $result[0] ?? false;
+                if ($requestsID) {
+                    $return[] = new self($requestsID);
                 }
             }
         }
@@ -85,9 +86,10 @@ class Frozen
         return $return;
     }
 
-    public static function create(string $usersID, int $requestID, ?DateTime $date = NULL, ?int $bascinet = NULL, ?int $material = NULL): array
+    //TODO: Change this function -- currently wrong
+    public static function create(string $usersID, int $requestsID, DateTime $date, ?int $bascinet = NULL, ?int $material = NULL): array
     {
-        $requestedQuantity = self::checkRequestedQuantity($requestID);
+        $requestedQuantity = self::checkRequestedQuantity($requestsID);
         if ($bascinet === NULL && $material === NULL) {
             return [
                 'success' => false,
@@ -118,11 +120,8 @@ class Frozen
             }
         }
 
-        if ($date === NULL) {
-            $date = date("Y-m-d H:i:s");
-        } else {
-            $date = $date->format("Y-m-d H:i:s");
-        }
+        $date = $date->format("Y-m-d H:i:s");
+
         if ($bascinet === NULL) {
             $bascinet = 'NULL';
         }
@@ -130,7 +129,7 @@ class Frozen
             $material = 'NULL';
         }
 
-        $sql = "INSERT INTO `requests` (`users_id`, `date`, `request_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestID}, {$bascinet}, {$material});";
+        $sql = "INSERT INTO `frozen` (`users_id`, `date`, `requests_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestsID}, {$bascinet}, {$material});";
 
         if (!!fs::$mysqli->query($sql)) {
             $data = [
@@ -148,17 +147,17 @@ class Frozen
         return $data;
     }
 
-    public static function checkRequestedQuantity(int $requestID)
+    public static function checkRequestedQuantity(int $requestsID)
     {
         $frozen = NULL;
 
-        $sql = "SELECT `bascinet`, `material` FROM `frozen` WHERE `request_id` = {$requestID};";
+        $sql = "SELECT `bascinet`, `material` FROM `frozen` WHERE `requests_id` = {$requestsID};";
 
         if ($query = fs::$mysqli->query($sql)) {
             $frozen = $query->fetch_assoc();
         }
 
-        $sql = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = '{$requestID}';";
+        $sql = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = '{$requestsID}';";
 
         $requested = NULL;
         if ($query = fs::$mysqli->query($sql)) {
@@ -179,5 +178,33 @@ class Frozen
         } else {
             return false;
         }
+    }
+
+    public static function count(string $usersID, string $type = "delivered"): int
+    {
+        $return = 0;
+        switch ($type) {
+//            case "material":
+//                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
+//                break;
+//            case "ready":
+//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+//                break;
+//            case "delivered":
+//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
+//                break;
+            case "trips":
+                $sql = "SELECT count(`id`) FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+                break;
+            default:
+                $sql = "SELECT 0";
+                break;
+        }
+
+        if ($query = fs::$mysqli->query($sql)) {
+            $return = intval($query->fetch_row()[0] ?? 0);
+        }
+
+        return $return;
     }
 }
