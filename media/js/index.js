@@ -461,7 +461,7 @@ var index = function () {
                     if (MaterialsNeededNo) {
                         htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
                     }
-                    if (additional_comments) {
+                    if (additionalComments) {
                         htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
                     htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
