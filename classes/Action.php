@@ -15,13 +15,13 @@ abstract class Action
         $this->table = $table;
     }
 
-    public function delete(): bool
+    public function delete(bool $activity = true): bool
     {
         $sql = "UPDATE `{$this->table}` SET `deleted` = 1 WHERE `id` = '{$this->id}';";
 
         $success = !!fs::$mysqli->query($sql);
 
-        if ($success) {
+        if ($success && $activity) {
             $sql = "UPDATE `activities` SET `deleted` = 1 WHERE (`requests_id` = {$this->id} AND `frozen_id` IS NULL) OR (`requests_id` IS NULL AND `frozen_id` = {$this->id});";
             $success &= !!fs::$mysqli->query($sql);
         }

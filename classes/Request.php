@@ -8,7 +8,6 @@ use classes\Functions as fs;
 
 class Request extends Action
 {
-    public int      $id;
     public User     $user;
     public string   $latLng;
     public ?int     $bascinet;

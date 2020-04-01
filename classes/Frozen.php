@@ -35,8 +35,9 @@ class Frozen extends Action
 
         if ($info) {
             $this->id         = intval($info['id']);
-            $this->request = new Request(intval($info['frozen']));
+            $this->request    = new Request(intval($info['frozen']));
             $this->user       = new User($info['users_id']);
+            $this->date       = new DateTime($info['date']);
             $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
             $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->delivered  = (bool)$info['delivered'];
@@ -85,6 +86,7 @@ class Frozen extends Action
         return $return;
     }
 
+    //TODO: Change this function -- currently wrong
     public static function create(string $usersID, int $requestsID, DateTime $date, ?int $bascinet = NULL, ?int $material = NULL): array
     {
         $requestedQuantity = self::checkRequestedQuantity($requestsID);
@@ -127,7 +129,7 @@ class Frozen extends Action
             $material = 'NULL';
         }
 
-        $sql = "INSERT INTO `requests` (`users_id`, `date`, `requests_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestsID}, {$bascinet}, {$material});";
+        $sql = "INSERT INTO `frozen` (`users_id`, `date`, `requests_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestsID}, {$bascinet}, {$material});";
 
         if (!!fs::$mysqli->query($sql)) {
             $data = [
