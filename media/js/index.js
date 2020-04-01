@@ -515,7 +515,7 @@ var index = function () {
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
 //                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
                     displayToast(`Potwierdziłeś: ${actionType} w dniu ${driverDateDay} o godzinie ${driverDateHour}
-                    i wysyłam do ${openPopupUserId}`);
+                    i wysyłam do ${openPopupUserId}`, "success");
                 });
 
 
