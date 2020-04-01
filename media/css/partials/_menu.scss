@@ -1,6 +1,7 @@
 body, h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 }
+
 body {
   nav {
     &.navbar {
@@ -22,6 +23,12 @@ body {
             border: solid 1px #FFF !important;
           }
         }
+
+        @media screen and (max-width: 767px) {
+          .actions {
+            display: none;
+          }
+        }
       }
 
       &.fixed-left {
@@ -29,10 +36,10 @@ body {
         top: 0;
         left: 0;
         height: 100vh;
-        width: 240px;
+        width: 250px;
         background-color: #FAFAFA;
         z-index: 1020;
-        transition: width .25s ease-in-out;
+        transition: width .25s ease-in-out, padding .25s ease-in-out;
 
         .navbar-nav {
           position: absolute;
@@ -45,6 +52,9 @@ body {
         }
 
         .nav-item {
+          &.actions {
+            display: none;
+          }
           .nav-link {
             color: #757575;
 
@@ -73,7 +83,7 @@ body {
           }
         }
 
-        &.small {
+        &.compact {
           width: 62px;
 
           .nav-item {
@@ -88,6 +98,62 @@ body {
               span.material-icons {
                 font-size: 30px;
                 padding: 5px 0;
+              }
+            }
+          }
+        }
+
+        @media screen and (max-width: 767px) {
+          width: 300px;
+          overflow: hidden;
+          position: fixed;
+          top: 0;
+          left: 0;
+          transition: left .25s ease-in-out;
+
+          .navbar-nav {
+            width: calc(100% - 30px);
+
+            .nav-item {
+              &.actions {
+                display: block;
+                margin-top: 5px;
+              }
+              .nav-link {
+                &[data-toggle='modal'] {
+                  display: block;
+                }
+
+                &.btn-white {
+                  color: $color-red;
+                }
+
+                &.btn-red {
+                  color: #FFF;
+                }
+              }
+            }
+          }
+
+          &.compact {
+            //width: 0;
+            //padding-left: 0;
+            //padding-right: 0;
+            width: 300px;
+            left: -300px;
+
+            .nav-item {
+              .nav-link {
+                span:not(.material-icons) {
+                  visibility: visible;
+                  opacity: 1;
+                  max-height: 50px;
+                }
+
+                span.material-icons {
+                  font-size: 24px;
+                  padding: 0;
+                }
               }
             }
           }

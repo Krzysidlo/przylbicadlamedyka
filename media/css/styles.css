@@ -19,16 +19,21 @@ body nav.navbar.fixed-top .navbar-brand {
 body nav.navbar.fixed-top .btn.btn-outline-white {
   border: solid 1px #FFF !important;
 }
+@media screen and (max-width: 767px) {
+  body nav.navbar.fixed-top .actions {
+    display: none;
+  }
+}
 body nav.navbar.fixed-left {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 240px;
+  width: 250px;
   background-color: #FAFAFA;
   z-index: 1020;
-  -webkit-transition: width .25s ease-in-out;
-  transition: width .25s ease-in-out;
+  -webkit-transition: width .25s ease-in-out, padding .25s ease-in-out;
+  transition: width .25s ease-in-out, padding .25s ease-in-out;
 }
 body nav.navbar.fixed-left .navbar-nav {
   position: absolute;
@@ -37,6 +42,9 @@ body nav.navbar.fixed-left .navbar-nav {
 body nav.navbar.fixed-left .navbar-nav.navbar-bottom {
   top: unset;
   bottom: 10px;
+}
+body nav.navbar.fixed-left .nav-item.actions {
+  display: none;
 }
 body nav.navbar.fixed-left .nav-item .nav-link {
   color: #757575;
@@ -60,18 +68,58 @@ body nav.navbar.fixed-left .nav-item .nav-link span.material-icons {
 body nav.navbar.fixed-left .nav-item.active .nav-link {
   color: #B7274B;
 }
-body nav.navbar.fixed-left.small {
+body nav.navbar.fixed-left.compact {
   width: 62px;
 }
-body nav.navbar.fixed-left.small .nav-item .nav-link span:not(.material-icons) {
+body nav.navbar.fixed-left.compact .nav-item .nav-link span:not(.material-icons) {
   visibility: hidden;
   height: 0;
   opacity: 0;
   max-height: 0;
 }
-body nav.navbar.fixed-left.small .nav-item .nav-link span.material-icons {
+body nav.navbar.fixed-left.compact .nav-item .nav-link span.material-icons {
   font-size: 30px;
   padding: 5px 0;
+}
+@media screen and (max-width: 767px) {
+  body nav.navbar.fixed-left {
+    width: 300px;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    -webkit-transition: left .25s ease-in-out;
+    transition: left .25s ease-in-out;
+  }
+  body nav.navbar.fixed-left .navbar-nav {
+    width: calc(100% - 30px);
+  }
+  body nav.navbar.fixed-left .navbar-nav .nav-item.actions {
+    display: block;
+    margin-top: 5px;
+  }
+  body nav.navbar.fixed-left .navbar-nav .nav-item .nav-link[data-toggle='modal'] {
+    display: block;
+  }
+  body nav.navbar.fixed-left .navbar-nav .nav-item .nav-link.btn-white {
+    color: #B7274B;
+  }
+  body nav.navbar.fixed-left .navbar-nav .nav-item .nav-link.btn-red {
+    color: #FFF;
+  }
+  body nav.navbar.fixed-left.compact {
+    width: 300px;
+    left: -300px;
+  }
+  body nav.navbar.fixed-left.compact .nav-item .nav-link span:not(.material-icons) {
+    visibility: visible;
+    opacity: 1;
+    max-height: 50px;
+  }
+  body nav.navbar.fixed-left.compact .nav-item .nav-link span.material-icons {
+    font-size: 24px;
+    padding: 0;
+  }
 }
 body.modal-open nav.navbar {
   padding-right: 16px !important;
@@ -680,6 +728,10 @@ body.index .container .feed .activityBox .content .text {
   margin-right: auto;
   padding: 5px 0;
 }
+body.index .container .feed .activityBox .content .button {
+  padding: 0;
+  text-align: right;
+}
 body.index .container .feed .activityBox .content .btn.btn-transparent {
   color: #B7274B;
   -webkit-box-shadow: none;
@@ -776,7 +828,12 @@ body.register .container-fluid .pinky {
 body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer {
   padding-top: 140px;
 }
-body.register .container-fluid .leftContainer.login, body.register .container-fluid .leftContainer.forgot {
+@media screen and (max-width: 767px) {
+  body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer {
+    padding-top: 30px;
+  }
+}
+body.register .container-fluid .leftContainer:not(.current) {
   display: none;
 }
 body.register .container-fluid .leftContainer .title {
@@ -810,8 +867,28 @@ body.register .container-fluid .leftContainer .btn-red {
 body.register .container-fluid .leftContainer hr {
   margin: 40px 0;
 }
+@media screen and (max-width: 767px) {
+  body.register .container-fluid .rightContainer {
+    padding-bottom: 30px;
+  }
+}
 body.register .container-fluid .rightContainer .img-logo {
   width: 5rem;
+}
+body.register .container-fluid .rightContainer h4 {
+  font-weight: bold;
+}
+body.register .container-fluid .rightContainer p {
+  color: #747D8C;
+}
+body.register .container-fluid .rightContainer p.number {
+  font-size: 24px;
+  color: #2F3542;
+}
+body.register .container-fluid .rightContainer p.number span {
+  font-size: 62px;
+  font-weight: bold;
+  color: #B7274B;
 }
 body.register .google, body.register .facebook {
   width: 100%;

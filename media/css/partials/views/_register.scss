@@ -7,11 +7,16 @@ body.register {
       min-height: calc(100vh - 33px);
       background: rgba(183, 39, 75, 0.08);
     }
+
     .leftContainer, .rightContainer {
       padding-top: 140px;
+      @media screen and(max-width: 767px) {
+        padding-top: 30px;
+      }
     }
+
     .leftContainer {
-      &.login, &.forgot {
+      &:not(.current) {
         display: none;
       }
 
@@ -28,28 +33,57 @@ body.register {
         padding: 17px 16px;
         height: 50px;
         color: #000;
+
         &:-webkit-autofill {
           animation-name: autofill;
           animation-fill-mode: both;
         }
       }
+
       a {
         color: $color-red;
+
         &:hover {
           color: darken($color-red, 20%);
         }
       }
+
       .btn-red {
         width: 100%;
         display: block;
       }
+
       hr {
         margin: 40px 0;
       }
     }
+
     .rightContainer {
+      @media screen and(max-width: 767px) {
+        padding-bottom: 30px;
+      }
+
       .img-logo {
         width: 5rem;
+      }
+
+      h4 {
+        font-weight: bold;
+      }
+
+      p {
+        color: #747D8C;
+
+        &.number {
+          font-size: 24px;
+          color: #2F3542;
+
+          span {
+            font-size: 62px;
+            font-weight: bold;
+            color: $color-red;
+          }
+        }
       }
     }
   }

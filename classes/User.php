@@ -357,10 +357,17 @@ class User
         return $success;
     }
 
+    /**
+     * @param string|null $hash
+     *
+     * @return static
+     * @throws Exception
+     * @throws UserNotFoundException
+     */
     public static function getByHash(?string $hash = NULL): self
     {
         $hash = filter_var($hash, FILTER_SANITIZE_STRING);
-        $sql  = "SELECT `users_id` FROM `options` WHERE `name` = 'confirm-email' AND `value` = '{$hash}';";
+        $sql  = "SELECT `users_id` FROM `options` WHERE (`name` = 'confirm-email' OR `name` = 'reset-password') AND `value` = '{$hash}';";
         if ($query = fs::$mysqli->query($sql)) {
             $usersID = $query->fetch_row()[0] ?? NULL;
         } else {
@@ -374,7 +381,7 @@ class User
         return new self($usersID);
     }
 
-    public function updatePassword(string $password)
+    public function updatePassword(string $password): bool
     {
         $salt     = rand(1111111111, 9999999999);
         $password = md5($password . $salt);

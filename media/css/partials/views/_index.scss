@@ -41,6 +41,11 @@ body.index .container {
           padding: 5px 0;
         }
 
+        .button {
+          padding: 0;
+          text-align: right;
+        }
+
         .btn.btn-transparent {
           color: $color-red;
           box-shadow: none;

@@ -5,6 +5,7 @@ namespace controllers;
 use Exception;
 use classes\User;
 use classes\Functions as fs;
+use classes\exceptions\UserNotFoundException;
 
 class RegisterController extends PageController
 {
@@ -103,8 +104,8 @@ class RegisterController extends PageController
                                     $data['success']      = true;
                                 } catch (Exception $e) {
                                     fs::log("Error: " . $e->getMessage());
-                                    $data['alert']   = "danger";
-                                    $data['message'] = "Wystąpił błąd podczas tworzenia użytkownika";
+                                    $data['alert']     = "danger";
+                                    $data['message']   = "Wystąpił błąd podczas tworzenia użytkownika";
                                     $data['exception'] = $e->getMessage();
                                 }
                             } else {
@@ -126,6 +127,139 @@ class RegisterController extends PageController
             } else {
                 $data['message'] = "Proszę wypełnić wszystkie pola w formularzu";
                 $data['alert']   = "warning";
+            }
+        }
+
+        return $data;
+    }
+
+    public static function ajax_forgot($get = []): array
+    {
+        $data = ['success' => true];
+
+        if (empty($get['femail'])) {
+            $data = [
+                'success' => false,
+                'alert'   => "warning",
+                'message' => "Proszę podać adres e-mail",
+            ];
+        }
+
+        if ($data['success']) {
+            try {
+                $user = new User($get['femail']);
+                $hash = md5($user->lastName . time());
+                $user->setOption('reset-password', $hash);
+
+                $subject = PAGE_NAME . " - " . "Reset hasła";
+
+                $text = "Aby zresetować hasło na stronie " . PAGE_NAME . " proszę kliknąć w poniższy link";
+                $link = ROOT_URL . "/reset/" . $hash;
+                // Message
+                $message = <<< HTML
+                <html lang="pl">
+                <head>
+                    <title>{$subject}</title>
+                </head>
+                <body>
+                    <p>{$text}</p>
+                    <a href="{$link}">{$link}</a>
+                </body>
+                </html>
+HTML;
+
+                $replyTo = EMAIL;
+                // To send HTML mail, the Content-type header must be set
+                $headers[] = 'MIME-Version: 1.0';
+                $headers[] = 'Content-type: text/html; charset=UTF-8';
+                // Additional headers
+                $headers[] = "To: {$user->email}";
+                $headers[] = "From: " . PAGE_NAME . "<no-reply@przylbicadlamedyka.pl>";
+                $headers[] = "Reply-To: {$replyTo}";
+
+                $data['success'] = mail($user->email, $subject, $message, implode("\r\n", $headers));
+
+                if ($data['success']) {
+                    $data = [
+                        'success' => true,
+                        'alert'   => "success",
+                        'message' => "Na podany adres e-mail został wysłany link do zresetowania hasła",
+                    ];
+                } else {
+                    $data = [
+                        'success' => false,
+                        'alert'   => "warning",
+                        'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+                    ];
+                }
+            } catch (Exception $e) {
+                $data = [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Podany adres e-mail nie został znaleziony. Proszę sprawdzić, czy podano poprawny adres.",
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    public static function ajax_resetPassword($get = []): array
+    {
+        $data = [
+            'success' => true,
+            'alert'   => false,
+            'message' => "",
+        ];
+
+        if (empty($get['password']) || empty('r-password')) {
+            $data = [
+                'success' => false,
+                'alert'   => "warning",
+                'message' => "Proszę uzupełnić wszystkie pola",
+            ];
+        } else {
+            if ($get['password'] !== $get['r-password']) {
+                $data = [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Powtórzone hasło nie jest takie samo",
+                ];
+            }
+        }
+
+        if ($data['success']) {
+            $usersID = $get['user_id'] ?? NULL;
+
+            try {
+                $user = new User($usersID);
+
+                $password = filter_var($get['password'], FILTER_SANITIZE_STRING);
+                if (md5($password . $user->salt) === $user->password) {
+                    $data = [
+                        'success' => false,
+                        'alert'   => "warning",
+                        'message' => "Nowe hasło powinno być inne niż obecne",
+                    ];
+                } else {
+                    if (!$user->updatePassword($password)) {
+                        fs::log("Error: function User->updatePassword returned false for password=[{$password}]");
+                        $data = [
+                            'success' => false,
+                            'alert'   => "warning",
+                            'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+                        ];
+                    } else {
+                        $data['success'] &= $user->setOption('reset-password', NULL);
+                    }
+                }
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+                $data = [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+                ];
             }
         }
 
@@ -280,7 +414,11 @@ class RegisterController extends PageController
 
     public static function ajax_sendConfirm($get = []): array
     {
-        $data = [];
+        $data = [
+            'success' => false,
+            'alert'   => "danger",
+            'message' => "Wystąpił błąd podczas wysyłania wiadomości. Proszę odświeżyć stornę i spróbować ponownie.",
+        ];
         $user = $get['user'] ?? new User;
 
         $hash = md5($user->email . time());
@@ -317,6 +455,10 @@ HTML;
         $headers[] = "Reply-To: {$replyTo}";
 
         $data['success'] = mail($user->email, $subject, $message, implode("\r\n", $headers));
+        if ($data['success']) {
+            $data['alert']   = "success";
+            $data['message'] = "Wiadomość została poprawnie wysłana na adres e-mail";
+        }
 
         return $data;
     }
@@ -329,6 +471,38 @@ HTML;
         }
 
         $this->title = "Zarejestruj się";
+
+        switch($this->view) {
+            case 'login':
+                $this->title = "Zaloguj się";
+                break;
+            case 'forgot':
+                $this->title = "Zapomniałem hasła";
+                break;
+            case 'reset':
+                $this->title = "Reset hasła";
+                break;
+
+        }
+
+        if ($this->view === "reset") {
+
+            $hash = $this->get('hash');
+
+            try {
+                $user = User::getByHash($hash);
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+                self::redirect("/");
+                exit(0);
+            }
+
+            $args['user'] = $user;
+        }
+
+        $args['view'] = $this->view;
+
+        $this->view = "register";
 
         return $this->render($args);
     }

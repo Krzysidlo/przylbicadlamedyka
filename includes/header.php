@@ -1,4 +1,4 @@
-<?php $description = "Opis strony"; ?>
+<?php $description = "Nawet najlepszy hełm potrzebuje przyłbicy"; ?>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -11,15 +11,15 @@
     <meta property="og:description" content="Szukana strona nie istnieje"/>
     <meta property="og:image" content="<?= IMG_URL; ?>/404.jpg"/>
     <meta property="og:image:alt" content="Błąd 404"/>
-    <meta property="og:image:width" content="1920"/>
-    <meta property="og:image:height" content="1200"/>
+    <meta property="og:image:width" content="800"/>
+    <meta property="og:image:height" content="445"/>
 <?php } else { ?>
     <meta property="og:title" content="<?= PAGE_NAME; ?>"/>
     <meta property="og:description" content="<?= $description; ?>"/>
     <meta property="og:image" content="<?= IMG_URL; ?>/background.jpg"/>
     <meta property="og:image:alt" content="<?= PAGE_NAME; ?>"/>
-    <meta property="og:image:width" content="1915"/>
-    <meta property="og:image:height" content="1078"/>
+    <meta property="og:image:width" content="1920"/>
+    <meta property="og:image:height" content="1080"/>
 <?php } ?>
 <meta property="og:url" content="<?= CURRENT_URL; ?>"/>
 <meta property="og:type" content="website"/>
