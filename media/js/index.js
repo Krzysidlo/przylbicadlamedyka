@@ -450,7 +450,8 @@ var index = function () {
                                 additionalComments,
                                 userName,
                                 userTelNo,
-                                userAddress) {
+                                userAddress,
+                                frozen) {
                     var htmlElement = `<div>${userName}</div>
                                        <div>${userTelNo}</div>
                                        <div>${userAddress}</div>
@@ -459,14 +460,16 @@ var index = function () {
                         htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
                     }
                     if (MaterialsNeededNo) {
-                        htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
+                        htmlElement += '<div><b>Zapotrzebowanie na materiały</b><br>' + MaterialsNeededNo + '<br></div>';
                     }
                     if (additionalComments) {
                         htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
-                    htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
-                        'POTWIERDŹ' +
-                        '</button></div>';
+                    if (frozen) {
+                        htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
+                            'POTWIERDŹ' +
+                            '</button></div>';
+                    }
                     var googleMapsLink = generateGoogleMapsLink(lat, lng);
                     htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
                         'MAPS LINK' +
@@ -517,7 +520,8 @@ var index = function () {
                                                     additionalComments,
                                                     userName,
                                                     userTelNo,
-                                                    userAddress),
+                                                    userAddress,
+                                                    frozen),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = userId;
                          console.log("PUPCIA" + marker._myId)
