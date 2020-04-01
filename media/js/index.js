@@ -527,6 +527,7 @@ var index = function () {
 
                 function onMapClick(data) {
                     data = data.requests;
+                    console.log(data)
                     for (var userId in data) {
                         var latLng = data[userId].latLng.split(','),
                             userName = data[userId].name,
@@ -551,6 +552,7 @@ var index = function () {
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = userId;
                     }
+//                    for (var userId in data) {}
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
