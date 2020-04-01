@@ -441,8 +441,8 @@ var index = function () {
                     });
                 }
 
-                var modalBody = `<div class="modal-body">
-
+                var modalBody = `
+                <div class="modal-body">
                     <p class="md-form mb-1">Wybierz akcję</p>
                         <select name="pets" id="driverAction-select">
                             <option value="collect">Odbiór</option>
@@ -450,14 +450,17 @@ var index = function () {
                             <option value="collectDeliver">Odbiór i dostarczenie</option>
                         </select>
 
-                    <p class="readyBascinetsNo-form">Potwierdź odebranie <span></span> przyłbic</p>
+                    <p class="driverBascinetsNo-form">Potwierdź odebranie <span></span> przyłbic</p>
 
-                    <p class="md-form mb-1">Ile materiałów?</p>
-                        <input type="text" id="MaterialsNeededNo">
+                    <p class="driverMaterialsNeededNo-form">Potwierdź odebranie <span></span> przyłbic</p>
 
                     <p class="md-form mb-1">Termin</p>
                         <input type="text" id="driverDate">
-                </div>`
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
+                </div>
+            `
 
                 function createBindPopup(
                                 lat,
