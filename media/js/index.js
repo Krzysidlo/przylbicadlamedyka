@@ -547,8 +547,7 @@ var index = function () {
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = userId;
                     }
-                    hospitalData = data.requests;
-                    console.log(hospitalData);
+                    hospitalData = data.hospitals;
                     for (var hospitalId in hospitalData) {
                         var latLng = hospitalData[hospitalId].latLng.split(','),
                             hospitalName = hospitalData[hospitalId].name;
