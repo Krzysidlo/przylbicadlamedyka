@@ -442,9 +442,9 @@ var index = function () {
                 }
 
                 var modalBody = `
-                <div class="modal-body">
+                <div class>
                     <p class="md-form mb-1">Wybierz akcję</p>
-                        <select name="pets" id="driverAction-select">
+                        <select name="driverSelect" id="driverAction-select">
                             <option value="collect">Odbiór</option>
                             <option value="deliver">Dostarczenie</option>
                             <option value="collectDeliver">Odbiór i dostarczenie</option>
