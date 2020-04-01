@@ -504,7 +504,7 @@ var index = function () {
 //                };
 
 
-                $("#driver-confirmation").on('click', function(e) {
+                $(document).on('click', "#driver-confirmation", function(e) {
                     e.preventDefault();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
                     sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
