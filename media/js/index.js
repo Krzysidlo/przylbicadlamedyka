@@ -454,10 +454,9 @@ var index = function () {
                         <input type="text" id="driverDate">
                 </div>
                 <div>
-                    <button type="button" class="btn btn-primary" id="driver-confirmation"
-                    onclick="driverConfirmation('actionType', 'actionData', 'driverDate')">Potwierdź</button>
+                    <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
                 </div>
-            `
+                `
 
                 function createBindPopup(
                                 lat,
@@ -498,11 +497,21 @@ var index = function () {
                     openPopupUserId = e.popup._source._myId;
                 });
 
-                function driverConfirmation(actionType, actionData, driverDate) {
+//                function driverConfirmation(actionType, actionData, driverDate) {
+//                    //    TODO HANDLE WITH RESPONSE - what if success wht if error
+//                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
+//                    displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
+//                };
+
+
+                $("#driver-confirmation").on('click', function(e) {
+                    e.preventDefault();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
                     sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
                     displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
-                };
+                });
+
+
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
