@@ -450,7 +450,7 @@ var index = function () {
                                 additionalComments,
                                 userName,
                                 userTelNo,
-                                userAddress), {
+                                userAddress) {
                     var htmlElement = `<div>${userName}</div>
                                        <div>${userTelNo}</div>
                                        <div>${userAddress}</div>
