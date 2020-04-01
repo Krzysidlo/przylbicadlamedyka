@@ -548,6 +548,7 @@ var index = function () {
                          marker._myId = userId;
                     }
                     hospitalData = data.requests;
+                    console.log(hospitalData);
                     for (var hospitalId in hospitalData) {
                         var latLng = hospitalData[hospitalId].latLng.split(','),
                             hospitalName = hospitalData[hospitalId].name;
