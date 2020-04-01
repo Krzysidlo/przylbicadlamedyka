@@ -385,8 +385,10 @@ var index = function () {
                         success: function (data) {
                             if (data.success) {
                                 if (method === "resetPassword") {
+                                    showPreloader();
                                     location.href = "/login";
                                 } else if (method !== "forgot") {
+                                    showPreloader();
                                     location.href = "/";
                                 }
                             }
@@ -428,7 +430,11 @@ var index = function () {
                         }
                     },
                     error: function () {
+<<<<<<< HEAD
                         displayToast("Problem z załadowaniem pinezek", "danger");
+=======
+                        // alert("Problem z zaladowaniem pinezek");
+>>>>>>> 98f68ec6c2dbcc3bc85d073b380c93cdc3ed33e8
                     }
                 });
 

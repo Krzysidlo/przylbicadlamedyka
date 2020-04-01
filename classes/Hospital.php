@@ -32,7 +32,7 @@ class Hospital extends Action
         if ($info) {
             $this->id         = intval($info['id']);
             $this->name       = (string)$info['name'];
-            $this->latLng     = trim((string)$info['latLng']);
+            $this->latLng     = trim((string)$info['location']);
             $this->created_at = new DateTime($info['created_at']);
         } else {
             throw new Exception("No hospital info found with id=[{$hospitalID}]");

@@ -4,6 +4,7 @@ namespace controllers;
 
 use Exception;
 use classes\User;
+use classes\Request;
 use classes\Functions as fs;
 use classes\exceptions\UserNotFoundException;
 
@@ -482,7 +483,6 @@ HTML;
             case 'reset':
                 $this->title = "Reset hasła";
                 break;
-
         }
 
         if ($this->view === "reset") {
@@ -500,7 +500,13 @@ HTML;
             $args['user'] = $user;
         }
 
+        try {
+            $delivered = Request::count();
+        } catch (Exception $e) {
+            $delivered = 0;
+        }
         $args['view'] = $this->view;
+        $args['delivered'] = $delivered;
 
         $this->view = "register";
 

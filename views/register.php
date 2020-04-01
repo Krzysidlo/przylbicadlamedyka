@@ -180,11 +180,13 @@
                     <img class="img-logo" src="<?= IMG_URL; ?>/logo.png" alt="logo"> <?= PAGE_NAME; ?>
                 </h1>
                 <h4 class="mt-5 mb-3">O akcji!</h4>
-                <p class="mb-4">Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros.</p>
+                <p class="mb-4">Tworzymy przyłbice dla medyków! Czym one są? Przyłbice to hełmy dla Medyków. Stanowią pierwszą barierę ochronną, która zmniejsza kontakt z wirusami, zarazkami, a także bakteriami. Są tanie i proste do wykonania nawet w domowych warunkach.</p>
                 <h4>Wspólnie stworzyliśmy</h4>
-                <p class="number"><span>3425</span> Przyłbic</p>
+                <p class="number"><span><?= $delivered; ?></span> Przyłbic</p>
                 <h4 class="mb-3">Jak możesz nam pomóc?</h4>
-                <p>Type someLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur et sapien scelerisque, ullamcorper lacus quis, accumsan urna. Sed semper risus non massa mattis iaculis. Nulla ut dolor vitae purus mollis rhoncus eu non eros. </p>
+                <p class="mb-3">Jeśli siedzisz w domu w izolacji (nie w kwarantannie!) i męczy Cię nuda, to ta akcja jest właśnie dla Ciebie - zacznij z nami tworzyć przyłbice! Materiały dostarczymy pod drzwi Twojego mieszkania. Poszukujemy także pomocy w transporcie, więc jeśli masz samochód i chciałbyś pomóc - zapraszamy!</p>
+                <p class="mb-3">Dodatkowo przyjmiemy także materiały niezbędne do produkcji.</p>
+                <p>Masz pytania? Napisz! <a href="mailto:collegium.medicum@samorzad.uj.edu.pl">collegium.medicum@samorzad.uj.edu.pl</a></p>
             </div>
         </div>
     </div>
