@@ -447,7 +447,7 @@ var index = function () {
                                 lng,
                                 readyBascinetsNo,
                                 MaterialsNeededNo,
-                                additional_comments.
+                                additionalComments,
                                 userName,
                                 userTelNo,
                                 userAddress), {
@@ -498,15 +498,15 @@ var index = function () {
 
                 function onMapClick(data) {
                     data = data.requests;
-                    for (var user_id in data) {
-                        var latLng = data[user_id].latLng.split(','),
-                            userName = data[user_id].name,
-                            userTelNo = data[user_id].tel,
-                            userAddress = data[user_id].address,
-                            readyBascinetsNo = data[user_id].bascinet,
-                            MaterialsNeededNo = data[user_id].material,
-                            additional_comments = data[user_id].comments,
-                            frozen = data[user_id].frozen,
+                    for (var userId in data) {
+                        var latLng = data[userId].latLng.split(','),
+                            userName = data[userId].name,
+                            userTelNo = data[userId].tel,
+                            userAddress = data[userId].address,
+                            readyBascinetsNo = data[userId].bascinet,
+                            MaterialsNeededNo = data[userId].material,
+                            additionalComments = data[userId].comments,
+                            frozen = data[userId].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
                             myIcon = createMyIcon(iconUrl),
                             htmlElement = createBindPopup(
@@ -514,12 +514,12 @@ var index = function () {
                                                     latLng[1],
                                                     readyBascinetsNo,
                                                     MaterialsNeededNo,
-                                                    additional_comments.
+                                                    additionalComments,
                                                     userName,
                                                     userTelNo,
                                                     userAddress),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
-                         marker._myId = user_id;
+                         marker._myId = userId;
                          console.log("PUPCIA" + marker._myId)
                     }
                 }
