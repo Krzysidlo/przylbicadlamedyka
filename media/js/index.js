@@ -506,6 +506,7 @@ var index = function () {
 
                 $(document).on('click', "#driver-confirmation", function(e) {
                     e.preventDefault();
+                    var actionType = $('#driverAction-select').val();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
 //                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
                     displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
