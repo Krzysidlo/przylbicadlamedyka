@@ -465,7 +465,7 @@ var index = function () {
                     if (additionalComments) {
                         htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
-                    if (frozen) {
+                    if (!frozen) {
                         htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
                             'POTWIERDŹ' +
                             '</button></div>';
