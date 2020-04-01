@@ -424,11 +424,15 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
+                        displayToast("Problem z zaladowaniem pinezek", "danger");
+                        }
                             onMapClick(data)
                         }
                     },
                     error: function () {
-                        alert("Problem z zaladowaniem pinezek");
+
+                    }
+                        displayToast("Problem z zaladowaniem pinezek", "danger");
                     }
                 });
 
@@ -490,6 +494,9 @@ var index = function () {
                         var latLng = data[user_id].latLng.split(','),
                             readyBascinetsNo = data[user_id].bascinet,
                             MaterialsNeededNo = data[user_id].material,
+                            userName = data[user_id].name,
+                            userTelNo = data[user_id].tel,
+                            userAddress = data[user_id].address,
                             additional_comments = data[user_id].comments,
                             frozen = data[user_id].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
@@ -497,7 +504,6 @@ var index = function () {
                             htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = user_id;
-                         console.log("PUPCIA" + marker._myId)
                     }
                 }
 
@@ -506,13 +512,13 @@ var index = function () {
                         //    GREY
                         return IMG_URL + '/pin_frozen.png';
                     } else if (readyBascinetsNo && MaterialsNeededNo) {
-                        //    GREEN / RED
+                        //    GREEN / ORANGE
                         return IMG_URL + '/pin_both.png';
                     } else if (readyBascinetsNo && !MaterialsNeededNo) {
                         //    GREEN
                         return IMG_URL + '/pin_bascinet.png';
                     } else if (!readyBascinetsNo && MaterialsNeededNo) {
-                        //    RED
+                        //    ORANGE
                         return IMG_URL + '/pin_material.png';
                     }
                 }
