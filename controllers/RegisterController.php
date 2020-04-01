@@ -5,6 +5,7 @@ namespace controllers;
 use Exception;
 use classes\User;
 use classes\Functions as fs;
+use classes\exceptions\UserNotFoundException;
 
 class RegisterController extends PageController
 {
@@ -470,6 +471,38 @@ HTML;
         }
 
         $this->title = "Zarejestruj się";
+
+        switch($this->view) {
+            case 'login':
+                $this->title = "Zaloguj się";
+                break;
+            case 'forgot':
+                $this->title = "Zapomniałem hasła";
+                break;
+            case 'reset':
+                $this->title = "Reset hasła";
+                break;
+
+        }
+
+        if ($this->view === "reset") {
+
+            $hash = $this->get('hash');
+
+            try {
+                $user = User::getByHash($hash);
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+                self::redirect("/");
+                exit(0);
+            }
+
+            $args['user'] = $user;
+        }
+
+        $args['view'] = $this->view;
+
+        $this->view = "register";
 
         return $this->render($args);
     }

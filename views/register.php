@@ -1,7 +1,7 @@
 <section class="container-fluid">
     <div class="row">
         <div class="col-12 order-2 col-md-5 order-md-1 pinky">
-            <div class="col-12 col-xl-7 offset-xl-5 leftContainer register">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer register<?= $view === "register" ? " current" : ""; ?>">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Rejestracja</h3>
@@ -75,7 +75,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-12 col-xl-7 offset-xl-5 leftContainer login">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer login<?= $view === "login" ? " current" : ""; ?>">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Logowanie</h3>
@@ -118,7 +118,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-12 col-xl-7 offset-xl-5 leftContainer forgot">
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer forgot<?= $view === "forgot" ? " current" : ""; ?>">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="title">Odzyskiwanie hasła</h3>
@@ -135,9 +135,41 @@
                                class="form-control validate<?= !empty($invalid['femail']) && $invalid['femail'] ? " invalid" : ""; ?>"
                                title="Wygląda na to, że adres e-mail jest niepoprawny"
                                value="<?= !empty($this->get('femail')) ? $this->get('femail') : ""; ?>">
+                        <a href="#" class="chngView right mt-2" data-view="login">Wróć do logowania</a>
                     </div>
                     <div class="col-12 text-center">
                         <button class="btn btn-red mx-0" type="submit">Wyślij</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-12 col-xl-7 offset-xl-5 leftContainer reset<?= $view === "reset" ? " current" : ""; ?>">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="title">Odzyskiwanie hasła</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <p>Po ustawieniu nowego hasła zostaniesz przekierowany do ekranu logowania.</p>
+                    </div>
+                </div>
+                <form action="/ajax/register/resetPassword" class="row">
+                    <input type="hidden" name="user_id" value="<?= $user->id; ?>">
+                    <div class="form-group col-12">
+                        <input type="password" name="password" pattern=".{8,}" required placeholder="Nowe hasło"
+                               class="form-control validate<?= !empty($invalid['password']) && $invalid['password'] ? " invalid" : ""; ?>"
+                               title="Hasło powinno mieć przynajmniej 8 znaków"
+                               value="<?= !empty($this->get('password')) ? $this->get('password') : ""; ?>">
+                    </div>
+                    <div class="form-group col-12">
+                        <input type="password" name="r-password" pattern=".{8,}" required placeholder="Powtórz hasło"
+                               class="form-control validate<?= !empty($invalid['r-password']) && $invalid['r-password'] ? " invalid" : ""; ?>"
+                               title="Hasło powinno mieć przynajmniej 8 znaków"
+                               value="<?= !empty($this->get('r-password')) ? $this->get('r-password') : ""; ?>">
+                        <a href="#" class="chngView right mt-2" data-view="login">Wróć do logowania</a>
+                    </div>
+                    <div class="col-12 text-center">
+                        <button class="btn btn-red mx-0" type="submit">Zapisz</button>
                     </div>
                 </form>
             </div>

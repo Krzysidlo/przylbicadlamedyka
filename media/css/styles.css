@@ -817,98 +817,98 @@ body.address .container form.settings .load img, body.address .container form.ad
           transform: translate(-50%, -50%);
 }
 
-body.register, body.reset {
+body.register {
   margin: 0;
   min-height: unset;
 }
-body.register .container-fluid .pinky, body.reset .container-fluid .pinky {
+body.register .container-fluid .pinky {
   min-height: calc(100vh - 33px);
   background: rgba(183, 39, 75, 0.08);
 }
-body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer, body.reset .container-fluid .leftContainer, body.reset .container-fluid .rightContainer {
+body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer {
   padding-top: 140px;
 }
 @media screen and (max-width: 767px) {
-  body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer, body.reset .container-fluid .leftContainer, body.reset .container-fluid .rightContainer {
+  body.register .container-fluid .leftContainer, body.register .container-fluid .rightContainer {
     padding-top: 30px;
   }
 }
-body.register .container-fluid .leftContainer.login, body.register .container-fluid .leftContainer.forgot, body.reset .container-fluid .leftContainer.login, body.reset .container-fluid .leftContainer.forgot {
+body.register .container-fluid .leftContainer:not(.current) {
   display: none;
 }
-body.register .container-fluid .leftContainer .title, body.reset .container-fluid .leftContainer .title {
+body.register .container-fluid .leftContainer .title {
   color: #B7274B;
 }
-body.register .container-fluid .leftContainer .title, body.register .container-fluid .leftContainer p, body.register .container-fluid .leftContainer label, body.register .container-fluid .leftContainer a, body.reset .container-fluid .leftContainer .title, body.reset .container-fluid .leftContainer p, body.reset .container-fluid .leftContainer label, body.reset .container-fluid .leftContainer a {
+body.register .container-fluid .leftContainer .title, body.register .container-fluid .leftContainer p, body.register .container-fluid .leftContainer label, body.register .container-fluid .leftContainer a {
   font-weight: 400;
 }
-body.register .container-fluid .leftContainer input, body.reset .container-fluid .leftContainer input {
+body.register .container-fluid .leftContainer input {
   border: none;
   padding: 17px 16px;
   height: 50px;
   color: #000;
 }
-body.register .container-fluid .leftContainer input:-webkit-autofill, body.reset .container-fluid .leftContainer input:-webkit-autofill {
+body.register .container-fluid .leftContainer input:-webkit-autofill {
   -webkit-animation-name: autofill;
           animation-name: autofill;
   -webkit-animation-fill-mode: both;
           animation-fill-mode: both;
 }
-body.register .container-fluid .leftContainer a, body.reset .container-fluid .leftContainer a {
+body.register .container-fluid .leftContainer a {
   color: #B7274B;
 }
-body.register .container-fluid .leftContainer a:hover, body.reset .container-fluid .leftContainer a:hover {
+body.register .container-fluid .leftContainer a:hover {
   color: #631529;
 }
-body.register .container-fluid .leftContainer .btn-red, body.reset .container-fluid .leftContainer .btn-red {
+body.register .container-fluid .leftContainer .btn-red {
   width: 100%;
   display: block;
 }
-body.register .container-fluid .leftContainer hr, body.reset .container-fluid .leftContainer hr {
+body.register .container-fluid .leftContainer hr {
   margin: 40px 0;
 }
 @media screen and (max-width: 767px) {
-  body.register .container-fluid .rightContainer, body.reset .container-fluid .rightContainer {
+  body.register .container-fluid .rightContainer {
     padding-bottom: 30px;
   }
 }
-body.register .container-fluid .rightContainer .img-logo, body.reset .container-fluid .rightContainer .img-logo {
+body.register .container-fluid .rightContainer .img-logo {
   width: 5rem;
 }
-body.register .container-fluid .rightContainer h4, body.reset .container-fluid .rightContainer h4 {
+body.register .container-fluid .rightContainer h4 {
   font-weight: bold;
 }
-body.register .container-fluid .rightContainer p, body.reset .container-fluid .rightContainer p {
+body.register .container-fluid .rightContainer p {
   color: #747D8C;
 }
-body.register .container-fluid .rightContainer p.number, body.reset .container-fluid .rightContainer p.number {
+body.register .container-fluid .rightContainer p.number {
   font-size: 24px;
   color: #2F3542;
 }
-body.register .container-fluid .rightContainer p.number span, body.reset .container-fluid .rightContainer p.number span {
+body.register .container-fluid .rightContainer p.number span {
   font-size: 62px;
   font-weight: bold;
   color: #B7274B;
 }
-body.register .google, body.register .facebook, body.reset .google, body.reset .facebook {
+body.register .google, body.register .facebook {
   width: 100%;
   margin: 0;
   border-radius: 10px;
 }
-body.register .google img, body.register .facebook img, body.reset .google img, body.reset .facebook img {
+body.register .google img, body.register .facebook img {
   max-width: 26px;
   margin: -5px 5px -5px -10px;
 }
-body.register .google, body.reset .google {
+body.register .google {
   color: #000;
 }
-body.register .google:hover, body.reset .google:hover {
+body.register .google:hover {
   color: #000;
 }
-body.register .facebook, body.reset .facebook {
+body.register .facebook {
   color: #FFF;
 }
-body.register .facebook:hover, body.reset .facebook:hover {
+body.register .facebook:hover {
   color: #FFF;
 }
 

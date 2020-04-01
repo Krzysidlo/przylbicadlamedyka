@@ -314,32 +314,55 @@ var index = function () {
                 var $chngView = $register.find("a.chngView"),
                     $forms = $register.find(".leftContainer form");
 
-                $chngView.on('click', function (e) {
-                    e.preventDefault();
+                var changeView = function (view, pushState) {
+                    pushState = pushState | false;
 
-                    var view = $(this).data('view'),
-                        $loginView = $register.find(".leftContainer.login"),
-                        $registerView = $register.find(".leftContainer.register"),
-                        $forgotView = $register.find(".leftContainer.forgot");
+                    if (view === "null") {
+                        view = "register";
+                    }
+
+                    var $loginView = $register.find(".leftContainer.login"),
+                        $forgotView = $register.find(".leftContainer.forgot"),
+                        $currentView = $register.find(".leftContainer:visible"),
+                        $targetView = $register.find(".leftContainer." + view),
+                        pageName = document.title.split(" - ")[1];
+
+                    if (pushState) {
+                        window.history.pushState(view, '', '/' + view);
+                    }
+
                     switch (view) {
                         case 'login':
-                            $registerView.fadeOut(function () {
-                                $loginView.fadeIn();
-                            });
+                            document.title = "Zaloguj się - " + pageName;
                             break;
                         case 'register':
-                            $loginView.fadeOut(function () {
-                                $registerView.fadeIn();
-                            });
+                            document.title = "Zarejestruj się - " + pageName;
                             break;
                         case 'forgot':
+                            document.title = "Zapomniałem hasła - " + pageName;
                             $forgotView.find('input[type="email"]').val($loginView.find('input[type="email"]').val());
-                            $loginView.fadeOut(function () {
+                            $currentView.fadeOut(function () {
                                 $forgotView.fadeIn();
                             });
                             break;
                     }
+
+                    if (view !== "forgot") {
+                        $currentView.fadeOut(function () {
+                            $targetView.fadeIn();
+                        });
+                    }
+                };
+
+                $chngView.on('click', function (e) {
+                    e.preventDefault();
+
+                    changeView($(this).data('view'), true);
                 });
+
+                window.onpopstate = function(event) {
+                    changeView(JSON.stringify(event.state).replace(/['"]+/g, ''));
+                };
 
                 $forms.on('submit', function (e) {
                     e.preventDefault();
@@ -360,8 +383,12 @@ var index = function () {
                             showLoading();
                         },
                         success: function (data) {
-                            if (data.success && method !== "forgot") {
-                                location.href = "/";
+                            if (data.success) {
+                                if (method === "resetPassword") {
+                                    location.href = "/login";
+                                } else if (method !== "forgot") {
+                                    location.href = "/";
+                                }
                             }
 
                             if (data.alert) {
