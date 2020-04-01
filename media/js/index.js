@@ -502,7 +502,7 @@ var index = function () {
                     openPopupUserId = e.popup._source._myId;
                 });
 
-                function driverConfirmation (actionType, actionData, driverDate) {
+                function driverConfirmation(actionType, actionData, driverDate) {
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
                     sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
                     displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
