@@ -12,7 +12,6 @@ class Activity extends Action
     public User     $user;
     public string   $type;
     public ?Request $request;
-    public ?Frozen  $frozen;
     public DateTime $date;
     public string   $message;
 
@@ -38,7 +37,7 @@ class Activity extends Action
             $this->user    = new User($info['users_id']);
             $this->type    = $info['type'];
             $this->date    = new DateTime($info['date']);
-            $this->message = $info['message'];
+            $this->message = base64_decode($info['message']);
 
             if (!empty($info['requests_id'])) {
                 $this->request = new Request($info['requests_id']);
@@ -56,19 +55,18 @@ class Activity extends Action
         }
     }
 
-    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?int $frozenID = NULL): array
+    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL): array
     {
         if ($requestsID === NULL) {
             $requestsID = "NULL";
         }
-        if ($frozenID === NULL) {
-            $frozenID = "NULL";
-        }
         $date = $date->format("Y-m-d H:i:s");
 
-        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenID}, '{$date}', '{$message}');";
+        $message = base64_encode($message);
 
-        if (!!fs::$mysqli->query($sql)) {
+        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, '{$date}', '{$message}');";
+
+        if (fs::$mysqli->query($sql)) {
             $data = [
                 'success' => true,
                 'alert'   => "success",

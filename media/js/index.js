@@ -130,6 +130,34 @@ var index = function () {
                     }
                 });
             });
+
+            $modals.find("input[type='range']").on('input', function () {
+                var $input = $(this),
+                    value = $input.val(),
+                    span = $input.parents('.modal').find("label[for='" + $input.attr('id') + "']");
+
+                $input.parents('.modal').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
+            });
+
+            $modals.find("input").on('keydown', function (e) {
+                if (!isNumberKey(e)) {
+                    e.preventDefault();
+                }
+            });
+
+            function isNumberKey(e) {
+                if (e.shiftKey) {
+                    return false;
+                }
+
+                var keyCode = (e.which) ? e.which : e.keyCode;
+
+                if (keyCode === 8 || keyCode === 13 || ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 96 && keyCode <= 105))) {
+                    return true;
+                }
+
+                return false;
+            }
         })();
 
         (function menu() {
@@ -358,7 +386,7 @@ var index = function () {
                     changeView($(this).data('view'), true);
                 });
 
-                window.onpopstate = function(event) {
+                window.onpopstate = function (event) {
                     changeView(JSON.stringify(event.state).replace(/['"]+/g, ''));
                 };
 
@@ -410,12 +438,22 @@ var index = function () {
         (function map() {
             var $map = $("body.map");
             if ($map.length) {
-                var mymap = L.map('map').setView([50.0647, 19.9450], 25);
+                var mymap = L.map('map').setView([50.0647, 19.9450], 25),
+                    today = new Date(Date.now()),
+                    clickedElement;
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(mymap);
+                $(document).on('mousedown', function (e) {
+                    clickedElement = $(e.target);
+                })
+                    .on('mouseup', function (e) {
+                        clickedElement = null;
+                    });
+
+                today = ("0" + today.getDate()).slice(-2) + "." + ("0" + (today.getMonth() + 1)).slice(-2) + "." + today.getFullYear();
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(mymap);
 
                 $.ajax({
                     url: "/ajax/map/getInfo?ajax=true",
@@ -424,12 +462,35 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
-                            onMapClick(data)
+                            var mapInfo = {requests: {}, hospitals: data.hospitals};
+                            for (let userID in data.requests) {
+                                let requests = data.requests[userID];
+                                for (let i in requests) {
+                                    let request = requests[i];
+
+                                    if (typeof mapInfo.requests[request.user_id] === "undefined") {
+                                        if (request.frozen) {
+                                            request.bascinet = 0;
+                                            request.material = 0;
+
+                                            mapInfo.requests[request.user_id] = request;
+                                        } else {
+                                            mapInfo.requests[request.user_id] = request;
+                                        }
+                                    } else {
+                                        if (!request.frozen) {
+                                            mapInfo.requests[request.user_id].bascinet += request.bascinet;
+                                            mapInfo.requests[request.user_id].material += request.material;
+                                        }
+                                        mapInfo.requests[request.user_id].frozen &= request.frozen;
+                                    }
+                                }
+                            }
+                            onMapLoad(mapInfo);
                         }
                     },
                     error: function () {
-                        displayToast("Problem z załadowaniem pinezek", "danger");
-
+                        displayToast("Wystąpił problem podczas ładowania pinezek", "danger");
                     }
                 });
 
@@ -442,88 +503,176 @@ var index = function () {
                     });
                 }
 
-                var modalBody = `
-                <div class>
-                    <p class="md-form mb-1">Wybierz akcję</p>
-                        <select name="driverSelect" id="driverAction-select">
-                            <option value="bascinet">Odbiór</option>
-                            <option value="material">Dostarczenie</option>
-                            <option value="bascinet,material">Odbiór i dostarczenie</option>
-                        </select>
+                function createBindPopup(info) {
+                    if (info.type === "hospital") {
+                        return `
+                        <div class="popup container pb-4">
+                            <div class="row">
+                                <div class="col-12 title">Informacje</div>
+                            </div>
+                            <div class="row userInfo mt-3">
+                                <div class="col-12 bascinetMaterial">${info.name}</div>
+                            </div>
+                        </div>
+                        `;
+                    } else {
+                        var bascinetInfo = "",
+                            materialInfo = "",
+                            comments = "",
+                            action = "";
 
-                    <p class="md-form mb-1">Dzień</p>
-                        <input type="text" id="driverDateDay">
+                        if (info.bascinetNo) {
+                            bascinetInfo = '<div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span>' + info.bascinetNo + '</span></div>';
+                        }
 
-                    <p class="md-form mb-1">Godzina</p>
-                        <input type="text" id="driverDateHour">
-                </div>
-                <div>
-                    <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
-                </div>
-                `
+                        if (info.materialNo) {
+                            materialInfo = '<div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span>' + info.materialNo + '</span></div>';
+                        }
 
-                function createBindPopup(
-                                lat,
-                                lng,
-                                readyBascinetsNo,
-                                MaterialsNeededNo,
-                                additionalComments,
-                                userName,
-                                userTelNo,
-                                userAddress,
-                                frozen) {
-                    var htmlElement = `<div>${userName}</div>
-                                       <div>${userTelNo}</div>
-                                       <div>${userAddress}</div>
-                    `
-                    if (readyBascinetsNo) {
-                        htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
+                        if (info.comments) {
+                            comments = '<div class="col-12 comments">Uwagi <span>' + info.comments + '</span></div>';
+                        }
+
+                        if (bascinetInfo === "") {
+                            action = `
+                            <input type='hidden' name='action' value='material'>
+                            <label class="md-form mb-1">
+                                Akcja
+                            </label>
+                            <input type='text' value='Dostarczenie' class="form-control" readonly>
+                            `;
+                        } else if (materialInfo === "") {
+                            action = `
+                            <input type='hidden' name='action' value='bascinet'>
+                            <label class="md-form mb-1">
+                                Akcja
+                            </label>
+                            <input type='text' value='Odbiór' class="form-control" readonly>
+                            `;
+                        } else {
+                            action = `
+                            <label for="driverSelect" class="md-form mb-1">Wybierz akcję</label>
+                            <select class="form-control" name="action" id="driverSelect">
+                                <option value="bascinet">Odbiór</option>
+                                <option value="material">Dostarczenie</option>
+                                <option value="both">Odbiór i dostarczenie</option>
+                            </select>
+                            `;
+                        }
+
+                        var googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
+                        googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Maps link</a>`;
+
+                        if (USER_PRV === 2) {
+                            return `
+                            <div class="popup container">
+                                <div class="row">
+                                    <div class="col-12 title">Zaplanuj transport</div>
+                                </div>
+                                <div class="row userInfo mt-3">
+                                    <div class="col-12 name">${info.name}</div>
+                                    <div class="col-12 mt-2 tel">${info.tel}</div>
+                                    <div class="col-12 mt-2 address">${info.address}</div>
+                                    ${bascinetInfo}
+                                    ${materialInfo}
+                                    ${comments}
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="form-group col-12 mb-2">
+                                        ${action}
+                                    </div>
+                                    <div class="form-group col-12 mb-2">
+                                        <label for="driverDate" class="md-form mb-1">Dzień</label>
+                                        <input type="text" id="driverDate" class="form-control" placeholder="Dzień" value="${today}" readonly>
+                                    </div>
+                                    <div class="form-group col-12 mb-3">
+                                        <label for="driverTime" class="md-form mb-1">Godzina</label>
+                                        <input type="time" id="driverTime" class="form-control" placeholder="Godzina" value="">
+                                    </div>
+                                    <div class="form-group col-12 mb-4 text-right">
+                                        ${googleMapsLink}
+                                        <button type="button" class="btn btn-red" id="driver-confirmation">Zapisz</button>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        } else {
+                            return `
+                            <div class="popup container pb-4">
+                                <div class="row">
+                                    <div class="col-12 title">Informacje</div>
+                                </div>
+                                <div class="row userInfo mt-3">
+                                    <div class="col-12 name">${info.name}</div>
+                                    <div class="col-12 mt-2 tel">${info.tel}</div>
+                                    <div class="col-12 mt-2 address">${info.address}</div>
+                                    ${bascinetInfo}
+                                    ${materialInfo}
+                                    ${comments}
+                                </div>
+                            </div>
+                            `;
+                        }
                     }
-                    if (MaterialsNeededNo) {
-                        htmlElement += '<div><b>Zapotrzebowanie na materiały</b><br>' + MaterialsNeededNo + '<br></div>';
-                    }
-                    if (additionalComments) {
-                        htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
-                    }
-                    if (!frozen) {
-                        htmlElement += modalBody
-                    }
-                    var googleMapsLink = generateGoogleMapsLink(lat, lng);
-                    htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
-                        'MAPS LINK' +
-                        '</button></div>';
-                    return htmlElement
                 }
 
                 var openPopupUserId;
 
                 mymap.on('popupopen', function (e) {
                     openPopupUserId = e.popup._source._myId;
+                    $map.find('.popup #driverDate').datepicker({
+                        autoclose: true,
+                        language: "pl",
+                        todayHighlight: true,
+                        todayBtn: "linked",
+                        maxViewMode: 2,
+                        startDate: today,
+                    })
+                        .on('blur', function (e) {
+                            if (clickedElement === null) {
+                                $(this).datepicker('hide');
+                            }
+                        });
+
+                    // $map.find('.popup #driverTime').timepicker({
+                    //     uiLibrary: 'bootstrap4',
+                    //     format: "HH:MM",
+                    //     // footer: false,
+                    //     locale: "pl-pl",
+                    // });
                 });
 
-
-                $(document).on('click', "#driver-confirmation", function(e) {
+                //On request freeze
+                $(document).on('click', "#driver-confirmation", function (e) {
                     e.preventDefault();
-                    var actionType = $('#driverAction-select').val();
-                        driverDateDay = $('#driverDateDay').val();
-                        driverDateHour = $('#driverDateHour').val();
-                    //    TODO HANDLE WITH RESPONSE - what if success wht if error
-//                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
-                    displayToast(`Potwierdziłeś: ${actionType} w dniu ${driverDateDay} o godzinie ${driverDateHour}
-                    i wysyłam do ${openPopupUserId}`, "success");
-                });
+                    var action = $map.find('[name="action"]').val(),
+                        driverDate = $map.find('#driverDate').val(),
+                        driverTime = $map.find('#driverTime').val();
 
+                    if (driverTime === "") {
+                        displayToast("Proszę podać godzinę odbioru/dostarczenia", "warning");
+                        return false;
+                    }
+
+                    freezeRequest(openPopupUserId, action, driverDate, driverTime);
+                });
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
                     return "https://maps.google.com/maps?q=" + lat + "," + lng;
                 }
 
-                function onMapClick(data) {
-                    userData = data.requests;
+                function onMapLoad(data) {
+                    var userData = data.requests,
+                        latLng,
+                        htmlElement,
+                        popup,
+                        marker;
+
                     for (var userId in userData) {
-                        var latLng = userData[userId].latLng.split(','),
-                            userName = userData[userId].name,
+                        latLng = userData[userId].latLng.split(',');
+                        var userName = userData[userId].name,
                             userTelNo = userData[userId].tel,
                             userAddress = userData[userId].address,
                             readyBascinetsNo = userData[userId].bascinet,
@@ -531,31 +680,53 @@ var index = function () {
                             additionalComments = userData[userId].comments,
                             frozen = userData[userId].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
-                            myIcon = createMyIcon(iconUrl),
-                            htmlElement = createBindPopup(
-                                                    latLng[0],
-                                                    latLng[1],
-                                                    readyBascinetsNo,
-                                                    MaterialsNeededNo,
-                                                    additionalComments,
-                                                    userName,
-                                                    userTelNo,
-                                                    userAddress,
-                                                    frozen),
-                            marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
-                         marker._myId = userId;
+                            myIcon = createMyIcon(iconUrl);
+
+                        htmlElement = createBindPopup({
+                            type: "request",
+                            name: userName,
+                            tel: userTelNo,
+                            address: userAddress,
+                            lat: latLng[0],
+                            lng: latLng[1],
+                            bascinetNo: readyBascinetsNo,
+                            materialNo: MaterialsNeededNo,
+                            comments: additionalComments,
+                        });
+
+                        popup = L.popup({
+                            minWidth: 400,
+                            className: 'customPopup',
+                        }).setContent(htmlElement),
+                            marker = L.marker(latLng, {icon: myIcon}).addTo(mymap);
+
+                        if (iconUrl !== IMG_URL + "/pin_frozen.png") {
+                            marker.bindPopup(popup);
+                        }
+
+                        marker._myId = userId;
                     }
-                    hospitalData = data.hospitals;
+
+                    var hospitalData = data.hospitals;
+
                     for (var hospitalId in hospitalData) {
-                        var latLng = hospitalData[hospitalId].latLng.split(','),
-                            hospitalName = hospitalData[hospitalId].name;
-                            hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png"),
-                            htmlElement = `<div>${hospitalName}</div>`;
-                            marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(htmlElement).addTo(mymap);
+                        latLng = hospitalData[hospitalId].latLng.split(',');
+                        var hospitalName = hospitalData[hospitalId].name,
+                            hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png");
+
+                        htmlElement = createBindPopup({
+                            type: "hospital",
+                            name: hospitalName,
+                        });
+
+                        popup = L.popup({
+                            maxWidth: 200,
+                            className: 'customPopup',
+                        }).setContent(htmlElement);
+
+                        marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(popup).addTo(mymap);
                         marker._myId = hospitalId;
                     }
-
-
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
@@ -574,21 +745,29 @@ var index = function () {
                     }
                 }
 
-                function sendConfirmedDriverData(userId, actionType, driverDate) {
+                function freezeRequest(userId, action, date, time) {
                     $.ajax({
-                        url: "/ajax/map/driverConfirmation?ajax=true",
+                        url: "/ajax/map/freezeRequest?ajax=true",
                         type: "POST",
-                        data: {userId: userId, actionType: actionType, date:driverDate},
+                        data: {userId: userId, action: action, date: date, time: time},
                         dataType: "JSON",
+                        beforeSend: function () {
+                            showLoading();
+                        },
                         success: function (data) {
-                            console.log(data);
                             if (data.success) {
+                                location.reload();
+                            }
 
-                            } else {
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
                             }
                         },
                         error: function () {
-                        console.log('error!!!!!')
+                            displayToast("Wystąpił nieznany błąd", "danger");
+                        },
+                        complete: function () {
+                            hideLoading();
                         }
                     });
                 }

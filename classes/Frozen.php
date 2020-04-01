@@ -11,8 +11,6 @@ class Frozen extends Action
     public User     $user;
     public DateTime $date;
     public Request  $request;
-    public ?int     $bascinet;
-    public ?int     $material;
     public bool     $delivered;
     public DateTime $created_at;
 
@@ -35,11 +33,9 @@ class Frozen extends Action
 
         if ($info) {
             $this->id         = intval($info['id']);
-            $this->request    = new Request(intval($info['frozen']));
+            $this->request    = new Request(intval($info['requests_id']));
             $this->user       = new User($info['users_id']);
             $this->date       = new DateTime($info['date']);
-            $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
-            $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->delivered  = (bool)$info['delivered'];
             $this->created_at = new DateTime($info['created_at']);
         } else {
@@ -86,52 +82,94 @@ class Frozen extends Action
         return $return;
     }
 
-    //TODO: Change this function -- currently wrong
-    public static function create(string $usersID, int $requestsID, DateTime $date, ?int $bascinet = NULL, ?int $material = NULL): array
+    public static function create(string $usersID, array $requestsArr, DateTime $date, string $action = "both", string $producerID): array
     {
-        $requestedQuantity = self::checkRequestedQuantity($requestsID);
-        if ($bascinet === NULL && $material === NULL) {
+        if (empty($requestsArr) || (empty($requestsArr['bascinet']) && empty($requestsArr['material']))) {
             return [
                 'success' => false,
-                'alert'   => "warning",
-                'message' => "Proszę podać ilość",
+                'alert'   => "danger",
+                'message' => "Błąd przy zapisie do bazy danych. Proszę odświeżyć stronę i spróbować ponownie.",
             ];
         }
-        if (!$requestedQuantity) {
-            return [
-                'success' => false,
-                'alert'   => "warning",
-                'message' => "Nie można zamrozić tego zamówienia. Proszę odświeżyć stronę i spróbowac ponownie.",
-            ];
-        } else {
-            if ($bascinet !== NULL && $bascinet > $requestedQuantity['bascinet']) {
-                return [
-                    'success' => false,
-                    'alert'   => "warning",
-                    'message' => "Podano zbyt dużą ilość. Można podać maksimum {$requestedQuantity['bascinet']}",
-                ];
+
+//        $requestedQuantity = self::checkRequestedQuantity($requestsArr);
+
+//        if (!$requestedQuantity) {
+//            return [
+//                'success' => false,
+//                'alert'   => "warning",
+//                'message' => "Nie można zamrozić tego zamówienia. Proszę odświeżyć stronę i spróbowac ponownie.",
+//            ];
+//        } else {
+//            if ($requestedQuantity['bascinet'] <= 0 && $requestedQuantity['material'] <= 0) {
+//                return [
+//                    'success' => false,
+//                    'alert'   => "warning",
+//                    'message' => "Wygląda na to, że to zgłoszenie zostało już zamrożone",
+//                ];
+//            } else {
+        $dbDate = $date->format("Y-m-d H:i");
+
+        $success          = true;
+        $bascinetQuantity = 0;
+        $materialQuantity = 0;
+        switch ($action) {
+            case 'bascinet':
+            case 'both':
+                if (!empty($requestsArr['bascinet'])) {
+                    foreach ($requestsArr['bascinet'] as $requestsID) {
+                        if ($query = fs::$mysqli->query("SELECT 1 FROM `frozen` WHERE `requests_id` = {$requestsID};")) {
+                            if (!empty($query->fetch_row()[0])) {
+                                $success = false;
+                                continue;
+                            }
+                        }
+                        $success &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$usersID}', '{$dbDate}', '{$requestsID}');");
+                        if ($success) {
+                            $bascinetQuantity += intval(fs::$mysqli->query("SELECT `bascinet` FROM `requests` WHERE `id` = {$requestsID}")->fetch_row()[0] ?? 0);
+                        }
+                    }
+                }
+            case 'material':
+                if ($action !== "bascinet" && !empty($requestsArr['material'])) {
+                    foreach ($requestsArr['material'] as $requestsID) {
+                        if ($query = fs::$mysqli->query("SELECT 1 FROM `frozen` WHERE `requests_id` = {$requestsID};")) {
+                            if (!empty($query->fetch_row()[0])) {
+                                $success = false;
+                                continue;
+                            }
+                        }
+                        $success &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$usersID}', '{$dbDate}', '{$requestsID}');");
+                        if ($success) {
+                            $materialQuantity += intval(fs::$mysqli->query("SELECT `material` FROM `requests` WHERE `id` = {$requestsID}")->fetch_row()[0] ?? 0);
+                        }
+                    }
+                }
+                break;
+        }
+//            }
+//        }
+
+        if ($success) {
+            try {
+                $activityDate = new DateTime();
+                $user         = new User($usersID);
+                $frozenDate   = $date->format("H:i - d.m.Y");
+                switch ($action) {
+                    case 'bascinet':
+                    case 'both':
+                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic o <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($producerID, $activityDate, $message, "notification");
+                    case 'material':
+                        if ($action !== "bascinet") {
+                            $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału o <span class='delivery'>{$frozenDate}</span>";
+                            Activity::create($producerID, $activityDate, $message, "notification");
+                        }
+                        break;
+                }
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
             }
-            if ($material !== NULL && $material > $requestedQuantity['material']) {
-                return [
-                    'success' => false,
-                    'alert'   => "warning",
-                    'message' => "Podano zbyt dużą ilość. Można podać maksimum {$requestedQuantity['material']}",
-                ];
-            }
-        }
-
-        $date = $date->format("Y-m-d H:i:s");
-
-        if ($bascinet === NULL) {
-            $bascinet = 'NULL';
-        }
-        if ($material === NULL) {
-            $material = 'NULL';
-        }
-
-        $sql = "INSERT INTO `frozen` (`users_id`, `date`, `requests_id`, `bascinet`, `material`) VALUES ('{$usersID}', '{$date}', {$requestsID}, {$bascinet}, {$material});";
-
-        if (!!fs::$mysqli->query($sql)) {
             $data = [
                 'success' => true,
                 'alert'   => "success",
@@ -147,38 +185,76 @@ class Frozen extends Action
         return $data;
     }
 
-    public static function checkRequestedQuantity(int $requestsID)
-    {
-        $frozen = NULL;
-
-        $sql = "SELECT `bascinet`, `material` FROM `frozen` WHERE `requests_id` = {$requestsID};";
-
-        if ($query = fs::$mysqli->query($sql)) {
-            $frozen = $query->fetch_assoc();
-        }
-
-        $sql = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = '{$requestsID}';";
-
-        $requested = NULL;
-        if ($query = fs::$mysqli->query($sql)) {
-            $requested = $query->fetch_assoc();
-        }
-
-        if (!empty($requested)) {
-            if (!empty($frozen)) {
-                $bascinet = $requested['bascinet'] - $frozen['bascinet'];
-                $material = $requested['material'] - $frozen['material'];
-                return [
-                    'bascinet' => $bascinet,
-                    'material' => $material,
-                ];
-            } else {
-                return $requested;
-            }
-        } else {
-            return false;
-        }
-    }
+//    public static function checkRequestedQuantity(array $requestsArr)
+//    {
+//        if (empty($requestsArr) || (empty($requestsArr['bascinet']) && empty($requestsArr['material']))) {
+//            return false;
+//        }
+//
+//        if (!empty($requestsArr['bascinet'])) {
+//            $requestsID = array_shift($requestsArr['bascinet']);
+//            $sql        = "SELECT `bascinet`, `material` FROM `frozen` WHERE `requests_id` = {$requestsID}";
+//            foreach ($requestsArr['bascinet'] as $requestsID) {
+//                $sql .= " OR `requests_id` = {$requestsID}";
+//            }
+//            $sql .= ";";
+//        } else {
+//            $requestsID = array_shift($requestsArr['material']);
+//            $sql        = "SELECT `bascinet`, `material` FROM `frozen` WHERE `requests_id` = {$requestsID}";
+//            foreach ($requestsArr['material'] as $requestsID) {
+//                $sql .= " OR `requests_id` = {$requestsID}";
+//            }
+//            $sql .= ";";
+//        }
+//
+//        $frozen = NULL;
+//        if ($query = fs::$mysqli->query($sql)) {
+//            while ($result = $query->fetch_assoc()) {
+//                isset($frozen['bascinet']) ? $frozen['bascinet'] += intval($result['bascinet']) : $frozen['bascinet'] = intval($result['bascinet']);
+//                isset($frozen['material']) ? $frozen['material'] += intval($result['material']) : $frozen['material'] = intval($result['material']);
+//            }
+//        }
+//
+//
+//        if (!empty($requestsArr['bascinet'])) {
+//            $requestsID = array_shift($requestsArr['bascinet']);
+//            $sql        = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = {$requestsID}";
+//            foreach ($requestsArr['bascinet'] as $requestsID) {
+//                $sql .= " OR `requests_id` = {$requestsID}";
+//            }
+//            $sql .= ";";
+//        } else {
+//            $requestsID = array_shift($requestsArr['material']);
+//            $sql        = "SELECT `bascinet`, `material` FROM `requests` WHERE `id` = {$requestsID}";
+//            foreach ($requestsArr['material'] as $requestsID) {
+//                $sql .= " OR `requests_id` = {$requestsID}";
+//            }
+//            $sql .= ";";
+//        }
+//
+//        $requested = NULL;
+//        if ($query = fs::$mysqli->query($sql)) {
+//            while ($result = $query->fetch_assoc()) {
+//                isset($requested['bascinet']) ? $requested['bascinet'] += intval($result['bascinet']) : $requested['bascinet'] = intval($result['bascinet']);
+//                isset($requested['material']) ? $requested['material'] += intval($result['material']) : $requested['material'] = intval($result['material']);
+//            }
+//        }
+//
+//        if (!empty($requested)) {
+//            if (!empty($frozen)) {
+//                $bascinet = $requested['bascinet'] - $frozen['bascinet'];
+//                $material = $requested['material'] - $frozen['material'];
+//                return [
+//                    'bascinet' => $bascinet,
+//                    'material' => $material,
+//                ];
+//            } else {
+//                return $requested;
+//            }
+//        } else {
+//            return false;
+//        }
+//    }
 
     public static function count(string $usersID, string $type = "delivered"): int
     {
@@ -194,7 +270,7 @@ class Frozen extends Action
 //                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
 //                break;
             case "trips":
-                $sql = "SELECT count(`id`) FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+                $sql = "SELECT count(f.`id`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
                 break;
             default:
                 $sql = "SELECT 0";
@@ -206,5 +282,15 @@ class Frozen extends Action
         }
 
         return $return;
+    }
+
+    public static function findByRequestID(int $requestsID): bool
+    {
+        $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = {$requestsID} AND `deleted` = 0";
+        if ($query = fs::$mysqli->query($sql)) {
+            return $query->fetch_row()[0] ?? false;
+        }
+
+        return false;
     }
 }

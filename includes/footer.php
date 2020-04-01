@@ -26,7 +26,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
           crossorigin=""/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.min.css"
+          integrity="sha256-FAOaXTpl90/K8cXmSdsskbQN3nKYulhCpPbcFzGTWKI=" crossorigin="anonymous"/>
 
     <script type="text/javascript">
         const JS_URL = '<?= JS_URL; ?>',
@@ -36,7 +39,7 @@
 <?php if (LOGGED_IN) { ?>
     <script type="text/javascript">
         const USER_NAME = '<?= USER_NAME; ?>',
-            USER_PRV = '<?= USER_PRV; ?>';
+            USER_PRV = parseInt(<?= USER_PRV; ?>);
     </script>
 <?php } ?>
 
