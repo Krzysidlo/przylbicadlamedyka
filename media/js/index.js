@@ -420,7 +420,7 @@ var index = function () {
                     }).addTo(mymap);
 
                 $.ajax({
-                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
+                    url: "/ajax/map/getInfo?ajax=true",
                     type: "POST",
                     data: "",
                     dataType: "JSON",
@@ -430,7 +430,8 @@ var index = function () {
                         }
                     },
                     error: function () {
-                        // alert("Problem z zaladowaniem pinezek");
+                        displayToast("Problem z załadowaniem pinezek", "danger");
+
                     }
                 });
 
@@ -443,34 +444,77 @@ var index = function () {
                     });
                 }
 
-                function createBindPopup(lat, lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
-                    var htmlElement = "";
+                var modalBody = `
+                <div class>
+                    <p class="md-form mb-1">Wybierz akcję</p>
+                        <select name="driverSelect" id="driverAction-select">
+                            <option value="bascinet">Odbiór</option>
+                            <option value="material">Dostarczenie</option>
+                            <option value="bascinet,material">Odbiór i dostarczenie</option>
+                        </select>
+
+                    <p class="md-form mb-1">Dzień</p>
+                        <input type="text" id="driverDateDay">
+
+                    <p class="md-form mb-1">Godzina</p>
+                        <input type="text" id="driverDateHour">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
+                </div>
+                `
+
+                function createBindPopup(
+                                lat,
+                                lng,
+                                readyBascinetsNo,
+                                MaterialsNeededNo,
+                                additionalComments,
+                                userName,
+                                userTelNo,
+                                userAddress,
+                                frozen) {
+                    var htmlElement = `<div>${userName}</div>
+                                       <div>${userTelNo}</div>
+                                       <div>${userAddress}</div>
+                    `
                     if (readyBascinetsNo) {
                         htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
                     }
                     if (MaterialsNeededNo) {
-                        htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
+                        htmlElement += '<div><b>Zapotrzebowanie na materiały</b><br>' + MaterialsNeededNo + '<br></div>';
                     }
-                    if (additional_comments) {
-                        htmlElement += '<div><b>Komentarz</b><br>' + additional_comments + '<br></div>';
+                    if (additionalComments) {
+                        htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
-                    htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
-                        'POTWIERDŹ' +
-                        '</button></div>';
+                    if (!frozen) {
+                        htmlElement += modalBody
+                    }
                     var googleMapsLink = generateGoogleMapsLink(lat, lng);
                     htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
                         'MAPS LINK' +
                         '</button></div>';
-                    console.log(htmlElement);
                     return htmlElement
                 }
 
-                $("#driver-confirmation").on('click', function () {
-                    $('#modalPopup').modal('hide');
-                    var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
-                    var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo);
+                var openPopupUserId;
+
+                mymap.on('popupopen', function (e) {
+                    openPopupUserId = e.popup._source._myId;
                 });
+
+
+                $(document).on('click', "#driver-confirmation", function(e) {
+                    e.preventDefault();
+                    var actionType = $('#driverAction-select').val();
+                        driverDateDay = $('#driverDateDay').val();
+                        driverDateHour = $('#driverDateHour').val();
+                    //    TODO HANDLE WITH RESPONSE - what if success wht if error
+//                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
+                    displayToast(`Potwierdziłeś: ${actionType} w dniu ${driverDateDay} o godzinie ${driverDateHour}
+                    i wysyłam do ${openPopupUserId}`, "success");
+                });
+
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
@@ -478,18 +522,42 @@ var index = function () {
                 }
 
                 function onMapClick(data) {
-                    data = data.requests;
-                    for (var user_id in data) {
-                        var latLng = data[user_id].latLng.split(','),
-                            readyBascinetsNo = data[user_id].bascinet,
-                            MaterialsNeededNo = data[user_id].material,
-                            additional_comments = data[user_id].comments,
-                            frozen = data[user_id].frozen,
+                    userData = data.requests;
+                    for (var userId in userData) {
+                        var latLng = userData[userId].latLng.split(','),
+                            userName = userData[userId].name,
+                            userTelNo = userData[userId].tel,
+                            userAddress = userData[userId].address,
+                            readyBascinetsNo = userData[userId].bascinet,
+                            MaterialsNeededNo = userData[userId].material,
+                            additionalComments = userData[userId].comments,
+                            frozen = userData[userId].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
                             myIcon = createMyIcon(iconUrl),
-                            htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
+                            htmlElement = createBindPopup(
+                                                    latLng[0],
+                                                    latLng[1],
+                                                    readyBascinetsNo,
+                                                    MaterialsNeededNo,
+                                                    additionalComments,
+                                                    userName,
+                                                    userTelNo,
+                                                    userAddress,
+                                                    frozen),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
+                         marker._myId = userId;
                     }
+                    hospitalData = data.hospitals;
+                    for (var hospitalId in hospitalData) {
+                        var latLng = hospitalData[hospitalId].latLng.split(','),
+                            hospitalName = hospitalData[hospitalId].name;
+                            hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png"),
+                            htmlElement = `<div>hospitalName</div>`;
+                            marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(htmlElement).addTo(mymap);
+                        marker._myId = hospitalId;
+                    }
+
+
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
@@ -508,13 +576,11 @@ var index = function () {
                     }
                 }
 
-                //mymap.on('click', drawPinsOnMap(listOfPins));
-
-                function database_query(lat, lng, user_id) {
+                function sendConfirmedDriverData(userId, actionType, driverDate) {
                     $.ajax({
-                        url: "https://przylbicadlamedyka.pl/ajax/map/savePoint?ajax=true",
+                        url: "/ajax/map/driverConfirmation?ajax=true",
                         type: "POST",
-                        data: {lat: lat, lng: lng, user_id: user_id},
+                        data: {userId: userId, actionType: actionType, date:driverDate},
                         dataType: "JSON",
                         success: function (data) {
                             console.log(data);
@@ -524,7 +590,7 @@ var index = function () {
                             }
                         },
                         error: function () {
-                            console.log('error!!!!!')
+                        console.log('error!!!!!')
                         }
                     });
                 }
