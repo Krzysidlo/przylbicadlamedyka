@@ -507,7 +507,7 @@ var index = function () {
                 $(document).on('click', "#driver-confirmation", function(e) {
                     e.preventDefault();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
-                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
+//                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
                     displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
                 });
 
