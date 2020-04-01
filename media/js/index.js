@@ -442,8 +442,19 @@ var index = function () {
                     });
                 }
 
-                function createBindPopup(lat, lng, readyBascinetsNo, MaterialsNeededNo, additional_comments) {
-                    var htmlElement = "";
+                function createBindPopup(
+                                latLng[0],
+                                latLng[1],
+                                readyBascinetsNo,
+                                MaterialsNeededNo,
+                                additional_comments.
+                                userName,
+                                userTelNo,
+                                userAddress), {
+                    var htmlElement = `<div>${userName}</div>
+                                       <div>${userTelNo}</div>
+                                       <div>${userAddress}</div>
+                    `
                     if (readyBascinetsNo) {
                         htmlElement += '<div><b>Gotowe przyłbice:</b><br>' + readyBascinetsNo + '<br></div>';
                     }
@@ -489,13 +500,24 @@ var index = function () {
                     data = data.requests;
                     for (var user_id in data) {
                         var latLng = data[user_id].latLng.split(','),
+                            userName = data[user_id].name,
+                            userTelNo = data[user_id].tel,
+                            userAddress = data[user_id].address,
                             readyBascinetsNo = data[user_id].bascinet,
                             MaterialsNeededNo = data[user_id].material,
                             additional_comments = data[user_id].comments,
                             frozen = data[user_id].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
                             myIcon = createMyIcon(iconUrl),
-                            htmlElement = createBindPopup(latLng[0], latLng[1], readyBascinetsNo, MaterialsNeededNo, additional_comments),
+                            htmlElement = createBindPopup(
+                                                    latLng[0],
+                                                    latLng[1],
+                                                    readyBascinetsNo,
+                                                    MaterialsNeededNo,
+                                                    additional_comments.
+                                                    userName,
+                                                    userTelNo,
+                                                    userAddress),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = user_id;
                          console.log("PUPCIA" + marker._myId)
