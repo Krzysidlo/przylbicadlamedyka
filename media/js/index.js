@@ -424,12 +424,11 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
-                            displayToast("JESTO OK", "warning");
                             onMapClick(data)
                         }
                     },
                     error: function () {
-                        displayToast("Problem z załadowaniem pinezek", "green");
+                        displayToast("Problem z załadowaniem pinezek", "danger");
                     }
                 });
 
@@ -441,6 +440,24 @@ var index = function () {
                         popupAnchor: [0, -58],
                     });
                 }
+
+                var modalBody = `<div class="modal-body">
+
+                    <p class="md-form mb-1">Wybierz akcję</p>
+                        <select name="pets" id="driverAction-select">
+                            <option value="collect">Odbiór</option>
+                            <option value="deliver">Dostarczenie</option>
+                            <option value="collectDeliver">Odbiór i dostarczenie</option>
+                        </select>
+
+                    <p class="readyBascinetsNo-form">Potwierdź odebranie <span></span> przyłbic</p>
+
+                    <p class="md-form mb-1">Ile materiałów?</p>
+                        <input type="text" id="MaterialsNeededNo">
+
+                    <p class="md-form mb-1">Termin</p>
+                        <input type="text" id="driverDate">
+                </div>`
 
                 function createBindPopup(
                                 lat,
@@ -466,9 +483,7 @@ var index = function () {
                         htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
                     if (!frozen) {
-                        htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
-                            'POTWIERDŹ' +
-                            '</button></div>';
+                        htmlElement += modalBody
                     }
                     var googleMapsLink = generateGoogleMapsLink(lat, lng);
                     htmlElement += '<div><button type="button" class="btn btn-secondary" data-target="#googlemaps" onclick="location.href=\'' + googleMapsLink + '\';">' +
@@ -546,7 +561,7 @@ var index = function () {
 
                 function sendConfirmedDriverData(userId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate) {
                     $.ajax({
-                        url: "https://przylbicadlamedyka.pl/ajax/map/driverConfirmation?ajax=true",
+                        url: "/ajax/map/driverConfirmation?ajax=true",
                         type: "POST",
                         data: {userId: userId, bascinets: driverBascinetsConfirmedNo, materials: driverMaterialsConfirmedNo, date:driverDate},
                         dataType: "JSON",
