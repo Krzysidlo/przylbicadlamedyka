@@ -158,18 +158,30 @@ class Request extends Action
         return $return;
     }
 
-    public static function count(string $usersID, string $type = "delivered"): int
+    public static function count(?string $usersID = NULL, string $type = "delivered"): int
     {
         $return = 0;
         switch ($type) {
             case "material":
-                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
+                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `deleted` = 0";
+                if ($usersID !== NULL) {
+                    $sql .= " AND `users_id` = '{$usersID}'";
+                }
+                $sql .= ";";
                 break;
             case "ready":
-                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
+                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `delivered` = 0 AND `deleted` = 0";
+                if ($usersID !== NULL) {
+                    $sql .= " AND `users_id` = '{$usersID}'";
+                }
+                $sql .= ";";
                 break;
             case "delivered":
-                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
+                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `delivered` = 1 AND `deleted` = 0";
+                if ($usersID !== NULL) {
+                    $sql .= " AND `users_id` = '{$usersID}'";
+                }
+                $sql .= ";";
                 break;
             default:
                 $sql = "SELECT 0";

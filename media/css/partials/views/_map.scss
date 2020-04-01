@@ -3,4 +3,63 @@ body.map {
     width: 100%;
     height: calc(100vh - 97px);
   }
+
+  .legend {
+    position: fixed;
+    bottom: 35px;
+    width: calc(100% - 62px);
+    height: 64px;
+    z-index: 1010;
+    background-color: #FAFAFA;
+    margin-left: 62px;
+    padding: 0 30px;
+    text-align: right;
+
+    .element {
+      display: inline-block;
+      color: #757575;
+      line-height: 64px;
+      .circle {
+        border: 14px solid;
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0 30px 0 10px;
+      }
+
+      &.frozen {
+        .circle {
+          border-color: #BCBCBC;
+        }
+      }
+
+      &.material {
+        .circle {
+          border-color: #FF8F00;
+        }
+      }
+
+      &.bascinet {
+        .circle {
+          border-color: #01AB6E;
+        }
+      }
+
+      &.both {
+        .circle {
+          border-top-color: #01AB6E;
+          border-right-color: #01AB6E;
+          border-left-color: #FF8F00;
+          border-bottom-color: #FF8F00;
+          transform: rotate(45deg);
+        }
+      }
+
+      &.hospital {
+        .circle {
+          border-color: $color-red;
+        }
+      }
+    }
+  }
 }

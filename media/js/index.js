@@ -385,8 +385,10 @@ var index = function () {
                         success: function (data) {
                             if (data.success) {
                                 if (method === "resetPassword") {
+                                    showPreloader();
                                     location.href = "/login";
                                 } else if (method !== "forgot") {
+                                    showPreloader();
                                     location.href = "/";
                                 }
                             }
@@ -428,7 +430,7 @@ var index = function () {
                         }
                     },
                     error: function () {
-                        alert("Problem z zaladowaniem pinezek");
+                        // alert("Problem z zaladowaniem pinezek");
                     }
                 });
 

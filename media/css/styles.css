@@ -665,6 +665,49 @@ body.map #map {
   width: 100%;
   height: calc(100vh - 97px);
 }
+body.map .legend {
+  position: fixed;
+  bottom: 35px;
+  width: calc(100% - 62px);
+  height: 64px;
+  z-index: 1010;
+  background-color: #FAFAFA;
+  margin-left: 62px;
+  padding: 0 30px;
+  text-align: right;
+}
+body.map .legend .element {
+  display: inline-block;
+  color: #757575;
+  line-height: 64px;
+}
+body.map .legend .element .circle {
+  border: 14px solid;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 30px 0 10px;
+}
+body.map .legend .element.frozen .circle {
+  border-color: #BCBCBC;
+}
+body.map .legend .element.material .circle {
+  border-color: #FF8F00;
+}
+body.map .legend .element.bascinet .circle {
+  border-color: #01AB6E;
+}
+body.map .legend .element.both .circle {
+  border-top-color: #01AB6E;
+  border-right-color: #01AB6E;
+  border-left-color: #FF8F00;
+  border-bottom-color: #FF8F00;
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+body.map .legend .element.hospital .circle {
+  border-color: #B7274B;
+}
 
 body.error, body.construction, body.noaccess {
   margin: 0;
