@@ -1,7 +1,8 @@
 <?php
 
-use classes\Functions as fs;
 use classes\User;
+use classes\Functions as fs;
+
 require_once __DIR__ . "/autoload.php";
 
 setlocale(LC_ALL, "pl_PL.utf-8");
@@ -27,18 +28,17 @@ if (!empty($_SESSION['usersID']) && !empty($_SESSION['userName'])) {
     $USER_NAME = $_SESSION['userName'];
 } else {
     if (DB_CONN && !empty(fs::getACookie('usersID')) && (empty($_GET['page']) || $_GET['page'] !== "error")) {
-        if ($query = fs::$mysqli->query("SELECT * FROM `users` WHERE `id` = '" . fs::getACookie('usersID') . "';")) {
-            if (!empty($result = $query->fetch_assoc())) {
-                $LOGGED_IN = true;
-                $USER_ID   = $result['id'];
-                $USER_NAME = $result['name'];
+        try {
+            $loggedUser = new User(fs::getACookie('usersID'));
+            $LOGGED_IN  = true;
+            $USER_ID    = $loggedUser->id;
+            $USER_NAME  = $loggedUser->name;
 
-                /* Prolong the cookie for easy log in */
-                if (!empty(fs::getACookie('easyLogIn'))) {
-                    fs::setACookie('easyLogIn', fs::getACookie('easyLogIn'), 3600 * 24 * 30);
-                }
+            /* Prolong the cookie for easy log in */
+            if (!empty(fs::getACookie('easyLogIn'))) {
+                fs::setACookie('easyLogIn', fs::getACookie('easyLogIn'), 3600 * 24 * 30);
             }
-        }
+        } catch (Exception $e) {}
     }
 }
 if (!DB_CONN) {
@@ -50,7 +50,7 @@ define("LOGGED_IN", $LOGGED_IN);
 define("USER_ID", $USER_ID);
 
 if (LOGGED_IN) {
-    $user = new User;
+    $user      = new User;
     $USER_NAME = $user->name;
 }
 define("USER_NAME", $USER_NAME);
@@ -92,6 +92,10 @@ $noLoggedIn = ['admin', 'confirm', 'error', 'register', 'reset', 'ajax', 'regula
 
 if (!LOGGED_IN && !in_array($view, $noLoggedIn)) {
     $view = 'register';
+}
+
+if (LOGGED_IN && $user->noAddress() && !in_array($view, $noLoggedIn)) {
+    $view = 'address';
 }
 
 if (USER_PRV == User::USER_NO_ACCESS) {

@@ -2,7 +2,7 @@ body.register {
   margin: 0;
   min-height: unset;
 
-  main {
+  .container-fluid {
     .pinky {
       min-height: calc(100vh - 33px);
       background: rgba(183, 39, 75, 0.08);
@@ -27,6 +27,7 @@ body.register {
         border: none;
         padding: 17px 16px;
         height: 50px;
+        color: #000;
         &:-webkit-autofill {
           animation-name: autofill;
           animation-fill-mode: both;
@@ -39,8 +40,6 @@ body.register {
         }
       }
       .btn-red {
-        background-color: $color-red!important;
-        border-radius: 6px;
         width: 100%;
         display: block;
       }
@@ -80,63 +79,6 @@ body.register {
     }
 
     color: #FFF;
-  }
-
-  #logRegTabs {
-    width: calc(100% + 32px);
-    margin: 0 -16px;
-
-    .nav-item {
-      width: 50%;
-      color: $main-color;
-      text-align: center;
-      text-transform: uppercase;
-
-      .nav-link {
-        color: $main-color;
-      }
-
-      &:first-of-type {
-        .nav-link {
-          border-top-left-radius: $border-radius;
-          border-top-right-radius: 0;
-        }
-      }
-
-      &:last-of-type {
-        .nav-link {
-          border-top-left-radius: 0;
-          border-top-right-radius: $border-radius;
-        }
-      }
-    }
-  }
-
-  #tabs {
-    border-bottom-left-radius: $border-radius;
-    border-bottom-right-radius: $border-radius;
-
-    .tab-pane {
-      padding: 30px;
-
-      &#login {
-        .form-check {
-          padding-left: 0;
-          margin-bottom: 10px;
-        }
-      }
-
-      form {
-        [type='submit'] {
-          border-radius: $border-radius;
-        }
-      }
-
-      #addressMap {
-        height: 300px;
-        border-radius: 4px;
-      }
-    }
   }
 }
 

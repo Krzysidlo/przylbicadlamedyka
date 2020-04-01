@@ -1,0 +1,57 @@
+body.index .container {
+  .numbers {
+    .numberBox {
+      .number {
+        font-size: 30px;
+        color: $color-red;
+      }
+
+      .description {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .title {
+    color: $color-red;
+  }
+
+  .feed {
+    .activityBox {
+      background: #FAFAFA;
+      border-left: 5px solid;
+      margin-bottom: 2px;
+
+      &.action {
+        border-color: $color-red;
+      }
+
+      &.notification {
+        border-color: #000;
+      }
+
+      .content {
+        padding: 5px 10px;
+
+        .text {
+          font-size: 16px;
+          color: #757575;
+          display: inline-block;
+          margin-right: auto;
+          padding: 5px 0;
+        }
+
+        .btn.btn-transparent {
+          color: $color-red;
+          box-shadow: none;
+        }
+
+        .date {
+          font-size: 10px;
+          padding: 5px 0;
+          color: #757575;
+        }
+      }
+    }
+  }
+}

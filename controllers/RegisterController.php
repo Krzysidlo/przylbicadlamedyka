@@ -9,7 +9,7 @@ use classes\Functions as fs;
 class RegisterController extends PageController
 {
 
-    public static function ajax_login($get): void
+    public static function ajax_login($get = []): array
     {
         $data = [];
         if (DB_CONN && !empty($get)) {
@@ -61,16 +61,10 @@ class RegisterController extends PageController
             }
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_register($get): void
+    public static function ajax_register($get = []): array
     {
         $data = [];
         if (DB_CONN && !empty($get)) {
@@ -111,6 +105,7 @@ class RegisterController extends PageController
                                     fs::log("Error: " . $e->getMessage());
                                     $data['alert']   = "danger";
                                     $data['message'] = "Wystąpił błąd podczas tworzenia użytkownika";
+                                    $data['exception'] = $e->getMessage();
                                 }
                             } else {
                                 $data['message']          = "Wygląda na to, że adres e-mail jest niepoprawny";
@@ -134,16 +129,10 @@ class RegisterController extends PageController
             }
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
-        }
-
-        exit(0);
+        return $data;
     }
 
-    public static function ajax_chgpswd($get): void
+    public static function ajax_chgpswd($get = []): array
     {
         $data = [];
 
@@ -211,13 +200,125 @@ class RegisterController extends PageController
 
         }
 
-        if (!empty($get['ajax'])) {
-            echo json_encode($data);
-        } else {
-            self::redirect("/");
+        return $data;
+    }
+
+    public static function ajax_address($get = []): array
+    {
+        $invalid = [];
+        foreach ($get as $name => $value) {
+            $invalid[$name] = empty($value);
+        }
+        if (isset($invalid['flat'])) {
+            unset($invalid['flat']);
         }
 
-        exit(0);
+        $data = [
+            'success' => true,
+            'alert'   => "",
+            'message' => "",
+            'invalid' => $invalid,
+        ];
+
+        $priv = $get['type'] ?? USER_PRV;
+        $priv = intval($priv);
+
+        if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
+            $data = [
+                'success' => false,
+                'alert'   => "warning",
+                'message' => "Pole 'Nazwa' nie może być puste",
+                'invalid' => $invalid,
+            ];
+        } else {
+            if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
+                $data = [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Proszę uzupełnić wymagane pola",
+                    'invalid' => $invalid,
+                ];
+            }
+        }
+
+        if ($data['success']) {
+            if (empty($get['pinName'])) {
+                $pinName = NULL;
+            } else {
+                $pinName = filter_var($get['pinName'], FILTER_SANITIZE_STRING);
+            }
+            $city     = filter_var($get['city'], FILTER_SANITIZE_STRING);
+            $street   = filter_var($get['street'], FILTER_SANITIZE_STRING);
+            $building = filter_var($get['building'], FILTER_SANITIZE_NUMBER_INT);
+            if (empty($get['flat'])) {
+                $flat = "NULL";
+            } else {
+                $flat = filter_var($get['flat'], FILTER_SANITIZE_NUMBER_INT);
+            }
+            $location = filter_var($get['location'], FILTER_SANITIZE_STRING);
+
+            try {
+                $user            = new User;
+                $data['success'] = $user->updateAddress($city, $street, $building, $flat, $location, $pinName);
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
+                $data = [
+                    'success' => false,
+                    'alert'   => "danger",
+                    'message' => "Wystąpił nieznany błąd. Proszę spróbować ponownie.",
+                    'invalid' => $invalid,
+                ];
+            }
+
+            if ($data['success']) {
+                $user->setPrivilege($priv);
+            }
+        }
+
+        return $data;
+    }
+
+    public static function ajax_sendConfirm($get = []): array
+    {
+        $data = [];
+        $user = $get['user'] ?? new User;
+
+        $hash = md5($user->email . time());
+        $user->setOption('confirm-email', $hash);
+
+        $subject = PAGE_NAME . " - " . "Potwierdzenie rejestracji";
+
+        $text[] = "Dziękujemy za zarejestrowanie się na stronie " . PAGE_NAME;
+        $text[] = "Proszę kliknąc w poniższy link, aby potwierdzić adres e-mail";
+
+        $link = ROOT_URL . "/confirm/" . $hash;
+
+        $text = implode("<br>", $text);
+        // Message
+        $message = <<< HTML
+        <html lang="pl">
+        <head>
+            <title>{$subject}</title>
+        </head>
+        <body>
+            <p>{$text}</p>
+            <a href="{$link}">{$link}</a>
+        </body>
+        </html>
+HTML;
+
+        $replyTo = EMAIL;
+        // To send HTML mail, the Content-type header must be set
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        // Additional headers
+        $headers[] = "To: {$user->email}";
+        $headers[] = "From: " . PAGE_NAME . "<no-reply@przylbicadlamedyka.pl>";
+        $headers[] = "Reply-To: {$replyTo}";
+
+        $data['success'] = mail($user->email, $subject, $message, implode("\r\n", $headers));
+
+        return $data;
     }
 
     public function content(array $args = [])

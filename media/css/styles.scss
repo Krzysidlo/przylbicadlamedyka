@@ -1,15 +1,16 @@
 @import 'partials/variables/colors_light';
 @import 'partials/variables/var';
 
+@import 'partials/menu';
 @import 'partials/main';
+@import 'partials/footer';
 
 @import 'partials/mdb';
 
-@import 'partials/footer';
-
-@import 'partials/views/maps';
+@import 'partials/views/map';
 @import 'partials/views/error';
 @import 'partials/views/index';
+@import 'partials/views/address';
 @import 'partials/views/register';
 @import 'partials/views/settings';
 @import 'partials/views/privileges';

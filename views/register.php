@@ -101,7 +101,7 @@
                         <a href="#" class="chngView right mt-2" data-view="forgot">Zapomniałem hasła</a>
                     </div>
                     <div class="form-check mt-2 mb-3 col-12">
-                        <input type="checkbox" class="form-check-input" name="lremember" required
+                        <input type="checkbox" class="form-check-input" name="lremember"
                                id="lremember" <?= !empty($this->get('lremember')) ? "checked" : ""; ?>>
                         <label for="lremember" class="form-check-label">
                             Pozostań zalogowany

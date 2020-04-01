@@ -1,0 +1,110 @@
+body, h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+}
+body {
+  nav {
+    &.navbar {
+      font-weight: normal;
+
+      &.fixed-top {
+        min-height: 62px;
+
+        &.bg-red {
+          background-color: $color-red;
+        }
+
+        .navbar-brand {
+          font-size: 16px;
+        }
+
+        .btn {
+          &.btn-outline-white {
+            border: solid 1px #FFF !important;
+          }
+        }
+      }
+
+      &.fixed-left {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 240px;
+        background-color: #FAFAFA;
+        z-index: 1020;
+        transition: width .25s ease-in-out;
+
+        .navbar-nav {
+          position: absolute;
+          top: 80px;
+
+          &.navbar-bottom {
+            top: unset;
+            bottom: 10px;
+          }
+        }
+
+        .nav-item {
+          .nav-link {
+            color: #757575;
+
+            &:hover {
+              color: $color-red;
+            }
+
+            span {
+              vertical-align: bottom;
+              margin-right: 15px;
+              transition: opacity .15s ease-in-out .15s, max-height 0s linear .25s;
+              display: block;
+              float: left;
+              max-height: 50px;
+
+              &.material-icons {
+                transition: font-size .25s ease-in-out, padding .25s ease-in-out;
+              }
+            }
+          }
+
+          &.active {
+            .nav-link {
+              color: $color-red;
+            }
+          }
+        }
+
+        &.small {
+          width: 62px;
+
+          .nav-item {
+            .nav-link {
+              span:not(.material-icons) {
+                visibility: hidden;
+                height: 0;
+                opacity: 0;
+                max-height: 0;
+              }
+
+              span.material-icons {
+                font-size: 30px;
+                padding: 5px 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &.modal-open {
+    nav {
+      &.navbar {
+        padding-right: 16px !important;
+
+        .navbar-nav.mr-right {
+          padding-right: 17px;
+        }
+      }
+    }
+  }
+}

@@ -2,8 +2,10 @@
 
 namespace classes;
 
+use stdClass;
 use Exception;
 use classes\Functions as fs;
+use controllers\RegisterController;
 use classes\exceptions\UserNotFoundException;
 
 class User
@@ -22,12 +24,12 @@ class User
     public string  $email     = "";
     public string  $tel       = "";
     public string  $login     = "";
-    public ?string $address   = NULL;
     public ?string $password  = NULL;
     public ?string $salt      = NULL;
 
-    private array $options   = [];
-    private ?int  $privilege = NULL;
+    private array   $options   = [];
+    private ?int    $privilege = NULL;
+    private ?stdClass $address   = NULL;
 
     /**
      * User constructor.
@@ -95,12 +97,12 @@ class User
             $this->firstName = $user['first_name'];
             $this->lastName  = $user['last_name'];
             $this->tel       = $user['tel'];
-            $this->address   = $user['address'];
             $this->login     = $user['login'];
             $this->email     = $user['email'];
             $this->password  = $user['password'];
             $this->salt      = $user['salt'];
             $this->name      = $this->firstName . " " . $this->lastName;
+            $this->address   = $this->getAddress();
         } else {
             throw new Exception("No user info found with id=[{$this->id}]");
         }
@@ -113,7 +115,7 @@ class User
     {
         $output = false;
 
-        $sql = "SELECT `first_name`, `last_name`, `tel`, `address`, `email`, `password`, `salt` FROM `users` WHERE `id` = '{$this->id}';";
+        $sql = "SELECT `first_name`, `last_name`, `tel`, `email`, `password`, `salt` FROM `users` WHERE `id` = '{$this->id}';";
         if ($query = fs::$mysqli->query($sql)) {
             $output = $query->fetch_assoc();
             if ($changedName = $this->getOption('changed_name')) {
@@ -183,9 +185,7 @@ class User
         try {
             new self($email);
             return false;
-        } catch (Exception $e) {
-            fs::log("No user with email=[{$email}]. Creating new user.");
-        }
+        } catch (Exception $e) {}
 
         $user = self::createUser($email, $firstName, $lastName, $tel, $password);
 
@@ -198,42 +198,7 @@ class User
         $mailMessage .= "Hasło: [{$password}]\n\n";
         @mail(EMAIL, PAGE_NAME . ' - pozytywna rejestracja', $mailMessage);
 
-        $user->sendNotification("Aby uzyskać pełny dostęp do storny proszę potwierdzić adres e-mail", NULL);
-
-        $hash = md5($email . time() . rand(1000, 9999));
-        $user->setOption('confirm-email', $hash);
-
-        $subject = PAGE_NAME . " - " . "Potwierdzenie rejestracji";
-
-        $text[] = "Dziękujemy za zarejestrowanie się na stronie " . PAGE_NAME;
-        $text[] = "Proszę kliknąc w poniższy link, aby potwierdzić adres e-mail";
-
-        $link = ROOT_URL . "/confirm/" . $hash;
-
-        $text = implode("<br>", $text);
-        // Message
-        $message = <<< HTML
-        <html lang="pl">
-        <head>
-            <title>{$subject}</title>
-        </head>
-        <body>
-            <p>{$text}</p>
-            <a href="{$link}">{$link}</a>
-        </body>
-        </html>
-HTML;
-
-        $replyTo = EMAIL;
-        // To send HTML mail, the Content-type header must be set
-        $headers[] = 'MIME-Version: 1.0';
-        $headers[] = 'Content-type: text/html; charset=UTF-8';
-        // Additional headers
-        $headers[] = "To: {$email}";
-        $headers[] = "From: " . PAGE_NAME . "<no-reply@cotyp.pl>";
-        $headers[] = "Reply-To: {$replyTo}";
-
-        mail($email, $subject, $message, implode("\r\n", $headers));
+        RegisterController::ajax_sendConfirm(['user' => $user]);
 
         $browserInfo = get_browser(NULL, true);
         $platform    = $browserInfo['platform'] ?? "";
@@ -265,7 +230,7 @@ HTML;
      */
     private static function createUser(string $email, string $firstName, string $lastName, string $tel, string $password)
     {
-        $usersID  = md5(time());
+        $usersID  = md5(time() . rand(1000, 9999));
         $salt     = rand(1111111111, 9999999999);
         $password = md5($password . $salt);
         $sql      = "INSERT INTO `users` (`id`, `email`, `first_name`, `last_name`, `tel`, `password`, `salt`) VALUES ('{$usersID}', '{$email}', '{$firstName}', '{$lastName}', '{$tel}', '{$password}', '{$salt}');";
@@ -420,9 +385,9 @@ HTML;
         return (fs::$mysqli->affected_rows > 0);
     }
 
-    public function updateInfo(string $firstName, string $lastName, string $address, string $tel, ?string $nPassword = NULL)
+    public function updateInfo(string $firstName, string $lastName, string $tel, ?string $nPassword = NULL)
     {
-        $sql = "UPDATE `users` SET `first_name` = '{$firstName}', `last_name` = '{$lastName}', `address` = '{$address}', `tel` = '{$tel}'";
+        $sql = "UPDATE `users` SET `first_name` = '{$firstName}', `last_name` = '{$lastName}', `tel` = '{$tel}'";
 
         if ($nPassword !== NULL) {
             $salt     = rand(1111111111, 9999999999);
@@ -433,6 +398,33 @@ HTML;
         $sql .= " WHERE `id` = '{$this->id}';";
 
         return !!fs::$mysqli->query($sql);
+    }
+
+    public function updateAddress(string $city, string $street, int $building, $flat, string $location, ?string $pinName = NULL): bool
+    {
+        if ($pinName === NULL) {
+            $pinName = "NULL";
+        } else {
+            $pinName = "'{$pinName}'";
+        }
+        $sql = <<< SQL
+        INSERT INTO `address` (`users_id`, `pin_name`, `city`, `street`, `building`, `flat`, `location`) VALUES
+            ('{$this->id}', {$pinName}, '{$city}', '{$street}', {$building}, {$flat}, '{$location}')
+            ON DUPLICATE KEY UPDATE `pin_name` = {$pinName}, `city` = '{$city}', `street` = '{$street}', `building` = {$building}, `flat` = {$flat}, `location` = '{$location}';
+SQL;
+        return !!fs::$mysqli->query($sql);
+    }
+
+    public function getAddress()
+    {
+        if (empty($this->address)) {
+            $sql = "SELECT `pin_name`, `city`, `street`, `building`, `flat`, `location` FROM `address` WHERE `users_id` = '{$this->id}';";
+            if ($query = fs::$mysqli->query($sql)) {
+                $this->address = $query->fetch_object();
+            }
+        }
+
+        return $this->address;
     }
 
     public function noAddress(): bool
