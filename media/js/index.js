@@ -459,7 +459,7 @@ var index = function () {
                 </div>
                 <div>
                     <button type="button" class="btn btn-primary" id="driver-confirmation"
-                    onclick="driverConfirmation ('actionType', 'actionData', 'driverDate')">Potwierdź</button>
+                    onclick="driverConfirmation('actionType', 'actionData', 'driverDate')">Potwierdź</button>
                 </div>
             `
 
@@ -500,7 +500,6 @@ var index = function () {
 
                 mymap.on('popupopen', function (e) {
                     openPopupUserId = e.popup._source._myId;
-                    console.log(openPopupUserId)
                 });
 
                 function driverConfirmation (actionType, actionData, driverDate) {
