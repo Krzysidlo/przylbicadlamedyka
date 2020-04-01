@@ -458,7 +458,8 @@ var index = function () {
                         <input type="text" id="driverDate">
                 </div>
                 <div>
-                    <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
+                    <button type="button" class="btn btn-primary" id="driver-confirmation"
+                    onclick="driverConfirmation ('actionType', 'actionData', 'driverDate')">Potwierdź</button>
                 </div>
             `
 
@@ -502,15 +503,11 @@ var index = function () {
                     console.log(openPopupUserId)
                 });
 
-                $("#driver-confirmation").on('click', function () {
-                    $('#modalPopup').modal('hide');
-                    var driverBascinetsConfirmedNo = $("#readyBascinetsNo").val();
-                    var driverMaterialsConfirmedNo = $("#MaterialsNeededNo").val();
-                    var driverDate = $("#driverDate").val();
+                function driverConfirmation (actionType, actionData, driverDate) {
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
-                    sendConfirmedDriverData(openPopupUserId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate)
-                    alert('Potwierdziłeś: Przylbice: ' + driverBascinetsConfirmedNo + ' Materialy: ' + driverMaterialsConfirmedNo + 'i wysylam do:' + openPopupUserId);
-                });
+                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
+                    displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
+                };
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
