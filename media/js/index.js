@@ -450,10 +450,6 @@ var index = function () {
                             <option value="collectDeliver">Odbiór i dostarczenie</option>
                         </select>
 
-                    <p class="driverBascinetsNo-form">Potwierdź odebranie <span></span> przyłbic</p>
-
-                    <p class="driverMaterialsNeededNo-form">Potwierdź odebranie <span></span> przyłbic</p>
-
                     <p class="md-form mb-1">Termin</p>
                         <input type="text" id="driverDate">
                 </div>
@@ -538,7 +534,6 @@ var index = function () {
                                                     frozen),
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = userId;
-                         console.log("PUPCIA" + marker._myId)
                     }
                 }
 
@@ -558,11 +553,11 @@ var index = function () {
                     }
                 }
 
-                function sendConfirmedDriverData(userId, driverBascinetsConfirmedNo, driverMaterialsConfirmedNo, driverDate) {
+                function sendConfirmedDriverData(userId, actionType, driverDate) {
                     $.ajax({
                         url: "/ajax/map/driverConfirmation?ajax=true",
                         type: "POST",
-                        data: {userId: userId, bascinets: driverBascinetsConfirmedNo, materials: driverMaterialsConfirmedNo, date:driverDate},
+                        data: {userId: userId, actionType: actionType, date:driverDate},
                         dataType: "JSON",
                         success: function (data) {
                             console.log(data);
