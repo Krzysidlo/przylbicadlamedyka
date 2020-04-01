@@ -550,7 +550,7 @@ var index = function () {
                     hospitalData = data.requests;
                     for (var hospitalId in hospitalData) {
                         var latLng = hospitalData[hospitalId].latLng.split(','),
-                            hospitalName = hospitalData[hospitalId].name,
+                            hospitalName = hospitalData[hospitalId].name;
                         console.log(hospitalName);
                     }
 
