@@ -429,7 +429,7 @@ var index = function () {
                         }
                     },
                     error: function () {
-                        displayToast("Problem z załadowaniem pinezek", "warning");
+                        displayToast("Problem z załadowaniem pinezek", "green");
                     }
                 });
 
