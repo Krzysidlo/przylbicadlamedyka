@@ -8,7 +8,6 @@ body.map {
     position: fixed;
     bottom: 35px;
     width: calc(100% - 62px);
-    height: 64px;
     z-index: 1010;
     background-color: #FAFAFA;
     margin-left: 62px;
@@ -18,7 +17,8 @@ body.map {
     .element {
       display: inline-block;
       color: #757575;
-      line-height: 64px;
+      line-height: 66px;
+
       .circle {
         border: 14px solid;
         border-radius: 50%;
@@ -58,6 +58,22 @@ body.map {
       &.hospital {
         .circle {
           border-color: $color-red;
+        }
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      margin: 0;
+      padding: 5px 0;
+      width: 100%;
+
+      .element {
+        font-size: 12px;
+        line-height: 12px;
+
+        .circle {
+          border: 8px solid;
+          margin: 0 15px 0 5px;
         }
       }
     }

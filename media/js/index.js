@@ -155,8 +155,6 @@ var index = function () {
                             var $target = $(e.target);
                             if (!$target.hasClass("fixed-left") && !$target.parents(".fixed-left").length && !$target.hasClass("navbar-toggler") && $target.parents(".navbar-toggler").length <= 0) {
                                 $navbarLeft.addClass("compact");
-                            } else {
-                                console.log($target);
                             }
                         }
                     });
@@ -430,7 +428,7 @@ var index = function () {
                         }
                     },
                     error: function () {
-                        // alert("Problem z zaladowaniem pinezek");
+                        alert("Problem z zaladowaniem pinezek");
                     }
                 });
 

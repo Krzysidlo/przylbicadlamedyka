@@ -669,7 +669,6 @@ body.map .legend {
   position: fixed;
   bottom: 35px;
   width: calc(100% - 62px);
-  height: 64px;
   z-index: 1010;
   background-color: #FAFAFA;
   margin-left: 62px;
@@ -679,7 +678,7 @@ body.map .legend {
 body.map .legend .element {
   display: inline-block;
   color: #757575;
-  line-height: 64px;
+  line-height: 66px;
 }
 body.map .legend .element .circle {
   border: 14px solid;
@@ -707,6 +706,21 @@ body.map .legend .element.both .circle {
 }
 body.map .legend .element.hospital .circle {
   border-color: #B7274B;
+}
+@media screen and (max-width: 767px) {
+  body.map .legend {
+    margin: 0;
+    padding: 5px 0;
+    width: 100%;
+  }
+  body.map .legend .element {
+    font-size: 12px;
+    line-height: 12px;
+  }
+  body.map .legend .element .circle {
+    border: 8px solid;
+    margin: 0 15px 0 5px;
+  }
 }
 
 body.error, body.construction, body.noaccess {
