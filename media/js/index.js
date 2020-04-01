@@ -462,7 +462,7 @@ var index = function () {
                         htmlElement += '<div><b>Potrzebne materiały</b><br>' + MaterialsNeededNo + '<br></div>';
                     }
                     if (additional_comments) {
-                        htmlElement += '<div><b>Komentarz</b><br>' + additional_comments + '<br></div>';
+                        htmlElement += '<div><b>Komentarz</b><br>' + additionalComments + '<br></div>';
                     }
                     htmlElement += '<div><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPopup">' +
                         'POTWIERDŹ' +
