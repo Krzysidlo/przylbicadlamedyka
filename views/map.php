@@ -10,7 +10,6 @@
 
                 <p class="md-form mb-1">Wybierz akcję</p>
                     <select name="pets" id="driverAction-select">
-                        <option value="">--Odbiór / Dostarczenie--</option>
                         <option value="collect">Odbiór</option>
                         <option value="deliver">Dostarczenie</option>
                         <option value="collectDeliver">Odbiór i dostarczenie</option>
