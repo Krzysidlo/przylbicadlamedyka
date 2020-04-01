@@ -552,7 +552,7 @@ var index = function () {
                         var latLng = hospitalData[hospitalId].latLng.split(','),
                             hospitalName = hospitalData[hospitalId].name;
                             hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png"),
-                            htmlElement = `<div>hospitalName</div>`;
+                            htmlElement = `<div>${hospitalName}</div>`;
                             marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(htmlElement).addTo(mymap);
                         marker._myId = hospitalId;
                     }
