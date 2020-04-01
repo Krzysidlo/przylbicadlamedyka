@@ -503,12 +503,6 @@ var index = function () {
                     openPopupUserId = e.popup._source._myId;
                 });
 
-//                function driverConfirmation(actionType, actionData, driverDate) {
-//                    //    TODO HANDLE WITH RESPONSE - what if success wht if error
-//                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
-//                    displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
-//                };
-
 
                 $(document).on('click', "#driver-confirmation", function(e) {
                     e.preventDefault();
@@ -522,24 +516,22 @@ var index = function () {
                 });
 
 
-
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
                     return "https://maps.google.com/maps?q=" + lat + "," + lng;
                 }
 
                 function onMapClick(data) {
-                    console.log(data)
-                    data = data.requests;
-                    for (var userId in data) {
-                        var latLng = data[userId].latLng.split(','),
-                            userName = data[userId].name,
-                            userTelNo = data[userId].tel,
-                            userAddress = data[userId].address,
-                            readyBascinetsNo = data[userId].bascinet,
-                            MaterialsNeededNo = data[userId].material,
-                            additionalComments = data[userId].comments,
-                            frozen = data[userId].frozen,
+                    userData = data.requests;
+                    for (var userId in userData) {
+                        var latLng = userData[userId].latLng.split(','),
+                            userName = userData[userId].name,
+                            userTelNo = userData[userId].tel,
+                            userAddress = userData[userId].address,
+                            readyBascinetsNo = userData[userId].bascinet,
+                            MaterialsNeededNo = userData[userId].material,
+                            additionalComments = userData[userId].comments,
+                            frozen = userData[userId].frozen,
                             iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
                             myIcon = createMyIcon(iconUrl),
                             htmlElement = createBindPopup(
@@ -555,7 +547,14 @@ var index = function () {
                             marker = L.marker(latLng, {icon: myIcon}).bindPopup(htmlElement).addTo(mymap);
                          marker._myId = userId;
                     }
-//                    for (var userId in data) {}
+                    hospitalData = data.requests;
+                    for (var hospitalId in hospitalData) {
+                        var latLng = hospitalData[hospitalId].latLng.split(','),
+                            hospitalName = hospitalData[hospitalId].name,
+                            console.log(hospitalName);
+                    }
+
+
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
