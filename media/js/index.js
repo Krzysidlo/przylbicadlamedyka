@@ -551,7 +551,7 @@ var index = function () {
                     for (var hospitalId in hospitalData) {
                         var latLng = hospitalData[hospitalId].latLng.split(','),
                             hospitalName = hospitalData[hospitalId].name,
-                            console.log(hospitalName);
+                        console.log(hospitalName);
                     }
 
 
