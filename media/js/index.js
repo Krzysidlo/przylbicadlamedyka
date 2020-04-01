@@ -418,7 +418,7 @@ var index = function () {
                     }).addTo(mymap);
 
                 $.ajax({
-                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
+                    url: "/ajax/map/getInfo?ajax=true",
                     type: "POST",
                     data: "",
                     dataType: "JSON",

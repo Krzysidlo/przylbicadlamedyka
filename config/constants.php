@@ -7,12 +7,9 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
-<<<<<<< HEAD
+
 //TODO: Zmienić na false
 define('DEV_MODE', true);
-=======
-define('DEV_MODE', false);
->>>>>>> 673f27a23d2633808d85bb57a6edbd5768575d4a
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
