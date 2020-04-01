@@ -57,7 +57,7 @@ class MapController extends PageController
                         'comments' => ($request->comments !== NULL ? (string)$request->comments . ", " : ""),
                         'frozen'   => !!$request->frozen,
                     ];
-                }
+                }git
             }
 
             foreach ($data['requests'] as &$dataRequest) {
