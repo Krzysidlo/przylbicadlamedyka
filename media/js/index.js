@@ -443,8 +443,8 @@ var index = function () {
                 }
 
                 function createBindPopup(
-                                latLng[0],
-                                latLng[1],
+                                lat,
+                                lng,
                                 readyBascinetsNo,
                                 MaterialsNeededNo,
                                 additional_comments.
