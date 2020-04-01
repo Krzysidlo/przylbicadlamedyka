@@ -526,8 +526,8 @@ var index = function () {
                 }
 
                 function onMapClick(data) {
-                    data = data.requests;
                     console.log(data)
+                    data = data.requests;
                     for (var userId in data) {
                         var latLng = data[userId].latLng.split(','),
                             userName = data[userId].name,
