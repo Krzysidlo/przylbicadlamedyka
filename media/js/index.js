@@ -445,13 +445,16 @@ var index = function () {
                 <div class>
                     <p class="md-form mb-1">Wybierz akcję</p>
                         <select name="driverSelect" id="driverAction-select">
-                            <option value="collect">Odbiór</option>
-                            <option value="deliver">Dostarczenie</option>
-                            <option value="collectDeliver">Odbiór i dostarczenie</option>
+                            <option value="bascinet">Odbiór</option>
+                            <option value="material">Dostarczenie</option>
+                            <option value="bascinet,material">Odbiór i dostarczenie</option>
                         </select>
 
-                    <p class="md-form mb-1">Termin</p>
-                        <input type="text" id="driverDate">
+                    <p class="md-form mb-1">Dzień</p>
+                        <input type="text" id="driverDateDay">
+
+                    <p class="md-form mb-1">Godzina</p>
+                        <input type="text" id="driverDateHour">
                 </div>
                 <div>
                     <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
@@ -507,9 +510,12 @@ var index = function () {
                 $(document).on('click', "#driver-confirmation", function(e) {
                     e.preventDefault();
                     var actionType = $('#driverAction-select').val();
+                        driverDateDay = $('#driverDateDay').val();
+                        driverDateHour = $('#driverDateHour').val();
                     //    TODO HANDLE WITH RESPONSE - what if success wht if error
 //                    sendConfirmedDriverData(openPopupUserId, actionType, driverDate)
-                    displayToast('Potwierdziłeś: ' + actionType + 'i wysylam do:' + openPopupUserId);
+                    displayToast(`Potwierdziłeś: ${actionType} w dniu ${driverDateDay} o godzinie ${driverDateHour}
+                    i wysyłam do ${openPopupUserId}`);
                 });
 
 
