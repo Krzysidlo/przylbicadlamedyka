@@ -457,7 +457,7 @@ var index = function () {
                     <p class="md-form mb-1">Termin</p>
                         <input type="text" id="driverDate">
                 </div>
-                <div class="modal-footer">
+                <div>
                     <button type="button" class="btn btn-primary" id="driver-confirmation">Potwierdź</button>
                 </div>
             `
