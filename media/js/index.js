@@ -418,17 +418,18 @@ var index = function () {
                     }).addTo(mymap);
 
                 $.ajax({
-                    url: "https://przylbicadlamedyka.pl/ajax/map/getInfo?ajax=true",
+                    url: "/ajax/map/getInfo?ajax=true",
                     type: "POST",
                     data: "",
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
+                            displayToast("JESTO OK", "warning");
                             onMapClick(data)
                         }
                     },
                     error: function () {
-                        alert("Problem z zaladowaniem pinezek");
+                        displayToast("Problem z załadowaniem pinezek", "warning");
                     }
                 });
 
