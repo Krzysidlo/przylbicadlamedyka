@@ -53,7 +53,7 @@ class TripsController extends PageController
             $description .= " <span>{$frozen->producer->name}</span> (tel. <a href='tel:{$frozen->producer->tel}'>{$frozen->producer->tel}</a>)";
 
             $address = $frozen->producer->getAddress();
-            $flat = !empty($address->building) ? "/$address->building" : "";
+            $flat = !empty($address->flat) ? "/$address->flat" : "";
             $address = "{$address->street} {$address->building}{$flat}, {$address->city}";
 
             $cancelButton = "";
@@ -95,7 +95,6 @@ HTML;
             $activities[] = <<< HTML
             <p class="no-frozen">Aktualnie nie masz zaplanowanych żadnych przjeazdów. Żeby zaplanować odbiór lub dostarczenie przejdż do mapy i wybierz producenta.</p>
 HTML;
-
         }
 
         return $activities;

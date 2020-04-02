@@ -174,14 +174,16 @@ class Frozen
                 $frozenIDS    = implode(",", $frozenIDS);
                 switch ($action) {
                     case 'bascinet':
-                    case 'both':
-                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic o <span class='delivery'>{$frozenDate}</span>";
+                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic około <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
+                        break;
                     case 'material':
-                        if ($action !== "bascinet") {
-                            $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału o <span class='delivery'>{$frozenDate}</span>";
+                            $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
                             Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
-                        }
+                        break;
+                    case 'both':
+                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
                         break;
                 }
             } catch (Exception $e) {

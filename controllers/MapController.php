@@ -7,6 +7,7 @@ use Exception;
 use classes\Frozen;
 use classes\Request;
 use classes\Hospital;
+use classes\Magazine;
 use classes\Functions as fs;
 
 class MapController extends PageController
@@ -38,20 +39,23 @@ class MapController extends PageController
             'success' => true,
         ];
         try {
-            $requests  = Request::getAll();
+            $requests = Request::getAll();
             foreach ($requests as $request) {
-                $address = $request->user->getAddress();
+                $userAddress = $request->user->getAddress();
 
                 $frozen = false;
-                $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}' AND `deleted` = 0;";
+                $sql    = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}' AND `deleted` = 0;";
                 if ($query = fs::$mysqli->query($sql)) {
                     $frozen = $query->fetch_row()[0] ?? false;
                 }
+                $flat                                               = !empty($userAddress->flat) ? "/$userAddress->flat" : "";
+                $address                                            = "{$userAddress->city}, {$userAddress->street} {$userAddress->building}";
+                $address                                            .= $flat;
                 $data['requests'][$request->user->id][$request->id] = [
                     'user_id'  => $request->user->id,
                     'name'     => $request->user->name,
                     'tel'      => $request->user->tel,
-                    'address'  => "{$address->city}, {$address->street} {$address->building}/{$address->flat}",
+                    'address'  => $address,
                     'latLng'   => $request->latLng,
                     'bascinet' => intval($request->bascinet),
                     'material' => intval($request->material),
@@ -61,18 +65,30 @@ class MapController extends PageController
             }
 
             foreach ($data['requests'] as &$dataRequest) {
-                foreach ($dataRequest as &$requests)
-                if ($requests['comments'] !== "") {
-                    $requests['comments'] = substr($requests['comments'], 0, -2);
+                foreach ($dataRequest as &$requests) {
+                    if ($requests['comments'] !== "") {
+                        $requests['comments'] = substr($requests['comments'], 0, -2);
+                    }
                 }
             }
 
             $hospitals = Hospital::getAll();
             foreach ($hospitals as $hospital) {
                 $data['hospitals'][$hospital->id] = [
-                    'id'     => $hospital->id,
-                    'name'   => $hospital->name,
-                    'latLng' => $hospital->latLng,
+                    'id'          => $hospital->id,
+                    'name'        => $hospital->name,
+                    'description' => $hospital->description,
+                    'latLng'      => $hospital->latLng,
+                ];
+            }
+
+            $magazines = Magazine::getAll();
+            foreach ($magazines as $magazine) {
+                $data['magazines'][$magazine->id] = [
+                    'id'          => $magazine->id,
+                    'name'        => $magazine->name,
+                    'description' => $magazine->description,
+                    'latLng'      => $magazine->latLng,
                 ];
             }
         } catch (Exception $e) {
@@ -121,7 +137,7 @@ class MapController extends PageController
         $time    = filter_var($get['time'], FILTER_SANITIZE_STRING);
 
         try {
-            $date    = new DateTime($date . " " . $time);
+            $date = new DateTime($date . " " . $time);
         } catch (Exception $e) {
             fs::log($e->getMessage());
             $data = [
@@ -133,7 +149,7 @@ class MapController extends PageController
 
         if ($data['success']) {
             $requestsArr = Request::getIdsByUserID($usersID);
-            $data = Frozen::create(USER_ID, $requestsArr, $date, $action, $usersID);
+            $data        = Frozen::create(USER_ID, $requestsArr, $date, $action, $usersID);
         }
 
         return $data;

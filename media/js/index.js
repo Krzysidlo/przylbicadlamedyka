@@ -65,8 +65,6 @@ var index = function () {
                             type = $btn.data('type'),
                             url = $btn.attr('href');
 
-                        console.log(id);
-
                         $.ajax({
                             url: url + "?ajax=true",
                             type: "POST",
@@ -464,7 +462,7 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
-                            var mapInfo = {requests: {}, hospitals: data.hospitals};
+                            var mapInfo = {requests: {}, hospitals: data.hospitals, magazines: data.magazines};
                             for (let userID in data.requests) {
                                 let requests = data.requests[userID];
                                 for (let i in requests) {
@@ -506,7 +504,9 @@ var index = function () {
                 }
 
                 function createBindPopup(info) {
-                    if (info.type === "hospital") {
+                    var googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
+                    googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Nawiguj</a>`;
+                    if (info.type === "hospital" || info.type === "magazine") {
                         return `
                         <div class="popup container pb-4">
                             <div class="row">
@@ -514,6 +514,12 @@ var index = function () {
                             </div>
                             <div class="row userInfo mt-3">
                                 <div class="col-12 bascinetMaterial">${info.name}</div>
+                            </div>
+                            <div class="row userInfo mt-3">
+                                <div class="col-12 description">${info.description}</div>
+                            </div>
+                            <div class="row userInfo mt-3">
+                                <div class="col-12 text-center">${googleMapsLink}</div>
                             </div>
                         </div>
                         `;
@@ -561,9 +567,6 @@ var index = function () {
                             </select>
                             `;
                         }
-
-                        var googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
-                        googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Maps link</a>`;
 
                         if (USER_PRV === 2) {
                             return `
@@ -662,21 +665,27 @@ var index = function () {
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
-                    return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                    // return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                    if ((navigator.platform.indexOf("iPhone") !== -1) || (navigator.platform.indexOf("iPod") !== -1) || (navigator.platform.indexOf("iPad") !== -1)) {
+                        return "maps://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=" + lat + "," + lng;
+                    } else {
+                        return "https://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=" + lat + "," + lng;
+                    }
                 }
 
                 function onMapLoad(data) {
                     var userData = data.requests,
-                        latLng,
-                        htmlElement,
-                        popup,
-                        marker;
+                        latLng, htmlElement, popup, marker,
+                        name, description, icon;
 
                     for (var userId in userData) {
+                        if (USER_PRV === 1 && USER_NAME !== userData[userId].name) {
+                            continue
+                        }
                         latLng = userData[userId].latLng.split(',');
-                        var userName = userData[userId].name,
-                            userTelNo = userData[userId].tel,
-                            userAddress = userData[userId].address,
+                        name = userData[userId].name;
+                        var tel = userData[userId].tel,
+                            address = userData[userId].address,
                             readyBascinetsNo = userData[userId].bascinet,
                             MaterialsNeededNo = userData[userId].material,
                             additionalComments = userData[userId].comments,
@@ -686,9 +695,9 @@ var index = function () {
 
                         htmlElement = createBindPopup({
                             type: "request",
-                            name: userName,
-                            tel: userTelNo,
-                            address: userAddress,
+                            name: name,
+                            tel: tel,
+                            address: address,
                             lat: latLng[0],
                             lng: latLng[1],
                             bascinetNo: readyBascinetsNo,
@@ -713,12 +722,41 @@ var index = function () {
 
                     for (var hospitalId in hospitalData) {
                         latLng = hospitalData[hospitalId].latLng.split(',');
-                        var hospitalName = hospitalData[hospitalId].name,
-                            hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                        name = hospitalData[hospitalId].name;
+                        description = hospitalData[hospitalId].description;
+                        icon = createMyIcon(IMG_URL + "/pin_hospital.png");
 
                         htmlElement = createBindPopup({
                             type: "hospital",
-                            name: hospitalName,
+                            name: name,
+                            description: description,
+                            lat: latLng[0],
+                            lng: latLng[1],
+                        });
+
+                        popup = L.popup({
+                            maxWidth: 300,
+                            className: 'customPopup',
+                        }).setContent(htmlElement);
+
+                        marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(mymap);
+                        marker._myId = hospitalId;
+                    }
+
+                    var magazineData = data.magazines;
+
+                    for (var magazineID in magazineData) {
+                        latLng = magazineData[magazineID].latLng.split(',');
+                        name = magazineData[magazineID].name;
+                        description = magazineData[magazineID].description;
+                        icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+
+                        htmlElement = createBindPopup({
+                            type: "magazine",
+                            name: name,
+                            description: description,
+                            lat: latLng[0],
+                            lng: latLng[1],
                         });
 
                         popup = L.popup({
@@ -726,8 +764,8 @@ var index = function () {
                             className: 'customPopup',
                         }).setContent(htmlElement);
 
-                        marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(popup).addTo(mymap);
-                        marker._myId = hospitalId;
+                        marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(mymap);
+                        marker._myId = magazineID;
                     }
                 }
 

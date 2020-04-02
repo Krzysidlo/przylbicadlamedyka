@@ -5,9 +5,9 @@ namespace classes;
 use Exception;
 use classes\Functions as fs;
 
-class Hospital extends Point
+class Magazine extends Point
 {
-    protected static string $table = "hospitals";
+    protected static string $table = "magazines";
 
     /**
      * Hospital constructor.
@@ -28,7 +28,7 @@ class Hospital extends Point
      */
     public static function getAll(bool $deleted = false): array
     {
-        $sql = "SELECT `id` FROM `hospitals`";
+        $sql = "SELECT `id` FROM `magazines`";
 
         if (!$deleted) {
             $sql .= " WHERE `deleted` = 0";
