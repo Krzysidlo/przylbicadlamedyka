@@ -138,12 +138,7 @@ abstract class PageController
         if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess'])) {
             $this->file = INC_DIR . "/modals.php";
 
-            try {
-                $frozen = Frozen::getAll(USER_ID);
-                $args['frozen'] = $frozen;
-            } catch (Exception $e) {
-                fs::log("Error: " . $e->getMessage());
-            }
+            $args['activities'] = TripsController::frozenActivities(true);
         }
 
         return $this->render($args);

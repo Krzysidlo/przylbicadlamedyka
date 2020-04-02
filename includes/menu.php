@@ -20,15 +20,16 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
     <span class="navbar-brand <?= $user->noAddress() ? "mr-auto" : "mx-auto"; ?>"><?= PAGE_NAME; ?></span>
 
     <?php if (!$user->noAddress() && USER_PRV === User::USER_PRODUCER) { ?>
-        <button class="btn btn-white my-0 actions" data-toggle="modal" data-target="#bascinetModal">Zgłoś gotowe przyłbice
+        <button class="btn btn-white my-0 actions" data-toggle="modal" data-target="#bascinetModal">
+            Zgłoś gotowe przyłbice
         </button>
-        <button class="btn btn-outline-white my-0 actions" data-toggle="modal" data-target="#materialModal">Zgłoś
-            zapotrzebowanie
+        <button class="btn btn-outline-white my-0 actions" data-toggle="modal" data-target="#materialModal">
+            Zgłoś zapotrzebowanie
         </button>
     <?php }
     if (!$user->noAddress() && USER_PRV === User::USER_DRIVER) { ?>
-        <button class="btn btn-white my-0 actions" data-toggle="modal" data-target="#deliveredModal">Zgłoś dostarczenie</button>
-        <button class="btn btn-outline-white my-0 actions" data-toggle="modal" data-target="#collectionModal">Zgłoś odbiór
+        <button class="btn btn-outline-white my-0 actions" data-toggle="modal" data-target="#driverModal">
+            Zgłoś dostarczenie / odbiór
         </button>
     <?php }
     if (!$user->noAddress() && USER_PRV === User::USER_NO_CONFIRM) { ?>
@@ -57,33 +58,32 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
                     <span>Ustawienia</span>
                 </a>
             </li>
-            <?php  if ($user->getPrivilege() === User::USER_DRIVER) {
+            <?php if ($user->getPrivilege() === User::USER_DRIVER) {
                 $trips = Frozen::count(USER_ID, "trips"); ?>
-            <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">
-                <a href="/trips" class="nav-link">
-                    <span class="material-icons">commute</span>
-                    <span>Planowane przejazdy (<?= $trips; ?>)</span>
-                </a>
-            </li>
+                <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">
+                    <a href="/trips" class="nav-link">
+                        <span class="material-icons">commute</span>
+                        <span>Planowane przejazdy (<?= $trips; ?>)</span>
+                    </a>
+                </li>
             <?php }
             if (USER_PRV === User::USER_PRODUCER) { ?>
                 <li class="nav-item actions">
-                    <a href="#" class="btn btn-white nav-link" data-toggle="modal" data-target="#bascinetModal">Zgłoś
-                        gotowe przyłbice</a>
+                    <a href="#" class="btn btn-white nav-link" data-toggle="modal" data-target="#bascinetModal">
+                        Zgłoś gotowe przyłbice
+                    </a>
                 </li>
                 <li class="nav-item actions">
-                    <a href="#" class="btn btn-red nav-link" data-toggle="modal" data-target="#materialModal">Zgłoś
-                        zapotrzebowanie</a>
+                    <a href="#" class="btn btn-red nav-link" data-toggle="modal" data-target="#materialModal">
+                        Zgłoś zapotrzebowanie
+                    </a>
                 </li>
             <?php }
             if (USER_PRV === User::USER_DRIVER) { ?>
                 <li class="nav-item actions">
-                    <a href="#" class="btn btn-white nav-link" data-toggle="modal" data-target="#deliveredModal">Zgłoś
-                        dostarczenie</a>
-                </li>
-                <li class="nav-item actions">
-                    <a href="#" class="btn btn-outline-white btn-red nav-link" data-toggle="modal"
-                       data-target="#collectionModal">Zgłoś odbiór</a>
+                    <a href="#" class="btn btn-red nav-link" data-toggle="modal" data-target="#driverModal">
+                        Zgłoś dostarczenie / odbiór
+                    </a>
                 </li>
             <?php }
             if (USER_PRV === User::USER_NO_CONFIRM) { ?>

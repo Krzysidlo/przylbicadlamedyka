@@ -6,8 +6,9 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Request extends Action
+class Request
 {
+    public int      $id;
     public User     $user;
     public string   $latLng;
     public ?int     $bascinet;
@@ -25,7 +26,6 @@ class Request extends Action
      */
     public function __construct(int $requestsID)
     {
-        parent::__construct("requests");
         $info = false;
 
         $sql = "SELECT * FROM `requests` WHERE `id` = '{$requestsID}'";
@@ -194,7 +194,7 @@ class Request extends Action
     public static function getIdsByUserID(string $usersID): array
     {
         $return = ['bascinet' => [], 'material' => []];
-        $sql    = "SELECT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN `frozen` f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
+        $sql    = "SELECT DISTINCT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_assoc()) {
                 if ($result['bascinet'] !== NULL) {
@@ -207,5 +207,19 @@ class Request extends Action
         }
 
         return $return;
+    }
+
+    public function delete(bool $activity = true): bool
+    {
+        $sql = "UPDATE `requests` SET `deleted` = 1 WHERE `id` = {$this->id};";
+
+        $success = !!fs::$mysqli->query($sql);
+
+        if ($success && $activity) {
+            $sql = "UPDATE `activities` SET `deleted` = 1 WHERE `requests_id` = {$this->id};";
+            $success &= !!fs::$mysqli->query($sql);
+        }
+
+        return $success;
     }
 }

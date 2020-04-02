@@ -201,6 +201,25 @@ body .modal.custom-modal form input:not([type="range"]):-webkit-autofill, body .
 body .modal.custom-modal form input {
   height: 50px;
 }
+body .modal.custom-modal#driverModal .modal-body {
+  color: #757575;
+  padding-bottom: 30px;
+}
+body .modal.custom-modal#driverModal .modal-body .activityBox:not(:last-child) {
+  border-bottom: solid 1px #E4E5EA;
+}
+body .modal.custom-modal#driverModal .modal-body .activityBox span {
+  color: #B7274B;
+}
+body .modal.custom-modal#driverModal .modal-body .activityBox a {
+  color: #757575;
+}
+body .modal.custom-modal#driverModal .modal-body .activityBox a:hover {
+  color: #B7274B;
+}
+body .modal.custom-modal#driverModal .modal-footer {
+  border-top: solid 1px #E4E5EA;
+}
 body .mainInfo, body .errorInfo {
   text-align: center;
 }
@@ -819,50 +838,64 @@ body.noaccess .errorInfo h1 {
   margin-top: 40vh;
 }
 
-body.index .container .numbers .numberBox .number {
+body.trips .container .feed .activityBox.trip {
+  border-left: none;
+  margin-bottom: 10px;
+}
+body.trips .container .feed p.no-frozen {
+  color: #757575;
+}
+
+body.index .container .numbers .numberBox .number, body.trips .container .numbers .numberBox .number {
   font-size: 30px;
   color: #B7274B;
 }
-body.index .container .numbers .numberBox .description {
+body.index .container .numbers .numberBox .description, body.trips .container .numbers .numberBox .description {
   font-size: 12px;
 }
-body.index .container .title {
+body.index .container .title, body.trips .container .title {
   color: #B7274B;
 }
-body.index .container .feed .activityBox {
+body.index .container .feed .activityBox, body.trips .container .feed .activityBox {
   background: #FAFAFA;
   border-left: 5px solid;
   margin-bottom: 2px;
 }
-body.index .container .feed .activityBox.action {
+body.index .container .feed .activityBox.action, body.trips .container .feed .activityBox.action {
   border-color: #B7274B;
 }
-body.index .container .feed .activityBox.notification {
+body.index .container .feed .activityBox.notification, body.trips .container .feed .activityBox.notification {
   border-color: #000;
 }
-body.index .container .feed .activityBox .content {
+body.index .container .feed .activityBox .content, body.trips .container .feed .activityBox .content {
   padding: 5px 10px;
 }
-body.index .container .feed .activityBox .content .text {
+body.index .container .feed .activityBox .content .text, body.trips .container .feed .activityBox .content .text {
   font-size: 16px;
   color: #757575;
   display: inline-block;
   margin-right: auto;
   padding: 5px 0;
 }
-body.index .container .feed .activityBox .content .text span {
+body.index .container .feed .activityBox .content .text span, body.trips .container .feed .activityBox .content .text span {
   color: #B7274B;
 }
-body.index .container .feed .activityBox .content .button {
+body.index .container .feed .activityBox .content .text a, body.trips .container .feed .activityBox .content .text a {
+  color: #757575;
+}
+body.index .container .feed .activityBox .content .text a:hover, body.trips .container .feed .activityBox .content .text a:hover {
+  color: #B7274B;
+}
+body.index .container .feed .activityBox .content .button, body.trips .container .feed .activityBox .content .button {
   padding: 0;
   text-align: right;
 }
-body.index .container .feed .activityBox .content .btn.btn-transparent {
+body.index .container .feed .activityBox .content .btn.btn-transparent, body.trips .container .feed .activityBox .content .btn.btn-transparent {
   color: #B7274B;
   -webkit-box-shadow: none;
           box-shadow: none;
 }
-body.index .container .feed .activityBox .content .date {
+body.index .container .feed .activityBox .content .date, body.trips .container .feed .activityBox .content .date {
   font-size: 10px;
   padding: 5px 0;
   color: #757575;

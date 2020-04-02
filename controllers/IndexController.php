@@ -42,20 +42,14 @@ class IndexController extends PageController
                 if (!$row->request->frozen) {
                     $button = true;
                 }
-            } else {
-                if ($row->frozen !== NULL) {
-                    $dataId   = "data-id='{$row->frozen->id}'";
-                    $dataType = "data-type='frozen'";
-                    $button = true;
-                }
             }
-            $button       = ($button ? "<a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel' {$dataId} {$dataType}>Anuluj</a>" : "");
+            $button       = ($button ? "<div class='button col-3'><a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel' {$dataId} {$dataType}>Anuluj</a></div>" : "");
             $activities[] = <<< HTML
             <div class="activityBox {$type} container">
                 <div class="content row">
-                    <div class="text col-9">{$text}</div>
-                    <div class="button col-3">{$button}</div>
-                    <div class="date">{$date}</div>
+                    <div class="text col">{$text}</div>
+                    {$button}
+                    <div class="date col-12">{$date}</div>
                 </div>
             </div>
 HTML;

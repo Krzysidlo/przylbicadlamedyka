@@ -55,14 +55,18 @@ body {
       .modal-header {
         background-color: $color-red !important;
         color: #FFF;
+
         .close {
           color: #FFF;
         }
       }
+
       .modal-body {
         padding-bottom: 0;
+
         label {
           line-height: 24px;
+
           span.quantity {
             color: $color-red;
             font-size: 24px;
@@ -70,21 +74,53 @@ body {
           }
         }
       }
+
       .modal-footer {
         border-top: none;
       }
+
       form {
         input:not([type="range"]), textarea {
           border: solid 1px #e4e5ea;
           padding: 17px 16px;
           color: #000;
+
           &:-webkit-autofill {
             animation-name: autofill;
             animation-fill-mode: both;
           }
         }
+
         input {
           height: 50px;
+        }
+      }
+
+      &#driverModal {
+        .modal-body {
+          color: #757575;
+          padding-bottom: 30px;
+
+          .activityBox {
+            &:not(:last-child) {
+              border-bottom: solid 1px #E4E5EA;
+            }
+            span {
+              color: $color-red;
+            }
+
+            a {
+              color: #757575;
+
+              &:hover {
+                color: $color-red;
+              }
+            }
+          }
+        }
+
+        .modal-footer {
+          border-top: solid 1px #E4E5EA;
         }
       }
     }

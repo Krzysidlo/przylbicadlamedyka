@@ -43,7 +43,7 @@ class MapController extends PageController
                 $address = $request->user->getAddress();
 
                 $frozen = false;
-                $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}';";
+                $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}' AND `deleted` = 0;";
                 if ($query = fs::$mysqli->query($sql)) {
                     $frozen = $query->fetch_row()[0] ?? false;
                 }
@@ -149,7 +149,7 @@ class MapController extends PageController
 
         $error = [
             'success' => false,
-            'alert'   => "warning",
+            'alert'   => "danger",
             'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
         ];
 

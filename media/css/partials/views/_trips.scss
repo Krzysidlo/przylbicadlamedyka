@@ -1,0 +1,12 @@
+//Most of the styles ar in _index.scss file
+body.trips .container {
+  .feed {
+    .activityBox.trip {
+      border-left: none;
+      margin-bottom: 10px;
+    }
+    p.no-frozen {
+      color: #757575;
+    }
+  }
+}

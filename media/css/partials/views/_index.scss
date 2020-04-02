@@ -1,4 +1,4 @@
-body.index .container {
+body.index .container, body.trips .container {
   .numbers {
     .numberBox {
       .number {
@@ -42,6 +42,14 @@ body.index .container {
 
           span {
             color: $color-red;
+          }
+
+          a {
+            color: #757575;
+
+            &:hover {
+              color: $color-red;
+            }
           }
         }
 
