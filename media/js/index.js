@@ -52,7 +52,7 @@ var index = function () {
         }
 
         (function index() {
-            var $index = $("body.index");
+            var $index = $("body.index, body.trips");
             if ($index.length) {
                 var $cancelBtn = $index.find(".activityBox .cancel");
 
@@ -64,6 +64,8 @@ var index = function () {
                             id = $btn.data('id'),
                             type = $btn.data('type'),
                             url = $btn.attr('href');
+
+                        console.log(id);
 
                         $.ajax({
                             url: url + "?ajax=true",

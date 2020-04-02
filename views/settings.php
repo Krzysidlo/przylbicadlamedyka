@@ -13,7 +13,7 @@ use classes\User;
                 </div>
             </div>
         <?php } ?>
-        <div class="col-12 col-md-8 mt-5">
+        <div class="col-12 col-md-8 mt-4">
             <form action="/ajax/settings/save" class="settings">
                 <div class="row">
                     <div class="col-12 mt-4 mb-3">

@@ -55,8 +55,13 @@ class Activity extends Action
         }
     }
 
-    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL): array
+    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?string $frozenIDS = NULL): array
     {
+        if ($frozenIDS === NULL) {
+            $frozenIDS = "NULL";
+        } else {
+            $frozenIDS = "'{$frozenIDS}'";
+        }
         if ($requestsID === NULL) {
             $requestsID = "NULL";
         }
@@ -64,7 +69,7 @@ class Activity extends Action
 
         $message = base64_encode($message);
 
-        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, '{$date}', '{$message}');";
+        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenIDS}, '{$date}', '{$message}');";
 
         if (fs::$mysqli->query($sql)) {
             $data = [

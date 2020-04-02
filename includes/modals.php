@@ -4,8 +4,7 @@ $frozen ??= [];
 
 if (USER_PRV === User::USER_PRODUCER) { ?>
     <div class="modal fade custom-modal functionModal" id="bascinetModal" tabindex="-1" role="dialog"
-         aria-labelledby="bascinetLabel"
-         aria-hidden="true">
+         aria-labelledby="bascinetLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="/ajax/map/newRequest" class="modal-content">
                 <div class="modal-header">
@@ -38,8 +37,7 @@ if (USER_PRV === User::USER_PRODUCER) { ?>
         </div>
     </div>
     <div class="modal fade custom-modal functionModal" id="materialModal" tabindex="-1" role="dialog"
-         aria-labelledby="bascinetLabel"
-         aria-hidden="true">
+         aria-labelledby="bascinetLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <form action="/ajax/map/newRequest" class="modal-content">
                 <div class="modal-header">
@@ -73,6 +71,26 @@ if (USER_PRV === User::USER_PRODUCER) { ?>
     </div>
 <?php }
 
-if (USER_PRV === User::USER_DRIVER) { //TODO: Zmienić modale na odpowiednie?>
-
+if (USER_PRV === User::USER_DRIVER) { ?>
+    <div class="modal fade custom-modal functionModal" id="driverModal" tabindex="-1" role="dialog"
+         aria-labelledby="driverLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="driverLabel">Zgłoś zapotrzebowanie</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <?php foreach ($activities as $html) {
+                        echo $html;
+                    } ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Anuluj</button>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php }
