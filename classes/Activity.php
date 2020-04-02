@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Activity extends Action
+class Activity
 {
     public int      $id;
     public User     $user;
@@ -23,7 +23,6 @@ class Activity extends Action
      */
     public function __construct(int $activityID)
     {
-        parent::__construct("activities");
         $info = false;
 
         $sql = "SELECT * FROM `activities` WHERE `id` = '{$activityID}'";
@@ -116,5 +115,12 @@ class Activity extends Action
         }
 
         return $return;
+    }
+
+    public function delete(): bool
+    {
+        $sql   = "UPDATE `{activities}` SET `deleted` = 1 WHERE `id` = {$this->id};";
+
+        return !!fs::$mysqli->query($sql);
     }
 }
