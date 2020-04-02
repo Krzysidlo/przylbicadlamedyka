@@ -4,8 +4,10 @@ namespace controllers;
 
 use Exception;
 use classes\User;
+use classes\Frozen;
 use classes\Request;
 use classes\Activity;
+use classes\Functions as fs;
 
 class IndexController extends PageController
 {
@@ -33,19 +35,18 @@ class IndexController extends PageController
             $button   = false;
             $dataId   = "";
             $dataType = "";
+
             if ($row->request !== NULL) {
                 $dataId   = "data-id='{$row->request->id}'";
                 $dataType = "data-type='request'";
-                if ($row->request->frozen === NULL) {
+                if (!$row->request->frozen) {
                     $button = true;
                 }
             } else {
                 if ($row->frozen !== NULL) {
                     $dataId   = "data-id='{$row->frozen->id}'";
                     $dataType = "data-type='frozen'";
-                    if ($row->request->frozen === NULL) {
-                        $button = true;
-                    }
+                    $button = true;
                 }
             }
             $button       = ($button ? "<a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel' {$dataId} {$dataType}>Anuluj</a>" : "");

@@ -2,13 +2,84 @@ body.map {
   #map {
     width: 100%;
     height: calc(100vh - 97px);
+    font-family: inherit;
+
+    .leaflet-popup.customPopup {
+      .leaflet-popup-content-wrapper {
+        border-radius: 0;
+        padding: 0;
+
+        .leaflet-popup-content {
+          margin: 0;
+          width: 400px;
+
+          .popup {
+            margin: 0;
+            font-size: 16px;
+
+            .title {
+              background: $color-red;
+              color: #FFF;
+              font-size: 20px;
+              line-height: 20px;
+              padding: 14px;
+            }
+
+            .userInfo {
+              color: #757575;
+              .name {
+                color: $color-red;
+              }
+            }
+
+            .bascinetMaterial {
+              color: #000;
+              line-height: 30px;
+
+              span {
+                color: $color-red;
+                font-size: 30px;
+                float: right;
+              }
+            }
+
+            hr {
+              width: calc(100% + 30px);
+              margin-left: -15px;
+            }
+
+            input, select {
+              border: solid 1px #e4e5ea;
+              padding-left: 16px;
+              height: 50px;
+              color: #000;
+              cursor: pointer;
+              &[readonly] {
+                border: solid 1px #e4e5ea;
+                background: transparent;
+              }
+            }
+
+            .btn-white {
+              box-shadow: none;
+            }
+          }
+        }
+      }
+
+      .leaflet-popup-close-button {
+        padding: 0;
+        width: 48px;
+        height: 48px;
+        line-height: 48px;
+      }
+    }
   }
 
   .legend {
     position: fixed;
     bottom: 35px;
     width: calc(100% - 62px);
-    height: 64px;
     z-index: 1010;
     background-color: #FAFAFA;
     margin-left: 62px;
@@ -18,7 +89,8 @@ body.map {
     .element {
       display: inline-block;
       color: #757575;
-      line-height: 64px;
+      line-height: 66px;
+
       .circle {
         border: 14px solid;
         border-radius: 50%;
@@ -58,6 +130,22 @@ body.map {
       &.hospital {
         .circle {
           border-color: $color-red;
+        }
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      margin: 0;
+      padding: 5px 0;
+      width: 100%;
+
+      .element {
+        font-size: 12px;
+        line-height: 12px;
+
+        .circle {
+          border: 8px solid;
+          margin: 0 15px 0 5px;
         }
       }
     }

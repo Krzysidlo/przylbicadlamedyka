@@ -2,6 +2,7 @@
 
 namespace controllers;
 
+use DateTime;
 use Exception;
 use classes\Frozen;
 use classes\Request;
@@ -41,28 +42,28 @@ class MapController extends PageController
             foreach ($requests as $request) {
                 $address = $request->user->getAddress();
 
-                if (isset($data['requests'][$request->user->id])) {
-                    $data['requests'][$request->user->id]['bascinet'] += intval($request->bascinet);
-                    $data['requests'][$request->user->id]['material'] += intval($request->material);
-                    $data['requests'][$request->user->id]['comments'] .= ($request->comments !== NULL ? (string)$request->comments . ", " : "");
-                } else {
-                    $data['requests'][$request->user->id] = [
-                        'user_id'  => $request->user->id,
-                        'name'     => $request->user->name,
-                        'tel'      => $request->user->tel,
-                        'address'  => "{$address->city}, {$address->street} {$address->building}/{$address->flat}",
-                        'latLng'   => $request->latLng,
-                        'bascinet' => intval($request->bascinet),
-                        'material' => intval($request->material),
-                        'comments' => ($request->comments !== NULL ? (string)$request->comments . ", " : ""),
-                        'frozen'   => !!$request->frozen,
-                    ];
+                $frozen = false;
+                $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}';";
+                if ($query = fs::$mysqli->query($sql)) {
+                    $frozen = $query->fetch_row()[0] ?? false;
                 }
+                $data['requests'][$request->user->id][$request->id] = [
+                    'user_id'  => $request->user->id,
+                    'name'     => $request->user->name,
+                    'tel'      => $request->user->tel,
+                    'address'  => "{$address->city}, {$address->street} {$address->building}/{$address->flat}",
+                    'latLng'   => $request->latLng,
+                    'bascinet' => intval($request->bascinet),
+                    'material' => intval($request->material),
+                    'comments' => ($request->comments !== NULL ? (string)$request->comments . ", " : ""),
+                    'frozen'   => (bool)$frozen,
+                ];
             }
 
             foreach ($data['requests'] as &$dataRequest) {
-                if ($dataRequest['comments'] !== "") {
-                    $dataRequest['comments'] = substr($dataRequest['comments'], 0, -2);
+                foreach ($dataRequest as &$requests)
+                if ($requests['comments'] !== "") {
+                    $requests['comments'] = substr($requests['comments'], 0, -2);
                 }
             }
 
@@ -106,9 +107,36 @@ class MapController extends PageController
         return $data;
     }
 
-    public static function ajax_newFrozen($get = []): array
+    public static function ajax_freezeRequest($get = []): array
     {
+        $data = [
+            'success' => true,
+            'alert'   => false,
+            'message' => "",
+        ];
 
+        $usersID = filter_var($get['userId'], FILTER_SANITIZE_STRING);
+        $action  = filter_var($get['action'], FILTER_SANITIZE_STRING);
+        $date    = filter_var($get['date'], FILTER_SANITIZE_STRING);
+        $time    = filter_var($get['time'], FILTER_SANITIZE_STRING);
+
+        try {
+            $date    = new DateTime($date . " " . $time);
+        } catch (Exception $e) {
+            fs::log($e->getMessage());
+            $data = [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        if ($data['success']) {
+            $requestsArr = Request::getIdsByUserID($usersID);
+            $data = Frozen::create(USER_ID, $requestsArr, $date, $action, $usersID);
+        }
+
+        return $data;
     }
 
     public static function ajax_delete($get = []): array
@@ -122,7 +150,7 @@ class MapController extends PageController
         $error = [
             'success' => false,
             'alert'   => "warning",
-            'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie",
+            'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
         ];
 
         if (!empty($get['id']) && !empty($get['type'])) {

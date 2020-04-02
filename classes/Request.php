@@ -13,7 +13,7 @@ class Request extends Action
     public ?int     $bascinet;
     public ?int     $material;
     public ?string  $comments;
-    public ?Frozen  $frozen;
+    public bool     $frozen;
     public bool     $delivered;
     public DateTime $created_at;
 
@@ -40,16 +40,10 @@ class Request extends Action
             $this->latLng     = trim($info['latLng'] ?? $this->user->getAddress()->location);
             $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
             $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
-            $this->comments   = (!empty($info['comments']) ? trim($info['comments']) : NULL);
+            $this->comments   = !empty($info['comments']) ? trim($info['comments']) : NULL;
             $this->delivered  = (bool)$info['delivered'];
             $this->created_at = new DateTime($info['created_at']);
-
-            $frozen = !empty($info['frozen']) ? intval($info['frozen']) : NULL;
-            if ($frozen === NULL) {
-                $this->frozen = NULL;
-            } else {
-                $this->frozen = new Frozen($frozen);
-            }
+            $this->frozen     = Frozen::findByRequestID($this->id);
         } else {
             throw new Exception("No request info found with id=[{$requestsID}]");
         }
@@ -78,7 +72,7 @@ class Request extends Action
         if ($material === NULL) {
             $material = 'NULL';
         }
-        if ($comments === NULL) {
+        if ($comments === NULL || $comments === "") {
             $comments = 'NULL';
         } else {
             $comments = "'{$comments}'";
@@ -102,15 +96,17 @@ class Request extends Action
 
         if ($data['success']) {
             $requestsID = fs::$mysqli->insert_id;
-            $sql = "SELECT `created_at` FROM `requests` WHERE `id`={$requestsID};";
-            $date = fs::$mysqli->query($sql)->fetch_row()[0] ?? NULL;
+            $sql        = "SELECT `created_at` FROM `requests` WHERE `id`={$requestsID};";
+            $date       = fs::$mysqli->query($sql)->fetch_row()[0] ?? NULL;
             if ($date !== NULL) {
-                $date = new DateTime($date);
+                $date    = new DateTime($date);
                 $message = "";
                 if ($bascinet !== "NULL") {
                     $message = "Zgłoszono {$bascinet} gotowych przyłbic do odbioru";
-                } else if ($material !== "NULL") {
-                    $message = "Zgłoszono zapotrzebowanie na {$material} materiału";
+                } else {
+                    if ($material !== "NULL") {
+                        $message = "Zgłoszono zapotrzebowanie na {$material} materiału";
+                    }
                 }
                 Activity::create($usersID, $date, $message, "action", $requestsID);
             }
@@ -190,6 +186,24 @@ class Request extends Action
 
         if ($query = fs::$mysqli->query($sql)) {
             $return = intval($query->fetch_row()[0] ?? 0);
+        }
+
+        return $return;
+    }
+
+    public static function getIdsByUserID(string $usersID): array
+    {
+        $return = ['bascinet' => [], 'material' => []];
+        $sql    = "SELECT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN `frozen` f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
+        if ($query = fs::$mysqli->query($sql)) {
+            while ($result = $query->fetch_assoc()) {
+                if ($result['bascinet'] !== NULL) {
+                    $return['bascinet'][] = $result['id'];
+                }
+                if ($result['material'] !== NULL) {
+                    $return['material'][] = $result['id'];
+                }
+            }
         }
 
         return $return;

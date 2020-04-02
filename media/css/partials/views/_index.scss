@@ -39,6 +39,10 @@ body.index .container {
           display: inline-block;
           margin-right: auto;
           padding: 5px 0;
+
+          span {
+            color: $color-red;
+          }
         }
 
         .button {

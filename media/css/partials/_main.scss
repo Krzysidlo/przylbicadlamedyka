@@ -62,14 +62,19 @@ body {
       .modal-body {
         padding-bottom: 0;
         label {
-          font-weight: 400;
+          line-height: 24px;
+          span.quantity {
+            color: $color-red;
+            font-size: 24px;
+            margin-left: 15px;
+          }
         }
       }
       .modal-footer {
         border-top: none;
       }
       form {
-        input, textarea {
+        input:not([type="range"]), textarea {
           border: solid 1px #e4e5ea;
           padding: 17px 16px;
           color: #000;
