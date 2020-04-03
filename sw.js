@@ -5,11 +5,11 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(cacheName).then(cache => {
             return cache.addAll([
-                IMG_URL + '/media/css/styles.css',
-                IMG_URL + '/media/css/styles.min.css',
-                IMG_URL + '/media/js/index.js',
-                IMG_URL + '/media/js/index.min.js',
-                IMG_URL + '/media/js/external.min.js',
+                '/media/css/styles.css',
+                '/media/css/styles.min.css',
+                '/media/js/index.js',
+                '/media/js/index.min.js',
+                '/media/js/external.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css',
