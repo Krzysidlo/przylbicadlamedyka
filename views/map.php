@@ -33,4 +33,5 @@
     <div class="element bascinet">Gotowe przyłbice <span class="circle"></span></div>
     <div class="element both">Gotowe przyłbice i potrzebuje materiałów <span class="circle"></span></div>
     <div class="element hospital">Szpitale <span class="circle"></span></div>
+    <div class="element magazine">Magazyny <span class="circle"></span></div>
 </div>

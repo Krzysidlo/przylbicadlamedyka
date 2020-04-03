@@ -4,35 +4,15 @@ namespace controllers;
 
 use DateTime;
 use Exception;
+use classes\Pin;
 use classes\Frozen;
+use classes\Hosmag;
 use classes\Request;
-use classes\Hospital;
-use classes\Magazine;
+use classes\Activity;
 use classes\Functions as fs;
 
 class MapController extends PageController
 {
-    public static function ajax_savePoint($get = []): array
-    {
-        $data = [
-            'success' => true,
-            'message' => "Poprawnie zapisano punkt",
-        ];
-
-        if (empty($get['lat']) || empty($get['lng']) || empty($get['user_id'])) {
-            $data = [
-                'success' => false,
-                'message' => 'Brakuje jednej z wartości',
-            ];
-        }
-
-        if ($data['success']) {
-
-        }
-
-        return $data;
-    }
-
     public static function ajax_getInfo($get = []): array
     {
         $data = [
@@ -72,29 +52,34 @@ class MapController extends PageController
                 }
             }
 
-            $hospitals = Hospital::getAll();
-            foreach ($hospitals as $hospital) {
-                $data['hospitals'][$hospital->id] = [
-                    'id'          => $hospital->id,
-                    'name'        => $hospital->name,
-                    'description' => $hospital->description,
-                    'latLng'      => $hospital->latLng,
-                ];
-            }
-
-            $magazines = Magazine::getAll();
-            foreach ($magazines as $magazine) {
-                $data['magazines'][$magazine->id] = [
-                    'id'          => $magazine->id,
-                    'name'        => $magazine->name,
-                    'description' => $magazine->description,
-                    'latLng'      => $magazine->latLng,
+            $pins = Pin::getAll();
+            foreach ($pins as $pin) {
+                $data['pins'][$pin->id] = [
+                    'id'          => $pin->id,
+                    'name'        => $pin->name,
+                    'description' => $pin->description,
+                    'latLng'      => $pin->latLng,
+                    'bascinet'    => $pin->bascinet,
+                    'material'    => $pin->material,
+                    'type'        => $pin->type,
                 ];
             }
         } catch (Exception $e) {
             fs::log("Error: " . $e->getMessage());
-            $data = [
+            return [
                 'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił błąd podczas pobierania danych z bazy",
+            ];
+        }
+
+        try {
+            $data['bascinet'] = Frozen::count(USER_ID, "bascinet");
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'alert'   => "danger",
                 'message' => "Wystąpił błąd podczas pobierania danych z bazy",
             ];
         }
@@ -113,7 +98,7 @@ class MapController extends PageController
             $data = Request::create(USER_ID, $latLng, $bascinet, $material, $comments);
         } catch (Exception $e) {
             fs::log("Error: " . $e->getMessage());
-            $data = [
+            return [
                 'success' => false,
                 'alert'   => "danger",
                 'message' => "Wystąpił błąd przy zapisie do bazy danych proszę spróbować ponownie",
@@ -125,12 +110,6 @@ class MapController extends PageController
 
     public static function ajax_freezeRequest($get = []): array
     {
-        $data = [
-            'success' => true,
-            'alert'   => false,
-            'message' => "",
-        ];
-
         $usersID = filter_var($get['userId'], FILTER_SANITIZE_STRING);
         $action  = filter_var($get['action'], FILTER_SANITIZE_STRING);
         $date    = filter_var($get['date'], FILTER_SANITIZE_STRING);
@@ -140,19 +119,108 @@ class MapController extends PageController
             $date = new DateTime($date . " " . $time);
         } catch (Exception $e) {
             fs::log($e->getMessage());
-            $data = [
+            return [
                 'success' => false,
                 'alert'   => "danger",
                 'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
             ];
         }
 
-        if ($data['success']) {
-            $requestsArr = Request::getIdsByUserID($usersID);
-            $data        = Frozen::create(USER_ID, $requestsArr, $date, $action, $usersID);
+        $requestsArr = Request::getIdsByUserID($usersID);
+
+        return Frozen::create(USER_ID, $requestsArr, $date, $action, $usersID);;
+    }
+
+    public static function ajax_hosMag($get = []): array
+    {
+        if (empty($get['type']) || empty($get['quantity']) || empty($get['pinID'])) {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
         }
 
-        return $data;
+        try {
+            $pinID    = filter_var($get['pinID'], FILTER_SANITIZE_NUMBER_INT);
+            $quantity = filter_var($get['quantity'], FILTER_SANITIZE_NUMBER_INT);
+            $data     = Hosmag::create($pinID, $quantity);
+
+            $success = $data['success'];
+
+            $name = "";
+            $sql  = "SELECT `name` FROM `pins` WHERE `id` = {$pinID};";
+            if ($query = fs::$mysqli->query($sql)) {
+                $name = $query->fetch_row()[0] ?? "";
+            }
+
+            $type = filter_var($get['type'], FILTER_SANITIZE_STRING);
+            if ($success && $type == "hospital") {
+                if ($success = Hosmag::deliverBascinet(USER_ID)) {
+                    $date            = new DateTime;
+                    $message         = "Dostarczono <span class='quantity'>{$quantity}</span> przyłbic do <span class='name'>{$name}</span>";
+                    $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+                }
+            }
+
+            if ($success && $type == "magazine") {
+//                if ($success = Hosmag::deliverBascinet(USER_ID)) {
+//                    $date = new DateTime;
+//                    $message = "<span></span>";
+//                    $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+//                }
+            }
+
+            return $data;
+
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => true,
+                'alert'   => false,
+                'message' => "",
+            ];
+        }
+    }
+
+    public static function ajax_deliverMaterial($get = []): array
+    {
+        $frozenID  = filter_var($get['frozenID'], FILTER_SANITIZE_STRING);
+        $frozenArr = explode(",", $frozenID);
+        try {
+            $frozen = new Frozen($frozenArr);
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        if (!$frozen->deliver()) {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        $date = new DateTime;
+        $message = "Potwierdzono odbiór <span class='quantity'></span>";
+        if (Activity::create(USER_ID, $date, $message)['success']) {
+            return [
+                'success' => true,
+                'alert'   => "success",
+                'message' => "Poprawnie zarejestrowano dostarczenie maetriału",
+            ];
+        } else {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
     }
 
     public static function ajax_delete($get = []): array

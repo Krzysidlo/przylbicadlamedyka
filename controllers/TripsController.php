@@ -58,7 +58,7 @@ class TripsController extends PageController
 
             $cancelButton = "";
             if (!$noCancelButton) {
-                $cancelButton = "<div class='button col-3'><a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel'  data-id='{$id}' data-type='frozen'>Anuluj</a></div>";
+                $cancelButton = "<div class='button col-3'><a href='/ajax/map/delete' class='m-0 cancel'  data-id='{$id}' data-type='frozen'>Anuluj</a></div>";
             }
 
             $activities[] = <<< HTML
@@ -83,8 +83,8 @@ class TripsController extends PageController
                         </div>
                     </div>
                     {$cancelButton}
-                    <div class="col-12 text-right">
-                        <button class="btn btn-red confirm">Potwierdź {$action}</button>
+                    <div class='col-12 text-right'>
+                        <button class='btn btn-red confirm mx-0' data-id='{$id}'>Potwierdź {$action}</button>
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@ HTML;
 
         if (empty($activities)) {
             $activities[] = <<< HTML
-            <p class="no-frozen">Aktualnie nie masz zaplanowanych żadnych przjeazdów. Żeby zaplanować odbiór lub dostarczenie przejdż do mapy i wybierz producenta.</p>
+            <p class="no-frozen">Aktualnie nie masz żadnych zaplanowanych przejazdów. Żeby zaplanować odbiór lub dostarczenie przejdż do mapy i wybierz producenta.</p>
 HTML;
         }
 

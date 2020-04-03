@@ -27,6 +27,7 @@ body.map {
 
             .userInfo {
               color: #757575;
+
               .name {
                 color: $color-red;
               }
@@ -54,6 +55,7 @@ body.map {
               height: 50px;
               color: #000;
               cursor: pointer;
+
               &[readonly] {
                 border: solid 1px #e4e5ea;
                 background: transparent;
@@ -62,6 +64,25 @@ body.map {
 
             .btn-white {
               box-shadow: none;
+            }
+
+            &.pin {
+              label[for="quantity"] {
+                line-height: 24px;
+
+                span {
+                  color: $color-red;
+                  font-size: 24px;
+                  vertical-align: bottom;
+                }
+              }
+              input[type="range"] {
+                border: none;
+                padding: 0;
+                &:focus {
+                  box-shadow: none;
+                }
+              }
             }
           }
         }
@@ -130,6 +151,12 @@ body.map {
       &.hospital {
         .circle {
           border-color: $color-red;
+        }
+      }
+
+      &.magazine {
+        .circle {
+          border-color: #00A0FF;
         }
       }
     }

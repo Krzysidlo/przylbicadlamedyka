@@ -4,6 +4,16 @@ body.trips .container {
     .activityBox.trip {
       border-left: none;
       margin-bottom: 10px;
+
+      .content {
+        padding: 20px 10px;
+        .text {
+          padding: 0 15px;
+        }
+        .button {
+          padding: 0 15px;
+        }
+      }
     }
     p.no-frozen {
       color: #757575;

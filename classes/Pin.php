@@ -6,14 +6,15 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-abstract class Point
+class Pin
 {
-    protected static string $table;
-
     public int      $id;
     public string   $name;
     public string   $description;
     public string   $latLng;
+    public string   $type;
+    public ?string  $bascinet = NULL;
+    public ?string  $material = NULL;
     public DateTime $created_at;
 
     /**
@@ -23,14 +24,12 @@ abstract class Point
      *
      * @throws Exception
      */
-    public function __construct(string $table, int $id)
+    public function __construct(int $id)
     {
-        self::$table = filter_var($table, FILTER_SANITIZE_STRING);
-        $table       = self::$table;
-        $this->id    = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
-        $info        = false;
+        $this->id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
+        $info     = false;
 
-        $sql = "SELECT * FROM `{$table}` WHERE `id` = '{$this->id}'";
+        $sql = "SELECT * FROM `pins` WHERE `id` = '{$this->id}';";
 
         if ($query = fs::$mysqli->query($sql)) {
             $info = $query->fetch_assoc() ?? false;
@@ -39,11 +38,13 @@ abstract class Point
         if ($info) {
             $this->name        = trim((string)$info['name']);
             $this->description = trim((string)$info['description']);
-            $this->latLng      = trim((string)$info['location']);
+            $this->latLng      = trim((string)$info['latLng']);
+            $this->type        = trim((string)$info['type']);
+            $this->bascinet    = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
+            $this->material    = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->created_at  = new DateTime($info['created_at']);
         } else {
-            $table = self::$table;
-            throw new Exception("No [{$table}] info found with id=[{$this->id}]");
+            throw new Exception("No pins info found with id=[{$this->id}]");
         }
     }
 
@@ -51,13 +52,22 @@ abstract class Point
      * @param string $name
      * @param string $description
      * @param string $latLng
+     * @param string $type
+     * @param int|null $bascinet
+     * @param int|null $material
      *
      * @return array
      */
-    public static function create(string $name, string $description, string $latLng): array
+    public static function create(string $name, string $description, string $latLng, string $type = "hospital", ?int $bascinet = NULL, ?int $material = NULL): array
     {
-        $table = self::$table;
-        $sql   = "INSERT INTO `{$table}` (`name`, `description`, `latLng`) VALUES ('{$name}', '{$description}', {$latLng});";
+        if ($bascinet === NULL) {
+            $bascinet = "NULL";
+        }
+        if ($material === NULL) {
+            $material = "NULL";
+        }
+
+        $sql = "INSERT INTO `pins` (`name`, `description`, `latLng`, `type`, `bascinet`, `material`) VALUES ('{$name}', '{$description}', {$latLng}, '{$type}', {$bascinet}, {$material});";
 
         if (!!fs::$mysqli->query($sql)) {
             $data = [
@@ -76,16 +86,28 @@ abstract class Point
         return $data;
     }
 
-    public static function getAllPoints(string $sql): array
+    /**
+     * @param bool $deleted
+     *
+     * @return array
+     * @throws Exception
+     */
+    public static function getAll(bool $deleted = false): array
     {
-        $class = get_called_class();
         $return = [];
+
+        $sql = "SELECT `id` FROM `pins`";
+
+        if (!$deleted) {
+            $sql .= " WHERE `deleted` = 0;";
+        }
+
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_row()) {
                 $id = $result[0] ?? false;
                 $id = intval($id);
                 if ($id) {
-                    $return[] = new $class($id);
+                    $return[] = new self($id);
                 }
             }
         }
@@ -95,8 +117,7 @@ abstract class Point
 
     public function delete(): bool
     {
-        $table = self::$table;
-        $sql   = "UPDATE `{$table}` SET `deleted` = 1 WHERE `id` = {$this->id};";
+        $sql = "UPDATE `pins` SET `deleted` = 1 WHERE `id` = {$this->id};";
 
         return !!fs::$mysqli->query($sql);
     }

@@ -11,45 +11,58 @@ var index = function () {
             settingsMap,
             mapMarker;
 
+        (function serviceWorker() {
+            if ($body.data('logged')) {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, error => {
+                        console.error('ServiceWorker registration failed: ', error);
+                    });
+                }
+            }
+        })();
+
         $(document).trigger('scroll');
 
         if (!mobileAndTabletCheck() && $body.height() > $(window).height()) {
             $body.addClass('desktop');
         }
 
-        function toggleMapInteraction(enable, map, marker) {
-            enable = enable | false;
-            if (enable) {
-                if (!mobileAndTabletCheck()) {
-                    map.dragging.enable();
-                }
-                if (map.tap) {
-                    map.tap.enable();
-                }
-                map.touchZoom.enable();
-                map.doubleClickZoom.enable();
-                map.scrollWheelZoom.enable();
-                map.boxZoom.enable();
-                map.keyboard.enable();
-                if (typeof marker !== "undefined") {
-                    marker.dragging.enable()
-                }
-            } else {
-                map.dragging.disable();
-                if (map.tap) {
-                    map.tap.disable();
-                }
-                map.touchZoom.disable();
-                map.doubleClickZoom.disable();
-                map.scrollWheelZoom.disable();
-                map.boxZoom.disable();
-                map.keyboard.disable();
-                if (typeof marker !== "undefined") {
-                    marker.dragging.disable()
-                }
-                map.panTo(marker.getLatLng());
-            }
-        }
+        (function driverConfirmation() {
+            let $confirmBtn = $("body .activityBox.trip button.confirm");
+
+            $confirmBtn.on('click', function (e) {
+                let frozenID = $(this).data('id');
+
+                $.ajax({
+                    url: "/ajax/map/deliverMaterial?ajax=true",
+                    type: "POST",
+                    data: {frozenID: frozenID},
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        showLoading();
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1E3);
+                        }
+
+                        if (data.alert) {
+                            displayToast(data.message, data.alert);
+                        }
+                    },
+                    error: function () {
+                        displayToast("Wystąpił nieznany błąd", "danger");
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+            });
+        })();
 
         (function index() {
             var $index = $("body.index, body.trips");
@@ -132,9 +145,7 @@ var index = function () {
             });
 
             $modals.find("input[type='range']").on('input', function () {
-                var $input = $(this),
-                    value = $input.val(),
-                    span = $input.parents('.modal').find("label[for='" + $input.attr('id') + "']");
+                var $input = $(this);
 
                 $input.parents('.modal').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
             });
@@ -462,7 +473,8 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
-                            var mapInfo = {requests: {}, hospitals: data.hospitals, magazines: data.magazines};
+                            let mapInfo = JSON.parse(JSON.stringify(data));
+                            mapInfo.requests = {};
                             for (let userID in data.requests) {
                                 let requests = data.requests[userID];
                                 for (let i in requests) {
@@ -504,11 +516,90 @@ var index = function () {
                 }
 
                 function createBindPopup(info) {
-                    var googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
+                    var bascinetInfo = "",
+                        materialInfo = "",
+                        googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
+
                     googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Nawiguj</a>`;
                     if (info.type === "hospital" || info.type === "magazine") {
+                        if (info.bascinet) {
+                            bascinetInfo = "<div class='col-12 mt-4 bascinetMaterial'>Potrzebne przyłbice <span>" + info.bascinet + "</span></div>";
+                        }
+
+                        if (info.material) {
+                            materialInfo = "<div class='col-12 mt-4 bascinetMaterial'>Dostępne materiały <span>" + info.material + "</span></div>";
+                        }
+                        if (USER_PRV === 2) {
+                            var type = "odbiór",
+                                longType = "Potwierdź odbiór materiału z magazynu",
+                                max = 50,
+                                ineract = true;
+
+                            if (info.material) {
+                                max = info.material;
+                            } else {
+                                ineract = false;
+                                longType = "Informacje";
+                            }
+
+                            let input = `
+                                <label for="quantity">Ilość: <span class="quantity">50</span></label>
+                                <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${max}" step="50">
+                                `;
+
+                            if (info.type === "hospital") {
+                                if (info.bascinetOwn) {
+                                    ineract = true;
+                                    longType = "Potwierdź dostarczenie przyłbic do szpitala";
+                                    input = `
+                                    <label for="quantity" class="md-form mb-1">Ilość</label>
+                                    <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Ilość" value="${info.bascinetOwn}" readonly>
+                                    `;
+                                }
+                                type = "dostarczenie";
+                                longType = "Informacje";
+                            } else if (info.type === "hospital") {
+                                ineract = false;
+                            }
+
+                            let interaction = "";
+                            if (ineract) {
+                                interaction = `
+                                <hr>
+                                <div class="row">
+                                    <div class="form-group col-12 mb-3">
+                                        <input type="hidden" name="pinID" value="${info.pinID}">
+                                        ${input}
+                                    </div>
+                                    <div class="form-group col-12 mb-0 text-right">
+                                        ${googleMapsLink}
+                                        <button type="button" class="btn btn-red" id="hosMag" data-type="${info.type}">Potwierdź ${type}</button>
+                                    </div>
+                                </div>
+                                `;
+                            }
+
+                            return `
+                            <div class="popup container pin pb-4">
+                                <div class="row">
+                                    <div class="col-12 title">${longType}</div>
+                                </div>
+                                <div class="row userInfo mt-3">
+                                    <div class="col-12 bascinetMaterial">${info.name}</div>
+                                </div>
+                                <div class="row userInfo mt-3">
+                                    <div class="col-12 description">${info.description}</div>
+                                </div>
+                                <div class="row userInfo mt-3">
+                                    ${bascinetInfo}
+                                    ${materialInfo}
+                                </div>
+                                ${interaction}
+                            </div>
+                            `;
+                        }
                         return `
-                        <div class="popup container pb-4">
+                        <div class="popup container pin pb-4">
                             <div class="row">
                                 <div class="col-12 title">Informacje</div>
                             </div>
@@ -519,22 +610,21 @@ var index = function () {
                                 <div class="col-12 description">${info.description}</div>
                             </div>
                             <div class="row userInfo mt-3">
-                                <div class="col-12 text-center">${googleMapsLink}</div>
+                                ${bascinetInfo}
+                                ${materialInfo}
                             </div>
                         </div>
                         `;
                     } else {
-                        var bascinetInfo = "",
-                            materialInfo = "",
-                            comments = "",
+                        var comments = "",
                             action = "";
 
-                        if (info.bascinetNo) {
-                            bascinetInfo = '<div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span>' + info.bascinetNo + '</span></div>';
+                        if (info.bascinet) {
+                            bascinetInfo = '<div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span>' + info.bascinet + '</span></div>';
                         }
 
-                        if (info.materialNo) {
-                            materialInfo = '<div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span>' + info.materialNo + '</span></div>';
+                        if (info.material) {
+                            materialInfo = '<div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span>' + info.material + '</span></div>';
                         }
 
                         if (info.comments) {
@@ -563,7 +653,7 @@ var index = function () {
                             <select class="form-control" name="action" id="driverSelect">
                                 <option value="bascinet">Odbiór</option>
                                 <option value="material">Dostarczenie</option>
-                                <option value="both">Odbiór i dostarczenie</option>
+                                <option value="both" selected>Odbiór i dostarczenie</option>
                             </select>
                             `;
                         }
@@ -661,7 +751,56 @@ var index = function () {
                     }
 
                     freezeRequest(openPopupUserId, action, driverDate, driverTime);
-                });
+                })
+                    .on('click', "#hosMag", function (e) {
+                        e.preventDefault();
+
+                        var $btn = $(this),
+                            $popup = $btn.parents(".popup"),
+                            type = $btn.data("type"),
+                            quantity = $popup.find("input[name='quantity']").val(),
+                            pinID = $popup.find("input[name='pinID']").val();
+
+                        if (isNaN(quantity) || quantity === "") {
+                            displayToast("Proszę podać poprawną liczbę", "warning");
+                            return false;
+                        }
+
+                        $.ajax({
+                            url: "/ajax/map/hosMag?ajax=true",
+                            type: "POST",
+                            data: {type: type, quantity: quantity, pinID: pinID},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 1E3);
+                                }
+
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Wystąpił nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    })
+                    .on('input', "#quantity[type='range']", function () {
+                        var $input = $(this);
+
+                        $input.parents('.popup').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
+                    })
+                    .on('click', "#quantity[type='text']", function () {
+                        displayToast("Obecnie nie można zmieniać ilości dostarczanej do szpitali", "warning");
+                    });
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
@@ -675,33 +814,27 @@ var index = function () {
 
                 function onMapLoad(data) {
                     var userData = data.requests,
-                        latLng, htmlElement, popup, marker,
-                        name, description, icon;
+                        latLng, htmlElement, popup, marker, icon;
 
                     for (var userId in userData) {
                         if (USER_PRV === 1 && USER_NAME !== userData[userId].name) {
                             continue
                         }
                         latLng = userData[userId].latLng.split(',');
-                        name = userData[userId].name;
-                        var tel = userData[userId].tel,
-                            address = userData[userId].address,
-                            readyBascinetsNo = userData[userId].bascinet,
-                            MaterialsNeededNo = userData[userId].material,
-                            additionalComments = userData[userId].comments,
+                        var additionalComments = userData[userId].comments,
                             frozen = userData[userId].frozen,
-                            iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
+                            iconUrl = defineIconColor(userData[userId].bascinet, userData[userId].material, frozen),
                             myIcon = createMyIcon(iconUrl);
 
                         htmlElement = createBindPopup({
                             type: "request",
-                            name: name,
-                            tel: tel,
-                            address: address,
+                            name: userData[userId].name,
+                            tel: userData[userId].tel,
+                            address: userData[userId].address,
                             lat: latLng[0],
                             lng: latLng[1],
-                            bascinetNo: readyBascinetsNo,
-                            materialNo: MaterialsNeededNo,
+                            bascinet: userData[userId].bascinet,
+                            material: userData[userId].material,
                             comments: additionalComments,
                         });
 
@@ -718,54 +851,44 @@ var index = function () {
                         marker._myId = userId;
                     }
 
-                    var hospitalData = data.hospitals;
+                    var pins = data.pins;
 
-                    for (var hospitalId in hospitalData) {
-                        latLng = hospitalData[hospitalId].latLng.split(',');
-                        name = hospitalData[hospitalId].name;
-                        description = hospitalData[hospitalId].description;
-                        icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                    for (var pinID in pins) {
+                        latLng = pins[pinID].latLng.split(',');
+                        var type = pins[pinID].type;
+                        if (type === "hospital") {
+                            icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                        } else if (type === "magazine") {
+                            icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+                        }
 
                         htmlElement = createBindPopup({
-                            type: "hospital",
-                            name: name,
-                            description: description,
+                            type: type,
+                            name: pins[pinID].name,
+                            description: pins[pinID].description,
                             lat: latLng[0],
                             lng: latLng[1],
+                            bascinet: pins[pinID].bascinet,
+                            material: pins[pinID].material,
+                            bascinetOwn: data.bascinet,
+                            pinID: pinID,
                         });
 
+                        var minWidth = 0,
+                            maxWidth = 300;
+                        if (USER_PRV === 2) {
+                            minWidth = 400;
+                            maxWidth = 0;
+                        }
+
                         popup = L.popup({
-                            maxWidth: 300,
+                            minWidth: minWidth,
+                            maxWidth: maxWidth,
                             className: 'customPopup',
                         }).setContent(htmlElement);
 
                         marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(mymap);
-                        marker._myId = hospitalId;
-                    }
-
-                    var magazineData = data.magazines;
-
-                    for (var magazineID in magazineData) {
-                        latLng = magazineData[magazineID].latLng.split(',');
-                        name = magazineData[magazineID].name;
-                        description = magazineData[magazineID].description;
-                        icon = createMyIcon(IMG_URL + "/pin_magazine.png");
-
-                        htmlElement = createBindPopup({
-                            type: "magazine",
-                            name: name,
-                            description: description,
-                            lat: latLng[0],
-                            lng: latLng[1],
-                        });
-
-                        popup = L.popup({
-                            maxWidth: 200,
-                            className: 'customPopup',
-                        }).setContent(htmlElement);
-
-                        marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(mymap);
-                        marker._myId = magazineID;
+                        marker._myId = pinID;
                     }
                 }
 
@@ -796,7 +919,9 @@ var index = function () {
                         },
                         success: function (data) {
                             if (data.success) {
-                                location.reload();
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1E3);
                             }
 
                             if (data.alert) {
@@ -943,7 +1068,7 @@ var index = function () {
                                 $mapContainer.removeClass("loading");
                             }
                         });
-                    }, 15E2);
+                    }, 1E3);
                 });
             }
         })();
@@ -1105,6 +1230,40 @@ var index = function () {
 
         var $body = $("body");
         $body.removeClass('no_scroll');
+    }
+
+    function toggleMapInteraction(enable, map, marker) {
+        enable = enable | false;
+        if (enable) {
+            if (!mobileAndTabletCheck()) {
+                map.dragging.enable();
+            }
+            if (map.tap) {
+                map.tap.enable();
+            }
+            map.touchZoom.enable();
+            map.doubleClickZoom.enable();
+            map.scrollWheelZoom.enable();
+            map.boxZoom.enable();
+            map.keyboard.enable();
+            if (typeof marker !== "undefined") {
+                marker.dragging.enable()
+            }
+        } else {
+            map.dragging.disable();
+            if (map.tap) {
+                map.tap.disable();
+            }
+            map.touchZoom.disable();
+            map.doubleClickZoom.disable();
+            map.scrollWheelZoom.disable();
+            map.boxZoom.disable();
+            map.keyboard.disable();
+            if (typeof marker !== "undefined") {
+                marker.dragging.disable()
+            }
+            map.panTo(marker.getLatLng());
+        }
     }
 
     $.fn.isInViewport = function () {

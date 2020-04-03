@@ -101,17 +101,7 @@ use classes\User;
                                class="form-control validate>" readonly
                                value="<?= $user->getAddress()->flat; ?>">
                     </div>
-                    <div class="col-12 mt-4">
-                        <h4 class="title">Twoja lokalizacja</h4>
-                    </div>
-                    <div class="col-12 mt-4">
-                        <input type="hidden" name="location" value="<?= $user->getAddress()->location; ?>">
-                        <div id="addressMap"></div>
-                        <div class="load">
-                            <img src="<?= IMG_URL; ?>/loading.gif" alt="loading">
-                        </div>
-                    </div>
-                    <div class="col-12 mt-3 mb-5">
+                    <div class="col-12 mt-3">
                         <?php if (USER_PRV === User::USER_NO_CONFIRM) { ?>
                             <button class="btn btn-red right no-confirm mx-0">Edytuj</button>
                         <?php } else { ?>
@@ -119,6 +109,16 @@ use classes\User;
                             <button type="submit" class="btn btn-red right mx-0">Zapisz</button>
                             <button class="btn btn-white right cancel mr-3">Anuluj</button>
                         <?php } ?>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <h4 class="title">Twoja lokalizacja</h4>
+                    </div>
+                    <div class="col-12 mt-4 mb-5">
+                        <input type="hidden" name="location" value="<?= $user->getAddress()->location; ?>">
+                        <div id="addressMap"></div>
+                        <div class="load">
+                            <img src="<?= IMG_URL; ?>/loading.gif" alt="loading">
+                        </div>
                     </div>
                 </div>
             </form>

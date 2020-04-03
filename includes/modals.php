@@ -72,7 +72,7 @@ if (USER_PRV === User::USER_PRODUCER) { ?>
 <?php }
 
 if (USER_PRV === User::USER_DRIVER) { ?>
-    <div class="modal fade custom-modal functionModal" id="driverModal" tabindex="-1" role="dialog"
+    <div class="modal fade custom-modal" id="driverModal" tabindex="-1" role="dialog"
          aria-labelledby="driverLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">

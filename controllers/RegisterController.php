@@ -358,14 +358,14 @@ HTML;
         $priv = $get['type'] ?? USER_PRV;
         $priv = intval($priv);
 
-        if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
-            $data = [
-                'success' => false,
-                'alert'   => "warning",
-                'message' => "Pole 'Nazwa' nie może być puste",
-                'invalid' => $invalid,
-            ];
-        } else {
+//        if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
+//            $data = [
+//                'success' => false,
+//                'alert'   => "warning",
+//                'message' => "Pole 'Nazwa' nie może być puste",
+//                'invalid' => $invalid,
+//            ];
+//        } else {
             if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
                 $data = [
                     'success' => false,
@@ -374,7 +374,7 @@ HTML;
                     'invalid' => $invalid,
                 ];
             }
-        }
+//        }
 
         if ($data['success']) {
             if (empty($get['pinName'])) {
@@ -400,7 +400,7 @@ HTML;
                 $data = [
                     'success' => false,
                     'alert'   => "danger",
-                    'message' => "Wystąpił nieznany błąd. Proszę spróbować ponownie.",
+                    'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
                     'invalid' => $invalid,
                 ];
             }

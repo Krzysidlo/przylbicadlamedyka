@@ -66,7 +66,7 @@ class Frozen
      * @return array
      * @throws Exception
      */
-    public static function getAll(?string $usersID = NULL, bool $delivered = true, bool $deleted = false): array
+    public static function getAll(?string $usersID = NULL, bool $delivered = false, bool $deleted = false): array
     {
         $sql      = "SELECT GROUP_CONCAT(DISTINCT f.`id` SEPARATOR ',') AS `ids`, GROUP_CONCAT(DISTINCT f.`users_id`) AS `driver`,  GROUP_CONCAT(DISTINCT r.`users_id`) AS `producer`, f.`date` AS `date`, SUM(r.`bascinet`) AS `bascinet`, SUM(r.`material`) AS `material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id`";
         $whereAnd = "WHERE";
@@ -94,7 +94,7 @@ class Frozen
         return $return;
     }
 
-    public static function create(string $usersID, array $requestsArr, DateTime $date, string $action = "both", string $producerID): array
+    public static function create(string $driverID, array $requestsArr, DateTime $date, string $action = "both", string $producerID): array
     {
         if (empty($requestsArr) || (empty($requestsArr['bascinet']) && empty($requestsArr['material']))) {
             return [
@@ -138,7 +138,7 @@ class Frozen
                                 continue;
                             }
                         }
-                        $success     &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$usersID}', '{$dbDate}', '{$requestsID}');");
+                        $success     &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$driverID}', '{$dbDate}', '{$requestsID}');");
                         $frozenIDS[] = fs::$mysqli->insert_id;
                         if ($success) {
                             $bascinetQuantity += intval(fs::$mysqli->query("SELECT `bascinet` FROM `requests` WHERE `id` = {$requestsID}")->fetch_row()[0] ?? 0);
@@ -154,7 +154,7 @@ class Frozen
                                 continue;
                             }
                         }
-                        $success     &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$usersID}', '{$dbDate}', '{$requestsID}');");
+                        $success     &= fs::$mysqli->query("INSERT INTO `frozen` (`users_id`, `date`, `requests_id`) VALUES ('{$driverID}', '{$dbDate}', '{$requestsID}');");
                         $frozenIDS[] = fs::$mysqli->insert_id;
                         if ($success) {
                             $materialQuantity += intval(fs::$mysqli->query("SELECT `material` FROM `requests` WHERE `id` = {$requestsID}")->fetch_row()[0] ?? 0);
@@ -169,21 +169,28 @@ class Frozen
         if ($success) {
             try {
                 $activityDate = new DateTime();
-                $user         = new User($usersID);
+                $driver       = new User($driverID);
+                $producer     = new User($producerID);
                 $frozenDate   = $date->format("H:i - d.m.Y");
                 $frozenIDS    = implode(",", $frozenIDS);
                 switch ($action) {
                     case 'bascinet':
-                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic około <span class='delivery'>{$frozenDate}</span>";
+                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic około <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
+                        $message = "Zadeklarowano odbiór <span class='quantity'>{$bascinetQuantity}</span> przyłbic od <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                     case 'material':
-                            $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
-                            Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
+                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
+                        $message = "Zadeklarowano dostarczenie <span class='quantity'>{$materialQuantity}</span> materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                     case 'both':
-                        $message = "<span class='name'>{$user->name}</span> (tel. {$user->tel}) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
+                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
+                        $message = "Zadeklarowano odbiór <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczenie <span class='quantity'>{$materialQuantity}</span> materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
+                        Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                 }
             } catch (Exception $e) {
@@ -202,6 +209,28 @@ class Frozen
             ];
         }
         return $data;
+    }
+
+    public static function count(string $usersID, string $type = "delivered"): int
+    {
+        $return = 0;
+        switch ($type) {
+            case "bascinet":
+                $sql = "SELECT SUM(r.`bascinet`) FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`delivered` = 0 AND r.`deleted` = 0;";
+                break;
+            case "trips":
+                $sql = "SELECT count(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
+                break;
+            default:
+                $sql = "SELECT 0";
+                break;
+        }
+
+        if ($query = fs::$mysqli->query($sql)) {
+            $return = intval($query->fetch_row()[0] ?? 0);
+        }
+
+        return $return;
     }
 
 //    public static function checkRequestedQuantity(array $requestsArr)
@@ -275,34 +304,6 @@ class Frozen
 //        }
 //    }
 
-    public static function count(string $usersID, string $type = "delivered"): int
-    {
-        $return = 0;
-        switch ($type) {
-//            case "material":
-//                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `deleted` = 0;";
-//                break;
-//            case "ready":
-//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0;";
-//                break;
-//            case "delivered":
-//                $sql = "SELECT SUM(`bascinet`) FROM `requests` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0;";
-//                break;
-            case "trips":
-                $sql = "SELECT count(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
-                break;
-            default:
-                $sql = "SELECT 0";
-                break;
-        }
-
-        if ($query = fs::$mysqli->query($sql)) {
-            $return = intval($query->fetch_row()[0] ?? 0);
-        }
-
-        return $return;
-    }
-
     public static function findByRequestID(int $requestsID): bool
     {
         $sql = "SELECT 1 FROM `frozen` WHERE `requests_id` = {$requestsID} AND `deleted` = 0";
@@ -313,6 +314,29 @@ class Frozen
         return false;
     }
 
+    public function deliver(): bool
+    {
+        $success = true;
+
+        foreach ($this->id as $frozenID) {
+            if (!$success) {
+                break;
+            }
+
+            if ($query = fs::$mysqli->query("SELECT `requests_id` FROM `frozen` WHERE `id` = {$frozenID};")) {
+                $requestsID = $query->fetch_row()[0] ?? NULL;
+                $success &= $requestsID !== NULL;
+                if ($success &= !!fs::$mysqli->query("UPDATE `requests` SET `delivered` = 1 WHERE `id` = {$requestsID}")) {
+                    $success &= !!fs::$mysqli->query("UPDATE `frozen` SET `delivered` = 1 WHERE `id` = {$frozenID};");
+                }
+            } else {
+                $success = false;
+            }
+        }
+
+        return $success;
+    }
+
     public function delete(bool $activity = true): bool
     {
         $id  = implode(",", $this->id);
@@ -321,7 +345,7 @@ class Frozen
         $success = !!fs::$mysqli->query($sql);
 
         if ($success && $activity) {
-            $sql = "UPDATE `activities` SET `deleted` = 1 WHERE '{$id}' LIKE CONCAT('%', `frozen_id`, '%');";
+            $sql     = "UPDATE `activities` SET `deleted` = 1 WHERE '{$id}' LIKE CONCAT('%', `frozen_id`, '%');";
             $success &= !!fs::$mysqli->query($sql);
         }
 

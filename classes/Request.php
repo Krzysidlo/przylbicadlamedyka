@@ -194,7 +194,7 @@ class Request
     public static function getIdsByUserID(string $usersID): array
     {
         $return = ['bascinet' => [], 'material' => []];
-        $sql    = "SELECT DISTINCT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
+        $sql    = "SELECT DISTINCT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_assoc()) {
                 if ($result['bascinet'] !== NULL) {
