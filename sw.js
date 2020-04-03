@@ -1,6 +1,6 @@
 self.skipWaiting();
 
-const version = 1,
+const version = 4,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
