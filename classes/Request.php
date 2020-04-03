@@ -159,7 +159,7 @@ class Request
         $return = 0;
         switch ($type) {
             case "material":
-                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `delivered` = 0 `deleted` = 0";
+                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `delivered` = 0 AND `deleted` = 0";
                 if ($usersID !== NULL) {
                     $sql .= " AND `users_id` = '{$usersID}'";
                 }

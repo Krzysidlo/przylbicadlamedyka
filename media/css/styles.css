@@ -203,7 +203,12 @@ body .modal.custom-modal form input {
 }
 body .modal.custom-modal#driverModal .modal-body {
   color: #757575;
-  padding-bottom: 30px;
+  padding-top: 0;
+}
+body .modal.custom-modal#driverModal .modal-body .activityBox {
+  width: calc(100% + 30px);
+  margin-left: -15px;
+  padding: 30px;
 }
 body .modal.custom-modal#driverModal .modal-body .activityBox:not(:last-child) {
   border-bottom: solid 1px #E4E5EA;

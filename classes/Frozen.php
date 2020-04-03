@@ -218,13 +218,13 @@ class Frozen
         $return = 0;
         switch ($type) {
             case "bascinet":
-                $sql = "SELECT SUM(r.`bascinet`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0;";
+                $sql = "SELECT SUM(r.`bascinet`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`delivered` = 1 AND r.`deleted` = 0;";
                 break;
             case "trips":
                 $sql = "SELECT COUNT(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
                 break;
             case "material":
-                $sql = "SELECT SUM(r.`material`) FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`deleted` = 0;";
+                $sql = "SELECT SUM(r.`material`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0;";
                 break;
             default:
                 $sql = "SELECT 0";

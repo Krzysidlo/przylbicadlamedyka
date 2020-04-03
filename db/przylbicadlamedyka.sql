@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Czas generowania: 03 Kwi 2020, 21:25
+-- Czas generowania: 03 Kwi 2020, 22:05
 -- Wersja serwera: 8.0.19-0ubuntu0.19.10.3
 -- Wersja PHP: 7.4.4
 
@@ -157,6 +157,16 @@ CREATE TABLE `pins` (
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
+
+--
+-- Zrzut danych tabeli `pins`
+--
+
+INSERT INTO `pins` (`id`, `name`, `description`, `latLng`, `type`, `bascinet`, `material`, `deleted`, `created_at`) VALUES
+(1, 'Nowa Siedziba Szpitala Uniwersyteckiego', 'ul. Macieja Jakubowskiego 2 Po podjechaniu pod szpital należy skierować się pod wejście nr. 3 i zadzwonić do p. Marii Włodkowskiej (rzecznik prasowy SU). Najlepiej przypomnieć się wtedy z prośbą o zabranie pieczątki i długopisu przez pracownika szpitala, który będzie odbierał przyłbice. Osoba: p. Maria Włodkowska Tel.: 785 790 319', '50.00850975,19.99970164986864', 'hospital', 4000, NULL, 0, '2020-04-03 19:57:37'),
+(2, 'Uniwersytecki Szpital Dziecięcy', 'ul. Wielicka 265 Pani rzecznik Katarzyna Pokorna-Hryniszyn będzie do 14:00 w USD, jeśli do tego czasu kierowca podjedzie pod szpital to prosimy dzwonić właśnie do Niej. Jeśli kierowca będzie pod Szpitalem po godzinie 14:00 to prosimy o zostawienie przyłbic w punkcie ochrony, a pan ochroniarz będzie poinformowany, że ma podejść z papierem do dyrekcji i tam przybiją pieczątkę na naszych drukach. Osoba: p. Katarzyna Pokorna-Hryniszyn Tel.: 600 410 792', '50.0116536,20.0021265', 'hospital', 4000, NULL, 0, '2020-04-03 19:57:37'),
+(3, 'Magazyn 1', 'ul. Kącik 13/13', '50.047141,19.9573196', 'magazine', NULL, 5000, 0, '2020-04-03 19:58:28'),
+(4, 'Magazyn 2', 'Os. Centrum E 21/4', '50.0705444,20.0383246', 'magazine', NULL, 5000, 0, '2020-04-03 19:58:28');
 
 -- --------------------------------------------------------
 
@@ -355,7 +365,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT dla tabeli `pins`
 --
 ALTER TABLE `pins`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT dla tabeli `requests`

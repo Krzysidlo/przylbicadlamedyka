@@ -46,8 +46,17 @@ class IndexController extends PageController
                 </div>
             </div>
 HTML;
-
         }
+
+        $data = [
+            'activities' => [],
+            'material'   => 0,
+            'bascinet'   => 0,
+            'deliveredM' => 0,
+            'deliveredB' => 0,
+            'ready'      => 0,
+            'delivered'  => 0,
+        ];
 
         if (USER_PRV === User::USER_PRODUCER) {
             $data = [
@@ -65,6 +74,10 @@ HTML;
                 'deliveredB' => Hosmag::count(USER_ID, "bascinet"),
             ];
         }
+
+        $user = new User;
+
+        $data['userPrv'] = $user->getPrivilege();
 
         return parent::content(array_merge($args, $data));
     }
