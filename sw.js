@@ -1,5 +1,3 @@
-self.skipWaiting();
-
 const version = 1,
     cacheName = `przylbica-dla-medyka-${version}`;
 
