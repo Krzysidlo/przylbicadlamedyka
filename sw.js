@@ -1,6 +1,6 @@
 self.skipWaiting();
 
-const version = 2,
+const version = 1,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
@@ -49,17 +49,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    let request = "internet";
     event.respondWith(
         caches.open(cacheName).then(cache => {
             return cache.match(event.request.url).then(response => {
-                if (response) {
-                    request = "cached";
-                    return response;
-                }
-                return fetch(event.request.url);
+                return fetch(event.request.url) || response;
             })
         })
     );
-    console.log(request, cacheName);
 });
