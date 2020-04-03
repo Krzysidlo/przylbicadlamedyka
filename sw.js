@@ -9,6 +9,8 @@ self.addEventListener('install', event => {
             return cache.addAll([
                 '/media/css/styles.css',
                 '/media/css/styles.min.css',
+                '/media/js/index.js',
+                '/media/js/index.min.js',
                 '/media/js/external.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
@@ -27,6 +29,7 @@ self.addEventListener('install', event => {
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/font/roboto/Roboto-Regular.woff2',
                 'https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap4.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.min.css',
+                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/css/select2.min.css',
                 'https://fonts.googleapis.com/icon?family=Material+Icons',
                 'https://unpkg.com/leaflet@1.6.0/dist/leaflet.css'
             ]);
