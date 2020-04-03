@@ -6,7 +6,7 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 
 use classes\Functions as fs;
 
-//Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
+//Tryb developerski - wyświetlanie błędów oraz korzystanie z nieskompilowanego js-a
 define('DEV_MODE', false);
 
 if (DEV_MODE) {
@@ -16,8 +16,8 @@ if (DEV_MODE) {
 }
 
 //Use local database
-//$DB_HOST = 'localhost';
-$DB_HOST = '185.243.55.171';
+$DB_HOST = 'localhost';
+//$DB_HOST = '185.243.55.171';
 $DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';

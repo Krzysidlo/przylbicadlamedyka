@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Czas generowania: 02 Kwi 2020, 16:39
+-- Czas generowania: 03 Kwi 2020, 21:25
 -- Wersja serwera: 8.0.19-0ubuntu0.19.10.3
 -- Wersja PHP: 7.4.4
 
@@ -34,8 +34,8 @@ CREATE TABLE `activities` (
   `users_id` varchar(256) NOT NULL,
   `type` enum('action','notification') NOT NULL,
   `requests_id` int DEFAULT NULL,
-  `frozen_id` varchar(128) CHARACTER SET latin2 COLLATE latin2_general_ci DEFAULT NULL,
-  `date` timestamp NOT NULL,
+  `frozen_id` varchar(128) DEFAULT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `message` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
@@ -89,48 +89,17 @@ CREATE TABLE `frozen` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `hospitals`
+-- Struktura tabeli dla tabeli `hos_mag`
 --
 
-CREATE TABLE `hospitals` (
+CREATE TABLE `hos_mag` (
   `id` int NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci,
-  `location` varchar(256) NOT NULL,
+  `pins_id` int NOT NULL,
+  `users_id` varchar(256) NOT NULL,
+  `quantity` int NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
-
---
--- Zrzut danych tabeli `hospitals`
---
-
-INSERT INTO `hospitals` (`id`, `name`, `description`, `location`, `deleted`, `created_at`) VALUES
-(1, 'Nowa Siedziba Szpitala Uniwersyteckiego', 'ul. Macieja Jakubowskiego 2 Po podjechaniu pod szpital należy skierować się pod wejście nr. 3 i zadzwonić do p. Marii Włodkowskiej (rzecznik prasowy SU). Najlepiej przypomnieć się wtedy z prośbą o zabranie pieczątki i długopisu przez pracownika szpitala, który będzie odbierał przyłbice. Osoba: p. Maria Włodkowska Tel.: 785 790 319', '50.00850975,19.99970164986864', 0, '2020-04-01 10:34:16'),
-(2, 'Uniwersytecki Szpital Dziecięcy', 'ul. Wielicka 265 Pani rzecznik Katarzyna Pokorna-Hryniszyn będzie do 14:00 w USD, jeśli do tego czasu kierowca podjedzie pod szpital to prosimy dzwonić właśnie do Niej. Jeśli kierowca będzie pod Szpitalem po godzinie 14:00 to prosimy o zostawienie przyłbic w punkcie ochrony, a pan ochroniarz będzie poinformowany, że ma podejść z papierem do dyrekcji i tam przybiją pieczątkę na naszych drukach. Osoba: p. Katarzyna Pokorna-Hryniszyn Tel.: 600 410 792', '50.0116536,20.0021265', 0, '2020-04-01 10:34:16');
-
--- --------------------------------------------------------
-
---
--- Struktura tabeli dla tabeli `magazines`
---
-
-CREATE TABLE `magazines` (
-  `id` int NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci,
-  `location` varchar(256) NOT NULL,
-  `deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin2;
-
---
--- Zrzut danych tabeli `magazines`
---
-
-INSERT INTO `magazines` (`id`, `name`, `description`, `location`, `deleted`, `created_at`) VALUES
-(1, 'Magazyn 1', 'ul. Kącik 13/13', '50.047141,19.9573196', 0, '2020-04-02 14:07:19'),
-(2, 'Magazyn 2', 'Os. Centrum E 21/4', '50.0705444,20.0383246', 0, '2020-04-02 14:07:19');
 
 -- --------------------------------------------------------
 
@@ -171,12 +140,23 @@ CREATE TABLE `options_page` (
   `value` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
 
+-- --------------------------------------------------------
+
 --
--- Zrzut danych tabeli `options_page`
+-- Struktura tabeli dla tabeli `pins`
 --
 
-INSERT INTO `options_page` (`name`, `value`) VALUES
-('CONST_MODE', 'false');
+CREATE TABLE `pins` (
+  `id` int NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `latLng` varchar(256) NOT NULL,
+  `type` enum('hospital','magazine') NOT NULL,
+  `bascinet` int DEFAULT NULL,
+  `material` int DEFAULT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin2;
 
 -- --------------------------------------------------------
 
@@ -278,16 +258,12 @@ ALTER TABLE `frozen`
   ADD KEY `request_id` (`requests_id`);
 
 --
--- Indeksy dla tabeli `hospitals`
+-- Indeksy dla tabeli `hos_mag`
 --
-ALTER TABLE `hospitals`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeksy dla tabeli `magazines`
---
-ALTER TABLE `magazines`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `hos_mag`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pins_id` (`pins_id`),
+  ADD KEY `users_id` (`users_id`);
 
 --
 -- Indeksy dla tabeli `notifications`
@@ -309,6 +285,12 @@ ALTER TABLE `options`
 --
 ALTER TABLE `options_page`
   ADD PRIMARY KEY (`name`);
+
+--
+-- Indeksy dla tabeli `pins`
+--
+ALTER TABLE `pins`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeksy dla tabeli `privileges`
@@ -358,22 +340,22 @@ ALTER TABLE `frozen`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT dla tabeli `hospitals`
+-- AUTO_INCREMENT dla tabeli `hos_mag`
 --
-ALTER TABLE `hospitals`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT dla tabeli `magazines`
---
-ALTER TABLE `magazines`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `hos_mag`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT dla tabeli `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT dla tabeli `pins`
+--
+ALTER TABLE `pins`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT dla tabeli `requests`
@@ -404,6 +386,13 @@ ALTER TABLE `address`
 ALTER TABLE `frozen`
   ADD CONSTRAINT `frozen_ibfk_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `frozen_ibfk_2` FOREIGN KEY (`requests_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Ograniczenia dla tabeli `hos_mag`
+--
+ALTER TABLE `hos_mag`
+  ADD CONSTRAINT `hos_mag_ibfk_1` FOREIGN KEY (`pins_id`) REFERENCES `pins` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `hos_mag_ibfk_2` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `notifications`

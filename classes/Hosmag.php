@@ -39,9 +39,13 @@ class Hosmag
         }
     }
 
-    public static function create(int $pinsID, int $quantity): array
+    public static function create(int $pinsID, int $quantity, string $usersID = NULL): array
     {
-        $sql = "INSERT INTO `hos_mag` (`pins_id`, `quantity`) VALUES ({$pinsID}, {$quantity});";
+        if ($usersID === NULL) {
+            $user = new User();
+            $usersID = $user->id;
+        }
+        $sql = "INSERT INTO `hos_mag` (`pins_id`, `users_id`, `quantity`) VALUES ({$pinsID}, '{$usersID}', {$quantity});";
 
         if (!!fs::$mysqli->query($sql)) {
             return [
@@ -60,22 +64,26 @@ class Hosmag
 
     public static function deliverBascinet(string $usersID): bool
     {
-        $success = true;
-        $sql     = "SELECT f.`id` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`delivered` = 0 AND r.`deleted` = 0 AND r.`material` IS NULL;";
+        $sql       = "SELECT f.`id` FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0 AND r.`material` IS NULL;";
+        $frozenArr = [];
+
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_assoc()) {
-                try {
-                    $frozenID = filter_var($result['id'], FILTER_SANITIZE_NUMBER_INT);
-                    $frozen   = new Frozen($frozenID);
-                    $success  &= $frozen->deliver();
-                } catch (Exception $e) {
-                    fs::log("Error: " . $e->getMessage());
-                    $success = false;
-                }
+                $frozenArr[] = filter_var($result['id'], FILTER_SANITIZE_NUMBER_INT);
             }
         } else {
             return false;
         }
+
+        try {
+            $frozenIDs = implode(",", $frozenArr);
+            $frozen  = new Frozen($frozenIDs);
+            $success = $frozen->deliver();
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            $success = false;
+        }
+
         return $success;
     }
 
@@ -103,6 +111,35 @@ class Hosmag
                     $return[] = new self($id);
                 }
             }
+        }
+
+        return $return;
+    }
+
+    public static function count(string $usersID, $type = "material"): int
+    {
+        $return = 0;
+
+        switch ($type) {
+            case 'material':
+                $sql = "SELECT SUM(h.`quantity`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`deleted` = 0 AND p.`type` = 'magazine' AND p.`deleted` = 0";
+
+                if ($query = fs::$mysqli->query($sql)) {
+                    $collectedMaterial = intval($query->fetch_row()[0] ?? 0);
+                    $delivredMaterial  = Frozen::count($usersID, "material");
+                    $return = $collectedMaterial - $delivredMaterial;
+                    if ($return < 0) {
+                        $return = 0;
+                    }
+                }
+                break;
+            case 'bascinet':
+                $sql = "SELECT SUM(h.`quantity`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`deleted` = 0 AND p.`type` = 'hospital' AND p.`deleted` = 0";
+
+                if ($query = fs::$mysqli->query($sql)) {
+                    $return = intval($query->fetch_row()[0] ?? 0);
+                }
+                break;
         }
 
         return $return;

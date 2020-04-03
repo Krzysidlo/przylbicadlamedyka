@@ -1,7 +1,7 @@
 {
   "name": "Przyłbica dla medyka",
   "short_name": "Przyłbica",
-  "theme_color": "#b7274b",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "fullscreen",
   "Scope": "/",

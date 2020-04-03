@@ -33,21 +33,34 @@ var index = function () {
             let $confirmBtn = $("body .activityBox.trip button.confirm");
 
             $confirmBtn.on('click', function (e) {
-                let frozenID = $(this).data('id');
+                e.preventDefault();
+
+                let $btn = $(this),
+                    $box = $btn.parents(".activityBox.trip"),
+                    frozenID = $btn.data('frozen'),
+                    requestsID = $btn.data('requests'),
+                    method = "both";
+
+                if (frozenID === 0) {
+                    method = "bascinet";
+                } else if (requestsID === 0) {
+                    method = "material";
+                }
+                console.log(method, frozenID, requestsID);
 
                 $.ajax({
-                    url: "/ajax/map/deliverMaterial?ajax=true",
+                    url: `/ajax/map/${method}?ajax=true`,
                     type: "POST",
-                    data: {frozenID: frozenID},
+                    data: {frozenID: frozenID, requestsID: requestsID},
                     dataType: "JSON",
                     beforeSend: function () {
                         showLoading();
                     },
                     success: function (data) {
                         if (data.success) {
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1E3);
+                            $box.fadeOut(function () {
+                                $(this).remove();
+                            });
                         }
 
                         if (data.alert) {
@@ -532,12 +545,10 @@ var index = function () {
                         if (USER_PRV === 2) {
                             var type = "odbiór",
                                 longType = "Potwierdź odbiór materiału z magazynu",
-                                max = 50,
+                                max = 600,
                                 ineract = true;
 
-                            if (info.material) {
-                                max = info.material;
-                            } else {
+                            if (!info.material) {
                                 ineract = false;
                                 longType = "Informacje";
                             }

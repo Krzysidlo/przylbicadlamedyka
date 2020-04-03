@@ -9,7 +9,7 @@ use classes\Functions as fs;
 class Request
 {
     public int      $id;
-    public User     $user;
+    public User     $producer;
     public string   $latLng;
     public ?int     $bascinet;
     public ?int     $material;
@@ -36,8 +36,8 @@ class Request
 
         if ($info) {
             $this->id         = intval($info['id']);
-            $this->user       = new User($info['users_id']);
-            $this->latLng     = trim($info['latLng'] ?? $this->user->getAddress()->location);
+            $this->producer   = new User($info['users_id']);
+            $this->latLng     = trim($info['latLng'] ?? $this->producer->getAddress()->location);
             $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
             $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->comments   = !empty($info['comments']) ? trim($info['comments']) : NULL;
@@ -102,10 +102,10 @@ class Request
                 $date    = new DateTime($date);
                 $message = "";
                 if ($bascinet !== "NULL") {
-                    $message = "Zgłoszono {$bascinet} gotowych przyłbic do odbioru";
+                    $message = "Zgłoszono <span class='quantity'>{$bascinet}</span> gotowych przyłbic do odbioru";
                 } else {
                     if ($material !== "NULL") {
-                        $message = "Zgłoszono zapotrzebowanie na {$material} materiału";
+                        $message = "Zgłoszono zapotrzebowanie na <span class='quantity'>{$material}</span> sztuk materiału";
                     }
                 }
                 Activity::create($usersID, $date, $message, "action", $requestsID);
@@ -159,7 +159,7 @@ class Request
         $return = 0;
         switch ($type) {
             case "material":
-                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `deleted` = 0";
+                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `delivered` = 0 `deleted` = 0";
                 if ($usersID !== NULL) {
                     $sql .= " AND `users_id` = '{$usersID}'";
                 }
@@ -207,6 +207,11 @@ class Request
         }
 
         return $return;
+    }
+
+    public function deliver(): bool
+    {
+        return !!fs::$mysqli->query("UPDATE `requests` SET `delivered` = 1 WHERE `id` = {$this->id};");
     }
 
     public function delete(bool $activity = true): bool

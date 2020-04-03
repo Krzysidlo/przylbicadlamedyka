@@ -298,7 +298,7 @@ class User
      * @return array
      * @throws Exception
      */
-    public static function getAll(bool $all = false, bool $noaccess = false, int $competitionsID = NULL, int $groupsID = NULL): array
+    public static function getAll(bool $all = false, bool $noaccess = false): array
     {
         $return = [];
 
@@ -313,17 +313,8 @@ class User
             while ($result = $query->fetch_assoc()) {
                 $usersID = $result['id'];
                 $user    = new self($usersID);
-                if (!$noaccess && $user->getPrivilege() == 0) {
+                if (!$noaccess && $user->getPrivilege() == User::USER_NO_CONFIRM) {
                     continue;
-                }
-                if ($competitionsID !== NULL && fs::getOption('competition', $usersID) !== $competitionsID) {
-                    continue;
-                }
-                if ($groupsID !== NULL && $groupsID > 1) {
-                    $group = Group::getOne($groupsID);
-                    if (!in_array($usersID, $group->users)) {
-                        continue;
-                    }
                 }
                 $return[$usersID] = $user;
             }

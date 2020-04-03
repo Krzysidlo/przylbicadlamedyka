@@ -43,12 +43,6 @@ class Activity
             } else {
                 $this->request = NULL;
             }
-
-            if (!empty($info['frozen_id'])) {
-                $this->frozen = new Frozen($info['frozen_id']);
-            } else {
-                $this->frozen = NULL;
-            }
         } else {
             throw new Exception("No activity info found with id=[{$activityID}]");
         }

@@ -473,7 +473,7 @@ HTML;
 
         $this->title = "Zarejestruj się";
 
-        switch($this->view) {
+        switch ($this->view) {
             case 'login':
                 $this->title = "Zaloguj się";
                 break;
@@ -501,7 +501,7 @@ HTML;
         }
 
         try {
-            $delivered = Request::count();
+            $delivered = Request::count(NULL, "delivered");
         } catch (Exception $e) {
             $delivered = 0;
         }

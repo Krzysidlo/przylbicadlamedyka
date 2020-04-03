@@ -9,7 +9,8 @@ use classes\Functions as fs;
 class Frozen
 {
     public array    $id;
-    public User     $user;
+    public string   $requests;
+    public User     $driver;
     public User     $producer;
     public DateTime $date;
     public int      $bascinet = 0;
@@ -31,9 +32,9 @@ class Frozen
             if (is_numeric($arrayID)) {
                 $frozenID = intval($arrayID);
 
-                $sql = "SELECT f.`id`, f.`users_id` AS `driver`, r.`users_id` AS `producer`, f.`date`, r.`bascinet`, r.`material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`id` = {$frozenID};";
+                $sql = "SELECT f.`id`, f.`users_id` AS `driver`, r.`users_id` AS `producer`, f.`date`, r.`id` AS `requests`, r.`bascinet`, r.`material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`id` = {$frozenID};";
             } else {
-                $sql = "SELECT GROUP_CONCAT(DISTINCT f.`id` SEPARATOR ',') AS `id`, GROUP_CONCAT(DISTINCT f.`users_id`) AS `driver`,  GROUP_CONCAT(DISTINCT r.`users_id`) AS `producer`, f.`date` AS `date`, SUM(r.`bascinet`) AS `bascinet`, SUM(r.`material`) AS `material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`id` IN ({$arrayID}) GROUP BY f.`date`;";
+                $sql = "SELECT GROUP_CONCAT(DISTINCT f.`id` SEPARATOR ',') AS `id`, GROUP_CONCAT(DISTINCT f.`users_id`) AS `driver`,  GROUP_CONCAT(DISTINCT r.`users_id`) AS `producer`, f.`date`, GROUP_CONCAT(DISTINCT r.`id` SEPARATOR ',') AS `requests`, SUM(r.`bascinet`) AS `bascinet`, SUM(r.`material`) AS `material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`id` IN ({$arrayID}) GROUP BY f.`date`;";
             }
             if ($query = fs::$mysqli->query($sql)) {
                 $info = $query->fetch_assoc() ?? false;
@@ -43,7 +44,8 @@ class Frozen
 
         if ($info) {
             $this->id       = explode(",", $frozenIDs);
-            $this->user     = new User($info['driver']);
+            $this->requests = (string)$info['requests'];
+            $this->driver   = new User($info['driver']);
             $this->producer = new User($info['producer']);
             $this->date     = new DateTime($info['date']);
             $this->bascinet = intval($info['bascinet']);
@@ -68,7 +70,7 @@ class Frozen
      */
     public static function getAll(?string $usersID = NULL, bool $delivered = false, bool $deleted = false): array
     {
-        $sql      = "SELECT GROUP_CONCAT(DISTINCT f.`id` SEPARATOR ',') AS `ids`, GROUP_CONCAT(DISTINCT f.`users_id`) AS `driver`,  GROUP_CONCAT(DISTINCT r.`users_id`) AS `producer`, f.`date` AS `date`, SUM(r.`bascinet`) AS `bascinet`, SUM(r.`material`) AS `material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id`";
+        $sql      = "SELECT GROUP_CONCAT(DISTINCT f.`id` SEPARATOR ',') AS `ids`, GROUP_CONCAT(DISTINCT f.`users_id`) AS `driver`,  GROUP_CONCAT(DISTINCT r.`users_id`) AS `producer`, f.`date`, GROUP_CONCAT(DISTINCT r.`id` SEPARATOR ',') AS `requests`, SUM(r.`bascinet`) AS `bascinet`, SUM(r.`material`) AS `material` FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id`";
         $whereAnd = "WHERE";
         if ($usersID !== NULL) {
             $sql      .= " WHERE f.`users_id` = '{$usersID}'";
@@ -181,15 +183,15 @@ class Frozen
                         Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                     case 'material':
-                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
+                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) dostarczy Ci <span class='quantity'>{$materialQuantity}</span> sztuk materiału około <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
-                        $message = "Zadeklarowano dostarczenie <span class='quantity'>{$materialQuantity}</span> materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
+                        $message = "Zadeklarowano dostarczenie <span class='quantity'>{$materialQuantity}</span> sztuk materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                     case 'both':
-                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczy Ci <span class='quantity'>{$materialQuantity}</span> materiału około <span class='delivery'>{$frozenDate}</span>";
+                        $message = "<span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>) odbierze od Ciebie <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczy Ci <span class='quantity'>{$materialQuantity}</span> sztuk materiału około <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($producerID, $activityDate, $message, "notification", NULL, $frozenIDS);
-                        $message = "Zadeklarowano odbiór <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczenie <span class='quantity'>{$materialQuantity}</span> materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
+                        $message = "Zadeklarowano odbiór <span class='quantity'>{$bascinetQuantity}</span> przyłbic oraz dostarczenie <span class='quantity'>{$materialQuantity}</span> sztuk materiału do <span class='name'>{$producer->name}</span>  (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>) o <span class='delivery'>{$frozenDate}</span>";
                         Activity::create($driverID, $activityDate, $message, "action", NULL, $frozenIDS);
                         break;
                 }
@@ -216,10 +218,13 @@ class Frozen
         $return = 0;
         switch ($type) {
             case "bascinet":
-                $sql = "SELECT SUM(r.`bascinet`) FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`delivered` = 0 AND r.`deleted` = 0;";
+                $sql = "SELECT SUM(r.`bascinet`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0;";
                 break;
             case "trips":
-                $sql = "SELECT count(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
+                $sql = "SELECT COUNT(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND f.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
+                break;
+            case "material":
+                $sql = "SELECT SUM(r.`material`) FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`deleted` = 0;";
                 break;
             default:
                 $sql = "SELECT 0";
@@ -323,15 +328,7 @@ class Frozen
                 break;
             }
 
-            if ($query = fs::$mysqli->query("SELECT `requests_id` FROM `frozen` WHERE `id` = {$frozenID};")) {
-                $requestsID = $query->fetch_row()[0] ?? NULL;
-                $success &= $requestsID !== NULL;
-                if ($success &= !!fs::$mysqli->query("UPDATE `requests` SET `delivered` = 1 WHERE `id` = {$requestsID}")) {
-                    $success &= !!fs::$mysqli->query("UPDATE `frozen` SET `delivered` = 1 WHERE `id` = {$frozenID};");
-                }
-            } else {
-                $success = false;
-            }
+            $success &= !!fs::$mysqli->query("UPDATE `frozen` SET `delivered` = 1 WHERE `id` = {$frozenID};");
         }
 
         return $success;

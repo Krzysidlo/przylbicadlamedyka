@@ -5,6 +5,7 @@ namespace controllers;
 use DateTime;
 use Exception;
 use classes\Pin;
+use classes\User;
 use classes\Frozen;
 use classes\Hosmag;
 use classes\Request;
@@ -21,20 +22,23 @@ class MapController extends PageController
         try {
             $requests = Request::getAll();
             foreach ($requests as $request) {
-                $userAddress = $request->user->getAddress();
+                $userAddress = $request->producer->getAddress();
 
                 $frozen = false;
                 $sql    = "SELECT 1 FROM `frozen` WHERE `requests_id` = '{$request->id}' AND `deleted` = 0;";
+
                 if ($query = fs::$mysqli->query($sql)) {
                     $frozen = $query->fetch_row()[0] ?? false;
                 }
-                $flat                                               = !empty($userAddress->flat) ? "/$userAddress->flat" : "";
-                $address                                            = "{$userAddress->city}, {$userAddress->street} {$userAddress->building}";
-                $address                                            .= $flat;
-                $data['requests'][$request->user->id][$request->id] = [
-                    'user_id'  => $request->user->id,
-                    'name'     => $request->user->name,
-                    'tel'      => $request->user->tel,
+
+                $flat    = !empty($userAddress->flat) ? "/$userAddress->flat" : "";
+                $address = "{$userAddress->city}, {$userAddress->street} {$userAddress->building}";
+                $address .= $flat;
+
+                $data['requests'][$request->producer->id][$request->id] = [
+                    'user_id'  => $request->producer->id,
+                    'name'     => $request->producer->name,
+                    'tel'      => $request->producer->tel,
                     'address'  => $address,
                     'latLng'   => $request->latLng,
                     'bascinet' => intval($request->bascinet),
@@ -146,8 +150,6 @@ class MapController extends PageController
             $quantity = filter_var($get['quantity'], FILTER_SANITIZE_NUMBER_INT);
             $data     = Hosmag::create($pinID, $quantity);
 
-            $success = $data['success'];
-
             $name = "";
             $sql  = "SELECT `name` FROM `pins` WHERE `id` = {$pinID};";
             if ($query = fs::$mysqli->query($sql)) {
@@ -155,20 +157,26 @@ class MapController extends PageController
             }
 
             $type = filter_var($get['type'], FILTER_SANITIZE_STRING);
-            if ($success && $type == "hospital") {
-                if ($success = Hosmag::deliverBascinet(USER_ID)) {
-                    $date            = new DateTime;
-                    $message         = "Dostarczono <span class='quantity'>{$quantity}</span> przyłbic do <span class='name'>{$name}</span>";
-                    $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+            if ($data['success']) {
+                switch ($type) {
+                    case "hospital":
+                        if ($data['success'] = Hosmag::deliverBascinet(USER_ID)) {
+                            $date            = new DateTime;
+                            $message         = "Dostarczono <span class='quantity'>{$quantity}</span> przyłbic do <span class='name'>{$name}</span>";
+                            $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+                        }
+                        break;
+                    case 'magazine':
+                        $date            = new DateTime;
+                        $message         = "Potwierdzono odbiór <span class='quantity'>{$quantity}</span> sztuk materiału z <span class='name'>{$name}</span>";
+                        $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+                        break;
                 }
             }
 
-            if ($success && $type == "magazine") {
-//                if ($success = Hosmag::deliverBascinet(USER_ID)) {
-//                    $date = new DateTime;
-//                    $message = "<span></span>";
-//                    $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
-//                }
+            if (!$data['success']) {
+                $data['alert']   = "danger";
+                $data['message'] = "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.";
             }
 
             return $data;
@@ -177,46 +185,6 @@ class MapController extends PageController
             fs::log("Error: " . $e->getMessage());
             return [
                 'success' => true,
-                'alert'   => false,
-                'message' => "",
-            ];
-        }
-    }
-
-    public static function ajax_deliverMaterial($get = []): array
-    {
-        $frozenID  = filter_var($get['frozenID'], FILTER_SANITIZE_STRING);
-        $frozenArr = explode(",", $frozenID);
-        try {
-            $frozen = new Frozen($frozenArr);
-        } catch (Exception $e) {
-            fs::log("Error: " . $e->getMessage());
-            return [
-                'success' => false,
-                'alert'   => "danger",
-                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
-            ];
-        }
-
-        if (!$frozen->deliver()) {
-            return [
-                'success' => false,
-                'alert'   => "danger",
-                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
-            ];
-        }
-
-        $date = new DateTime;
-        $message = "Potwierdzono odbiór <span class='quantity'></span>";
-        if (Activity::create(USER_ID, $date, $message)['success']) {
-            return [
-                'success' => true,
-                'alert'   => "success",
-                'message' => "Poprawnie zarejestrowano dostarczenie maetriału",
-            ];
-        } else {
-            return [
-                'success' => false,
                 'alert'   => "danger",
                 'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
             ];
@@ -263,6 +231,137 @@ class MapController extends PageController
         }
 
         return $data;
+    }
+
+    public static function ajax_both($get = []): array
+    {
+        $material = self::ajax_material($get);
+        if (!$material['success']) {
+            return $material;
+        }
+
+        $bascinet = self::ajax_bascinet($get);
+        if (!$bascinet['success']) {
+            return $bascinet;
+        }
+
+        return [
+            'success' => true,
+            'alert'   => "success",
+            'message' => "Poprawnie zarejestrowano dostarczenie i odbiór",
+        ];
+    }
+
+    public static function ajax_material($get = []): array
+    {
+        $frozenIDs = filter_var($get['frozenID'], FILTER_SANITIZE_STRING);
+        try {
+            $frozen   = new Frozen($frozenIDs);
+            $quantity = $frozen->material;
+            $driver   = $frozen->driver;
+            $producer = $frozen->producer;
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        if (!$frozen->deliver()) {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        $requestsIDs = explode(",", $frozen->requests);
+        foreach ($requestsIDs as $requestID) {
+            try {
+                $request = new Request($requestID);
+                $request->deliver();
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+
+        $date    = new DateTime;
+        $message = "Dostarczono <span class='quantity'>{$quantity}</span> sztuk materiału do <span class='name'>{$producer->name}</span> (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>)";
+        $success = Activity::create($driver->id, $date, $message)['success'];
+        $message = "Odebrano <span class='quantity'>{$quantity}</span> sztuk materiału od <span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>)";
+        $success &= Activity::create($producer->id, $date, $message)['success'];
+        if ($success) {
+            return [
+                'success' => true,
+                'alert'   => "success",
+                'message' => "Poprawnie zarejestrowano dostarczenie maetriału",
+            ];
+        } else {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+    }
+
+    public static function ajax_bascinet($get = []): array
+    {
+        $quantity   = 0;
+        $producer   = NULL;
+        $driver     = new User;
+        $requestIDs = filter_var($get['requestsID'], FILTER_SANITIZE_STRING);
+        $requestIDs = explode(",", $requestIDs);
+        try {
+            foreach ($requestIDs as $requestID) {
+                $request = new Request($requestID);
+
+                if (empty($request->bascinet)) {
+                    continue;
+                }
+
+                $quantity += $request->bascinet;
+                if (empty($producer)) {
+                    $producer = $request->producer;
+                }
+
+                if (!$request->deliver()) {
+                    return [
+                        'success' => false,
+                        'alert'   => "danger",
+                        'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+                    ];
+                }
+            }
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        $date    = new DateTime;
+        $message = "Odebrano <span class='quantity'>{$quantity}</span> przyłbic od <span class='name'>{$producer->name}</span> (tel. <a href='tel:{$producer->tel}'>{$producer->tel}</a>)";
+        $success = Activity::create($driver->id, $date, $message)['success'];
+        $message = "Przekazano <span class='quantity'>{$quantity}</span> przyłbic kierowcy <span class='name'>{$driver->name}</span> (tel. <a href='tel:{$driver->tel}'>{$driver->tel}</a>)";
+        $success &= Activity::create($producer->id, $date, $message)['success'];
+        if ($success) {
+            return [
+                'success' => true,
+                'alert'   => "success",
+                'message' => "Poprawnie zarejestrowano dostarczenie maetriału",
+            ];
+        } else {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
     }
 
     public function content(array $args = [])
