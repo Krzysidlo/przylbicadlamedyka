@@ -11,6 +11,14 @@ $deliveredB ??= 0;
 use classes\User; ?>
 <section class="container">
     <div class="row justify-content-center">
+        <?php if (USER_PRV === User::USER_NO_CONFIRM) { ?>
+            <div class="col-12 col-md-8 mt-5">
+                <div class="alert alert-danger">Adres e-mail nie został potwierdzony. Nie można obecnie edytować danych, ani wykonywać żadnych akcji.
+                    Jeżeli e-mail z linkiem do potwierdzenia nie dotarł, proszę kliklnąć
+                    <a href="/ajax/register/sendConfirm" id="sendConfirm">tutaj</a>, aby wsłać ją ponownie.
+                </div>
+            </div>
+        <?php } ?>
         <div class="col-12 col-md-8 mt-4 numbers">
             <div class="row">
                 <?php if ($userPrv === User::USER_PRODUCER) { ?>

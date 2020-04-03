@@ -1,4 +1,6 @@
-const version = 1,
+self.skipWaiting();
+
+const version = 2,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
@@ -7,8 +9,6 @@ self.addEventListener('install', event => {
             return cache.addAll([
                 '/media/css/styles.css',
                 '/media/css/styles.min.css',
-                '/media/js/index.js',
-                '/media/js/index.min.js',
                 '/media/js/external.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
@@ -49,6 +49,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    console.log(event.request.url);
     event.respondWith(
         caches.open(cacheName).then(cache => {
             return cache.match(event.request.url).then(response => {

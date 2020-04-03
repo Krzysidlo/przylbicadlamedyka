@@ -58,7 +58,7 @@ class RegisterController extends PageController
                     $data['invalid']['lemail'] = true;
                 }
             } else {
-                $data['message'] = "Please fill in all necessary fields";
+                $data['message'] = "Proszę uzupełnić wszystkie pola";
                 $data['alert']   = "warning";
             }
         }
@@ -285,7 +285,7 @@ HTML;
         }
 
         if (!$break && empty($get['cpassword'])) {
-            $data['message'] = "Please provide current password";
+            $data['message'] = "Proszę podać obecne hasło";
             $data['alert']   = "warning";
             $data['field']   = "cpassword";
             $break           = true;
@@ -299,7 +299,7 @@ HTML;
         }
 
         if (!$break && (empty($get['password']) || empty($get['rpassword']))) {
-            $data['message'] = "Please fill in all fields";
+            $data['message'] = "Proszę uzupełnić wszystkie pola";
             $data['alert']   = "warning";
             $field           = "";
             if (empty($_POST['password'])) {
@@ -325,7 +325,7 @@ HTML;
 
         if (!$break) {
             $success = $user->updatePassword($get['password']);
-            $message = ($success ? ("You have successfully updated your password") : ("There was an error. Please refresh the page and try again."));
+            $message = ($success ? "Poprawnie zaktualizowałeś hasło" : "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.");
             $alert   = ($success ? 'success' : 'warning');
             $data    = [
                 'success' => $success,
