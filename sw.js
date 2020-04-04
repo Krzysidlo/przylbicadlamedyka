@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
                 '/media/img/offline.jpg',
-                '/offline',
+                ROOT_URL + '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css',
@@ -61,16 +61,19 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.open(cacheName).then(cache => {
             return cache.match(event.request.url).then(response => {
+                console.log(response);
                 if (response) {
                     return response;
                 }
                 return fetch(event.request.url).then(response => {
+                    console.log(response);
                     if (response) {
                         return response;
                     }
                     let offlineRequest = new Request('/offline');
-                    console.log(offlineRequest);
+                    console.log("offlineRequest", offlineRequest);
                     return cache.match(offlineRequest.url).then(response => {
+                        console.log(response);
                         return response;
                     })
                 });

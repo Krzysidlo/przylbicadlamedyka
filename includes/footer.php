@@ -32,7 +32,8 @@
           integrity="sha256-FAOaXTpl90/K8cXmSdsskbQN3nKYulhCpPbcFzGTWKI=" crossorigin="anonymous"/>
 
     <script type="text/javascript">
-        const JS_URL = '<?= JS_URL; ?>',
+        const ROOT_URL = '<?= ROOT_URL; ?>',
+            JS_URL = '<?= JS_URL; ?>',
             IMG_URL = '<?= IMG_URL; ?>';
     </script>
 
