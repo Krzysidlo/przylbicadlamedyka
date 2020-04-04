@@ -66,16 +66,7 @@ self.addEventListener('fetch', event => {
                     return response;
                 }
                 return fetch(event.request.url).then(response => {
-                    console.log(response);
-                    if (response) {
-                        return response;
-                    }
-                    let offlineRequest = new Request('/offline');
-                    console.log("offlineRequest", offlineRequest);
-                    return cache.match(offlineRequest.url).then(response => {
-                        console.log(response);
-                        return response;
-                    })
+                    return response || cache.match('/offline');
                 });
             })
         })
