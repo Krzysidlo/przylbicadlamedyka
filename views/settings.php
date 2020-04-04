@@ -55,17 +55,6 @@ use classes\User;
                     </div>
                 </div>
                 <div class="row">
-                    <?php if (USER_PRV === User::USER_PRODUCER) { ?>
-                        <div class="form-group col-12 mb-4">
-                            <label for="pinName">
-                                Nazwa Producenta
-                            </label>
-                            <input type="text" name="pinName" id="pinName" placeholder="Nazwa" required
-                                   class="form-control validate" readonly
-                                   title='Pole "Nazwa" jest wymagane'
-                                   value="<?= $user->getAddress()->pin_name ?? ""; ?>">
-                        </div>
-                    <?php } ?>
                     <div class="form-group col-6">
                         <label for="city">
                             Miasto
