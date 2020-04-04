@@ -14,6 +14,14 @@ self.addEventListener('install', event => {
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
                 '/media/img/offline.jpg',
+                '/includes/images/icons/incon-72x72.png',
+                '/includes/images/icons/incon-96x96.png',
+                '/includes/images/icons/incon-128x128.png',
+                '/includes/images/icons/incon-144x144.png',
+                '/includes/images/icons/incon-152x152.png',
+                '/includes/images/icons/incon-192x192.png',
+                '/includes/images/icons/incon-384x384.png',
+                '/includes/images/icons/incon-512x512.png',
                 '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
@@ -64,6 +72,10 @@ self.addEventListener('fetch', event => {
                 if (response) {
                     return response;
                 }
+                return fetch(event.request.url).then(response => {
+                    return response;
+                });
+            }).catch(() => {
                 return cache.match('/offline').then(response => {
                     console.log("after cache fail");
                     return response;
