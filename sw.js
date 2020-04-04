@@ -64,11 +64,12 @@ self.addEventListener('fetch', event => {
                 if (response) {
                     return response;
                 }
-                return fetch(event.request).then(response => {
+                return fetch(event.request.url).then(response => {
                     if (response) {
                         return response;
                     }
                     let offlineRequest = new Request('/offline');
+                    console.log(offlineRequest);
                     return cache.match(offlineRequest.url).then(response => {
                         return response;
                     })
