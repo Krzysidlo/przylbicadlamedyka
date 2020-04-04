@@ -15,14 +15,6 @@ self.addEventListener('install', event => {
                 '/media/img/favicon.png',
                 '/media/img/404.jpg',
                 '/media/img/offline.jpg',
-                // '/includes/images/icons/icon-72x72.png',
-                // '/includes/images/icons/icon-96x96.png',
-                // '/includes/images/icons/icon-128x128.png',
-                // '/includes/images/icons/icon-144x144.png',
-                // '/includes/images/icons/icon-152x152.png',
-                // '/includes/images/icons/icon-192x192.png',
-                // '/includes/images/icons/icon-384x384.png',
-                // '/includes/images/icons/icon-512x512.png',
                 '/error',
                 '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
@@ -71,30 +63,27 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.open(cacheName).then(cache => {
             return cache.match(event.request).then(response => {
-                return response || fetch(event.request);
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request).then(response => {
+                    if (response.status === 404) {
+                        return cache.match('/error');
+                    }
+                    return response;
+                });
             });
+        }).catch(() => {
+            return caches.match('/offline');
         })
     );
 });
-// self.addEventListener('fetch', event => {
-//     if (event.request.method === 'POST') {
-//         return;
-//     }
-//     event.respondWith(
-//         caches.open(cacheName).then(cache => {
-//             return cache.match(event.request).then(response => {
-//                 if (response) {
-//                     return response;
-//                 }
-//                 return fetch(event.request).then(response => {
-//                     if (response.status === 404) {
-//                         return cache.match('/error');
-//                     }
-//                     return response;
-//                 });
-//             });
-//         }).catch(() => {
-//             return caches.match('/offline');
-//         })
-//     );
-// });
+
+// '/includes/images/icons/icon-72x72.png',
+// '/includes/images/icons/icon-96x96.png',
+// '/includes/images/icons/icon-128x128.png',
+// '/includes/images/icons/icon-144x144.png',
+// '/includes/images/icons/icon-152x152.png',
+// '/includes/images/icons/icon-192x192.png',
+// '/includes/images/icons/icon-384x384.png',
+// '/includes/images/icons/icon-512x512.png',
