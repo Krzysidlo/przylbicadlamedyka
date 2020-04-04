@@ -104,7 +104,9 @@ class RegisterController extends PageController
             if (!empty(fs::getACookie('easyLogIn'))) {
                 fs::setACookie('easyLogIn', NULL, -1);
             }
-            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) && !empty($get['tel']) && !empty($get['password']) && !empty($get['r-password'])) {
+            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) &&
+                !empty($get['tel']) && !empty($get['password']) && !empty($get['r-password']) &&
+                !empty($get['no-quarantine']) && !empty($get['regulations']) && !empty($get['rodo'])) {
                 $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
                 try {
                     new User($email);

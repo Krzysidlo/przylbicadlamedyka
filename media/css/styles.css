@@ -817,6 +817,13 @@ body.map .mapModal .modal-body input[readonly], body.map .mapModal .modal-body s
   background: transparent;
 }
 
+body.regulations .title, body.rodo .title {
+  color: #B7274B;
+}
+body.regulations ol li, body.rodo ol li {
+  margin: 15px 0;
+}
+
 body.error, body.construction, body.noaccess {
   margin: 0;
 }
