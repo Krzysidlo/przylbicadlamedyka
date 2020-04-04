@@ -6,7 +6,6 @@ use Exception;
 use classes\User;
 use classes\Request;
 use classes\Functions as fs;
-use classes\exceptions\UserNotFoundException;
 
 class RegisterController extends PageController
 {
@@ -78,6 +77,28 @@ class RegisterController extends PageController
 
             foreach ($get as $name => $field) {
                 $data['invalid'][$name] = empty($field);
+            }
+
+            if (!empty($get['email'])) {
+                $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $csv = FILES_DIR . "/maile.csv";
+                    if (file_exists($csv)) {
+                        $file          = fopen($csv, "r");
+                        $allowedEmails = [];
+                        while ($line = fgets($file)) {
+                            [$name, $mail] = str_getcsv($line, ";");
+                            $allowedEmails[] = $mail;
+                        }
+                        if (!in_array($email, $allowedEmails)) {
+                            return [
+                                'success' => false,
+                                'alert'   => "warning",
+                                'message' => "Podany adres e-mail nie znajduje się na liście dzwolonych użytkowników. Proszę o kontakt z organizatorem w kwesti możliwości dołączenia.",
+                            ];
+                        }
+                    }
+                }
             }
 
             if (!empty(fs::getACookie('easyLogIn'))) {
@@ -366,14 +387,14 @@ HTML;
 //                'invalid' => $invalid,
 //            ];
 //        } else {
-            if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
-                $data = [
-                    'success' => false,
-                    'alert'   => "warning",
-                    'message' => "Proszę uzupełnić wymagane pola",
-                    'invalid' => $invalid,
-                ];
-            }
+        if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
+            $data = [
+                'success' => false,
+                'alert'   => "warning",
+                'message' => "Proszę uzupełnić wymagane pola",
+                'invalid' => $invalid,
+            ];
+        }
 //        }
 
         if ($data['success']) {
@@ -505,7 +526,7 @@ HTML;
         } catch (Exception $e) {
             $delivered = 0;
         }
-        $args['view'] = $this->view;
+        $args['view']      = $this->view;
         $args['delivered'] = $delivered;
 
         $this->view = "register";
