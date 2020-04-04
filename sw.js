@@ -14,14 +14,14 @@ self.addEventListener('install', event => {
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
                 '/media/img/offline.jpg',
-                '/includes/images/icons/incon-72x72.png',
-                '/includes/images/icons/incon-96x96.png',
-                '/includes/images/icons/incon-128x128.png',
-                '/includes/images/icons/incon-144x144.png',
-                '/includes/images/icons/incon-152x152.png',
-                '/includes/images/icons/incon-192x192.png',
-                '/includes/images/icons/incon-384x384.png',
-                '/includes/images/icons/incon-512x512.png',
+                '/includes/images/icons/icon-72x72.png',
+                '/includes/images/icons/icon-96x96.png',
+                '/includes/images/icons/icon-128x128.png',
+                '/includes/images/icons/icon-144x144.png',
+                '/includes/images/icons/icon-152x152.png',
+                '/includes/images/icons/icon-192x192.png',
+                '/includes/images/icons/icon-384x384.png',
+                '/includes/images/icons/icon-512x512.png',
                 '/error',
                 '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
@@ -69,11 +69,11 @@ self.addEventListener('fetch', event => {
     }
     event.respondWith(
         caches.open(cacheName).then(cache => {
-            return cache.match(event.request.url).then(response => {
+            return cache.match(event.request).then(response => {
                 if (response) {
                     return response;
                 }
-                return fetch(event.request.url).then(response => {
+                return fetch(event.request).then(response => {
                     if (response.status === 404) {
                         return cache.match('/error');
                     }
