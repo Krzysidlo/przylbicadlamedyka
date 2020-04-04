@@ -61,14 +61,19 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.open(cacheName).then(cache => {
             return cache.match(event.request.url).then(response => {
-                console.log(response);
                 if (response) {
                     return response;
                 }
                 return fetch(event.request.url).then(response => {
-                    return response || cache.match('/offline');
+                    return response;
                 });
-            })
+            });
+        }).catch(() => {
+            caches.open(cacheName).then(cache => {
+                cache.match('/offline').then(response => {
+                    return response;
+                });
+            });
         })
     );
 });
