@@ -64,14 +64,9 @@ self.addEventListener('fetch', event => {
                 if (response) {
                     return response;
                 }
-                return fetch(event.request.url).then(response => {
-                    console.log("try internet");
-                    return response || caches.open(cacheName).then(cache => {
-                        return cache.match('/offline').then(response => {
-                            console.log("after internet", response);
-                            return response;
-                        });
-                    });
+                return cache.match('/offline').then(response => {
+                    console.log("after cache fail");
+                    return response;
                 });
             });
         })
