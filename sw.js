@@ -74,12 +74,11 @@ self.addEventListener('fetch', event => {
                     return response;
                 }
                 return fetch(event.request).then(response => {
-                    if (response.status === 404) {
-                        return cache.match('/offline');
-                    }
                     return response;
                 });
             });
+        }).catch(() => {
+            return caches.match('/offline');
         })
     );
 });
