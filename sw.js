@@ -1,4 +1,4 @@
-const version = 4,
+const version = 5,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
