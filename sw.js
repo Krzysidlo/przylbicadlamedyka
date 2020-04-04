@@ -71,6 +71,7 @@ self.addEventListener('fetch', event => {
         }).catch(() => {
             caches.open(cacheName).then(cache => {
                 return cache.match('/offline').then(response => {
+                    console.log(response);
                     return response;
                 });
             });
