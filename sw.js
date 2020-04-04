@@ -15,7 +15,14 @@ self.addEventListener('install', event => {
                 '/media/img/favicon.png',
                 '/media/img/404.jpg',
                 '/media/img/offline.jpg',
-                '/error',
+                '/includes/images/icons/icon-72x72.png',
+                '/includes/images/icons/icon-96x96.png',
+                '/includes/images/icons/icon-128x128.png',
+                '/includes/images/icons/icon-144x144.png',
+                '/includes/images/icons/icon-152x152.png',
+                '/includes/images/icons/icon-192x192.png',
+                '/includes/images/icons/icon-384x384.png',
+                '/includes/images/icons/icon-512x512.png',
                 '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
@@ -68,7 +75,7 @@ self.addEventListener('fetch', event => {
                 }
                 return fetch(event.request).then(response => {
                     if (response.status === 404) {
-                        return cache.match('/error');
+                        return cache.match('/offline');
                     }
                     return response;
                 });
@@ -78,12 +85,3 @@ self.addEventListener('fetch', event => {
         })
     );
 });
-
-// '/includes/images/icons/icon-72x72.png',
-// '/includes/images/icons/icon-96x96.png',
-// '/includes/images/icons/icon-128x128.png',
-// '/includes/images/icons/icon-144x144.png',
-// '/includes/images/icons/icon-152x152.png',
-// '/includes/images/icons/icon-192x192.png',
-// '/includes/images/icons/icon-384x384.png',
-// '/includes/images/icons/icon-512x512.png',
