@@ -67,11 +67,18 @@ self.addEventListener('fetch', event => {
                 return fetch(event.request.url).then(response => {
                     return response;
                 });
-            });
+            }).catch(() => {
+                caches.open(cacheName).then(cache => {
+                    return cache.match('/offline').then(response => {
+                        console.log("first catch", response);
+                        return response;
+                    });
+                });
+            })
         }).catch(() => {
             caches.open(cacheName).then(cache => {
                 return cache.match('/offline').then(response => {
-                    console.log(response);
+                    console.log("second catch", response);
                     return response;
                 });
             });
