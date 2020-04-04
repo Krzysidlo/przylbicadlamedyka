@@ -1,4 +1,4 @@
-const version = 3,
+const version = 8,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
@@ -80,8 +80,6 @@ self.addEventListener('fetch', event => {
                     return response;
                 });
             });
-        }).catch(() => {
-            return caches.match('/offline');
         })
     );
 });
