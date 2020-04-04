@@ -76,7 +76,7 @@ self.addEventListener('fetch', event => {
                     return response;
                 });
             }).catch(() => {
-                return cache.match('/offline').then(response => {
+                return caches.match('/offline').then(response => {
                     console.log("after cache fail");
                     return response;
                 });
