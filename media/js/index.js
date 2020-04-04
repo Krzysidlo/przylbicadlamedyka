@@ -1053,13 +1053,20 @@ var index = function () {
                             $modal.find(".modal-body .name").html(data.name);
                             $modal.find(".modal-body .tel").html(`<a href="tel:${data.tel}">${data.tel}</a>`);
                             $modal.find(".modal-body .address").html(data.address);
-                            $modal.find(".modal-body .bascinet span").html(data.bascinet);
-                            $modal.find(".modal-body .material span").html(data.material);
+
+                            let $bascinet = $modal.find(".modal-body .bascinet"),
+                                $material = $modal.find(".modal-body .material");
+
+                            $bascinet.find("span").html(data.bascinet);
+                            $material.find("span").html(data.material);
+                            $bascinet.show();
+                            $material.show();
+
                             if (data.bascinet <= 0) {
-                                $modal.find(".modal-body .bascinet");
+                                $bascinet.hide();
                             }
                             if (data.material <= 0) {
-                                $modal.find(".modal-body .material");
+                                $material.hide();
                             }
 
                             if (USER_PRV === 1) {

@@ -71,7 +71,7 @@
 </div>
 
 <div class="legend">
-    <div class="element frozen">Niekatywny <span class="circle"></span></div>
+    <div class="element frozen">Nieaktywny <span class="circle"></span></div>
     <div class="element material">Potrzebuje materiałów <span class="circle"></span></div>
     <div class="element bascinet">Gotowe przyłbice <span class="circle"></span></div>
     <div class="element hospital">Szpitale <span class="circle"></span></div>
