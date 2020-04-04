@@ -1,4 +1,4 @@
-const version = 6,
+const version = 7,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
@@ -13,6 +13,8 @@ self.addEventListener('install', event => {
                 '/includes/manifest.json',
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
+                '/media/img/offline.jpg',
+                '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css',
