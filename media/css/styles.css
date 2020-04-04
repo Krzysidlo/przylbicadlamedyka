@@ -692,9 +692,16 @@ nav.navbar .dropdown-menu {
   }
 }
 body.map #map {
-  width: 100%;
+  width: calc(100% - 62px);
   height: calc(100vh - 97px);
+  margin-left: 62px;
   font-family: inherit;
+}
+@media screen and (max-width: 767px) {
+  body.map #map {
+    margin: 0;
+    width: 100%;
+  }
 }
 body.map .legend {
   position: fixed;
@@ -703,8 +710,30 @@ body.map .legend {
   z-index: 1010;
   background-color: #FAFAFA;
   margin-left: 62px;
-  padding: 0 30px;
+  padding: 0 55px 0 30px;
   text-align: right;
+  -webkit-transition: bottom .25s ease-in-out;
+  transition: bottom .25s ease-in-out;
+}
+body.map .legend.compact {
+  bottom: -35px;
+}
+body.map .legend.compact .trigger {
+  top: -70px;
+}
+body.map .legend .trigger {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  padding: 18px;
+  color: #757575;
+  -webkit-transition: top .25s ease-in-out;
+  transition: top .25s ease-in-out;
+  background: rgba(250, 250, 250, 0.7);
+}
+body.map .legend .trigger:hover {
+  color: #B7274B;
 }
 body.map .legend .element {
   display: inline-block;
@@ -744,8 +773,12 @@ body.map .legend .element.magazine .circle {
 @media screen and (max-width: 767px) {
   body.map .legend {
     margin: 0;
-    padding: 5px 0;
+    padding: 5px 30px 5px 0;
     width: 100%;
+  }
+  body.map .legend .trigger {
+    padding: 17px 9px;
+    line-height: 14px;
   }
   body.map .legend .element {
     font-size: 12px;
@@ -775,6 +808,16 @@ body.map .mapModal .modal-body .tel a, body.map .mapModal .modal-body .address a
 }
 body.map .mapModal .modal-body .tel a:hover, body.map .mapModal .modal-body .address a:hover, body.map .mapModal .modal-body .comments a:hover, body.map .mapModal .modal-body .description a:hover {
   color: #B7274B;
+}
+body.map .mapModal .modal-body .description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+body.map .mapModal .modal-body .description.full {
+  white-space: normal;
+  overflow: visible;
 }
 body.map .mapModal .modal-body .bascinetMaterial {
   color: #000;

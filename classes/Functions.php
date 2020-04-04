@@ -11,31 +11,26 @@ class Functions
     public static array $privilegeRoles = [];
 
     private static string $logFile;
-    private static bool   $logging;
 
     public static function init()
     {
         global $mysqli;
 
         self::$logFile        = "log.txt";
-        self::$logging        = true;
         self::$mysqli         = $mysqli ?? NULL;
         self::$privilegeRoles = [
-            0 => "",
-            1 => "",
-            2 => "",
-            3 => "",
-            4 => "",
-            5 => "Root",
+            User::USER_NO_CONFIRM => "Nie potwierdzony",
+            User::USER_PRODUCER   => "Producent",
+            User::USER_DRIVER     => "Kierowca",
+            User::USER_ADMIN      => "Admin",
+            User::USER_ROOT       => "Root",
         ];
+        ini_set("log_errors", 1);
+        ini_set("error_log", LOG_DIR . "/error.log");
     }
 
     public static function setLogFile(string $fileName)
     {
-        if (self::$logging) {
-            ini_set("log_errors", 1);
-        }
-        ini_set("error_log", LOG_DIR . "/" . $fileName);
         self::$logFile = $fileName;
     }
 
@@ -87,23 +82,16 @@ class Functions
                 var_dump($value);
                 $value = ob_get_clean();
             }
-            if (self::$logging) {
-                $logFile = LOG_DIR . '/' . self::$logFile;
-                if (!file_exists($logFile) || is_writable($logFile)) {
-                    file_put_contents($logFile, date("Y-m-d H:i:s") . ": " . $value . "\n", FILE_APPEND);
-                } else {
-                    file_put_contents(LOG_DIR . "/error.log", date("Y-m-d H:i:s") . ": Error: No access to file {$logFile}\n", FILE_APPEND);
-                    file_put_contents(LOG_DIR . "/error.log", date("Y-m-d H:i:s") . ": " . $value . "\n", FILE_APPEND);
-                }
-                if (DEV_MODE) {
-                    print($value . "\n");
-                }
+            $logFile = LOG_DIR . '/' . self::$logFile;
+            if (!file_exists($logFile) || is_writable($logFile)) {
+                file_put_contents($logFile, date("Y-m-d H:i:s") . ": " . $value . "\n", FILE_APPEND);
+            } else {
+                file_put_contents(LOG_DIR . "/error.log", date("Y-m-d H:i:s") . ": Error: No access to file {$logFile}\n", FILE_APPEND);
+                file_put_contents(LOG_DIR . "/error.log", date("Y-m-d H:i:s") . ": " . $value . "\n", FILE_APPEND);
+            }
+            if (DEV_MODE) {
+                print($value . "\n");
             }
         }
-    }
-
-    public static function setLogging(bool $flag)
-    {
-        self::$logging = $flag;
     }
 }

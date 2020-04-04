@@ -278,7 +278,7 @@ var index = function () {
                     $.each(originalValues, function (i, e) {
                         var $input = $form.find("input[name='" + e.name + "']");
 
-                        $input.val(e.value);
+                        $input.val(e.value).trigger("change");
                         $input.attr('readonly', true);
                     });
 
@@ -461,6 +461,10 @@ var index = function () {
         (function map() {
             var $map = $("body.map");
             if ($map.length) {
+                $map.find('.legend .trigger').on('click', () => {
+                    $map.find('.legend').toggleClass('compact');
+                });
+
                 let myMap = L.map('map').setView([50.0647, 19.9450], 13),
                     today = new Date(Date.now()),
                     clickedElement,
@@ -614,6 +618,9 @@ var index = function () {
                         var $input = $(this);
 
                         $input.parents('.modal').find("label[for='quantity'] span").html($input.val());
+                    })
+                    .on('click', '.modal.mapModal .modal-body .description', function () {
+                        $(this).toggleClass('full');
                     });
 
                 function generateGoogleMapsLink(lat, lng) {
