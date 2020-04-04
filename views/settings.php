@@ -103,7 +103,7 @@ use classes\User;
                         <h4 class="title">Twoja lokalizacja</h4>
                     </div>
                     <div class="col-12 mt-4 mb-5">
-                        <input type="hidden" name="location" value="<?= $user->getAddress()->location; ?>">
+                        <input type="hidden" name="location" value="<?= $user->getAddress()->location; ?>" readonly>
                         <div id="addressMap"></div>
                         <div class="load">
                             <img src="<?= IMG_URL; ?>/loading.gif" alt="loading">

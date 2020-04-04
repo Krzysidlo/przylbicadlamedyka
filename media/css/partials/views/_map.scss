@@ -1,100 +1,14 @@
 body.map {
   #map {
-    width: 100%;
+    width: calc(100% - 62px);
     height: calc(100vh - 97px);
+    margin-left: 62px;
     font-family: inherit;
 
-    //.leaflet-popup.customPopup {
-    //  .leaflet-popup-content-wrapper {
-    //    border-radius: 0;
-    //    padding: 0;
-    //
-    //    .leaflet-popup-content {
-    //      margin: 0;
-    //      width: 400px;
-    //
-    //      .popup {
-    //        margin: 0;
-    //        font-size: 16px;
-    //
-    //        .title {
-    //          background: $color-red;
-    //          color: #FFF;
-    //          font-size: 20px;
-    //          line-height: 20px;
-    //          padding: 14px;
-    //        }
-    //
-    //        .userInfo {
-    //          color: #757575;
-    //
-    //          .name {
-    //            color: $color-red;
-    //          }
-    //        }
-    //
-    //        .bascinetMaterial {
-    //          color: #000;
-    //          line-height: 30px;
-    //
-    //          span {
-    //            color: $color-red;
-    //            font-size: 30px;
-    //            float: right;
-    //          }
-    //        }
-    //
-    //        hr {
-    //          width: calc(100% + 30px);
-    //          margin-left: -15px;
-    //        }
-    //
-    //        input, select {
-    //          border: solid 1px #e4e5ea;
-    //          padding-left: 16px;
-    //          height: 50px;
-    //          color: #000;
-    //          cursor: pointer;
-    //
-    //          &[readonly] {
-    //            border: solid 1px #e4e5ea;
-    //            background: transparent;
-    //          }
-    //        }
-    //
-    //        .btn-white {
-    //          box-shadow: none;
-    //        }
-    //
-    //        &.pin {
-    //          label[for="quantity"] {
-    //            line-height: 24px;
-    //
-    //            span {
-    //              color: $color-red;
-    //              font-size: 24px;
-    //              vertical-align: bottom;
-    //            }
-    //          }
-    //          input[type="range"] {
-    //            border: none;
-    //            padding: 0;
-    //            &:focus {
-    //              box-shadow: none;
-    //            }
-    //          }
-    //        }
-    //      }
-    //    }
-    //  }
-    //
-    //  .leaflet-popup-close-button {
-    //    padding: 0;
-    //    width: 48px;
-    //    height: 48px;
-    //    line-height: 48px;
-    //  }
-    //}
+    @media screen and (max-width: 767px) {
+      margin: 0;
+      width: 100%;
+    }
   }
 
   .legend {
@@ -104,8 +18,31 @@ body.map {
     z-index: 1010;
     background-color: #FAFAFA;
     margin-left: 62px;
-    padding: 0 30px;
+    padding: 0 55px 0 30px;
     text-align: right;
+    transition: bottom .25s ease-in-out;
+
+    &.compact {
+      bottom: -35px;
+      .trigger {
+        top: -70px;
+      }
+    }
+
+    .trigger {
+      position: absolute;
+      right: 0;
+      top: 0;
+      cursor: pointer;
+      padding: 18px;
+      color: #757575;
+      transition: top .25s ease-in-out;
+      background: rgba(250, 250, 250, .7);
+
+      &:hover {
+        color: $color-red;
+      }
+    }
 
     .element {
       display: inline-block;
@@ -163,8 +100,13 @@ body.map {
 
     @media screen and (max-width: 767px) {
       margin: 0;
-      padding: 5px 0;
+      padding: 5px 30px 5px 0;
       width: 100%;
+
+      .trigger {
+        padding: 17px 9px;
+        line-height: 14px;
+      }
 
       .element {
         font-size: 12px;
@@ -205,6 +147,18 @@ body.map {
             color: $color-red;
           }
         }
+      }
+
+      .description {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
+
+      .description.full {
+        white-space: normal;
+        overflow: visible;
       }
 
       .bascinetMaterial {

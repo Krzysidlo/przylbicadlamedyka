@@ -5,7 +5,8 @@ global $pageClass;
 
 $content = $pageClass->content();
 
-use classes\User; ?>
+use classes\Functions as fs;
+?>
 <!DOCTYPE html>
 <html lang="pl">
 <head>
