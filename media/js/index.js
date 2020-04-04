@@ -1053,6 +1053,14 @@ var index = function () {
                             $modal.find(".modal-body .name").html(data.name);
                             $modal.find(".modal-body .tel").html(`<a href="tel:${data.tel}">${data.tel}</a>`);
                             $modal.find(".modal-body .address").html(data.address);
+                            $modal.find(".modal-body .bascinet span").html(data.bascinet);
+                            $modal.find(".modal-body .material span").html(data.material);
+                            if (data.bascinet <= 0) {
+                                $modal.find(".modal-body .bascinet");
+                            }
+                            if (data.material <= 0) {
+                                $modal.find(".modal-body .material");
+                            }
 
                             if (USER_PRV === 1) {
                                 $modal.find(".modal-header .modal-title").html("Informacje");

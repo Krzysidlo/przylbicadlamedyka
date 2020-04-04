@@ -15,8 +15,8 @@
                     <div class="col-12 mt-2 tel"></div>
                     <div class="col-12 mt-2 address"></div>
                     <div class="col-12 mt-2 comments"></div>
-                    <div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span></span></div>
-                    <div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span></span></div>
+                    <div class="col-12 mt-4 bascinetMaterial bascinet">Gotowe przyłbice <span></span></div>
+                    <div class="col-12 mt-4 bascinetMaterial material">Zapotrzebowanie na materiały <span></span></div>
                 </div>
                 <hr class="interaction">
                 <div class="row mt-3 interaction">
@@ -74,7 +74,6 @@
     <div class="element frozen">Niekatywny <span class="circle"></span></div>
     <div class="element material">Potrzebuje materiałów <span class="circle"></span></div>
     <div class="element bascinet">Gotowe przyłbice <span class="circle"></span></div>
-    <div class="element both">Gotowe przyłbice i potrzebuje materiałów <span class="circle"></span></div>
     <div class="element hospital">Szpitale <span class="circle"></span></div>
     <div class="element magazine">Magazyny <span class="circle"></span></div>
 </div>
