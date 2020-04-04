@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
                 '/media/img/offline.jpg',
-                '/offline',
+                'https://przylbicadlamedyka.pl/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css',
@@ -70,7 +70,7 @@ self.addEventListener('fetch', event => {
             });
         }).catch(() => {
             caches.open(cacheName).then(cache => {
-                cache.match('/offline').then(response => {
+                cache.match('https://przylbicadlamedyka.pl/offline').then(response => {
                     return response;
                 });
             });
