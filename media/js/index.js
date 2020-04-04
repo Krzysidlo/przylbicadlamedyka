@@ -462,10 +462,12 @@ var index = function () {
         (function map() {
             var $map = $("body.map");
             if ($map.length) {
-                var mymap = L.map('map').setView([50.0647, 19.9450], 25),
+                let myMap = L.map('map').setView([50.0647, 19.9450], 25),
                     today = new Date(Date.now()),
-                    clickedElement;
+                    clickedElement,
+                    usersID;
 
+                //Fix for datepicker to hide on blur
                 $(document).on('mousedown', function (e) {
                     clickedElement = $(e.target);
                 })
@@ -473,11 +475,12 @@ var index = function () {
                         clickedElement = null;
                     });
 
+                //Default date for date picker (current day)
                 today = ("0" + today.getDate()).slice(-2) + "." + ("0" + (today.getMonth() + 1)).slice(-2) + "." + today.getFullYear();
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(mymap);
+                }).addTo(myMap);
 
                 $.ajax({
                     url: "/ajax/map/getInfo?ajax=true",
@@ -723,54 +726,53 @@ var index = function () {
                     }
                 }
 
-                var openPopupUserId;
-
-                mymap.on('popupopen', function (e) {
-                    openPopupUserId = e.popup._source._myId;
-                    $map.find('.popup #driverDate').datepicker({
-                        autoclose: true,
-                        language: "pl",
-                        todayHighlight: true,
-                        todayBtn: "linked",
-                        maxViewMode: 2,
-                        startDate: today,
-                    })
-                        .on('blur', function (e) {
-                            if (clickedElement === null) {
-                                $(this).datepicker('hide');
-                            }
-                        });
-
-                    // $map.find('.popup #driverTime').timepicker({
-                    //     uiLibrary: 'bootstrap4',
-                    //     format: "HH:MM",
-                    //     // footer: false,
-                    //     locale: "pl-pl",
-                    // });
-                });
-
-                //On request freeze
+                //On request, hospital or magazine freeze
                 $(document).on('click', "#driver-confirmation", function (e) {
                     e.preventDefault();
-                    var action = $map.find('[name="action"]').val(),
-                        driverDate = $map.find('#driverDate').val(),
-                        driverTime = $map.find('#driverTime').val();
+                    let action = $map.find('#requestModal [name="action"]').val(),
+                        date = $map.find('#requestModal #driverDate').val(),
+                        time = $map.find('#requestModal #driverTime').val();
 
-                    if (driverTime === "") {
+                    if (time === "") {
                         displayToast("Proszę podać godzinę odbioru/dostarczenia", "warning");
                         return false;
                     }
 
-                    freezeRequest(openPopupUserId, action, driverDate, driverTime);
+                    $.ajax({
+                        url: "/ajax/map/freezeRequest?ajax=true",
+                        type: "POST",
+                        data: {usersID: usersID, action: action, date: date, time: time},
+                        dataType: "JSON",
+                        beforeSend: function () {
+                            showLoading();
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1E3);
+                            }
+
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
+                            }
+                        },
+                        error: function () {
+                            displayToast("Wystąpił nieznany błąd", "danger");
+                        },
+                        complete: function () {
+                            hideLoading();
+                        }
+                    });
                 })
                     .on('click', "#hosMag", function (e) {
                         e.preventDefault();
 
                         var $btn = $(this),
-                            $popup = $btn.parents(".popup"),
-                            type = $btn.data("type"),
-                            quantity = $popup.find("input[name='quantity']").val(),
-                            pinID = $popup.find("input[name='pinID']").val();
+                            $modal = $btn.parents(".modal"),
+                            type = $modal.find("input[name='type']").val(),
+                            quantity = $modal.find("input[name='quantity']").val(),
+                            pinsID = $modal.find("input[name='pinsID']").val();
 
                         if (isNaN(quantity) || quantity === "") {
                             displayToast("Proszę podać poprawną liczbę", "warning");
@@ -780,7 +782,7 @@ var index = function () {
                         $.ajax({
                             url: "/ajax/map/hosMag?ajax=true",
                             type: "POST",
-                            data: {type: type, quantity: quantity, pinID: pinID},
+                            data: {type: type, quantity: quantity, pinsID: pinsID},
                             dataType: "JSON",
                             beforeSend: function () {
                                 showLoading();
@@ -807,7 +809,7 @@ var index = function () {
                     .on('input', "#quantity[type='range']", function () {
                         var $input = $(this);
 
-                        $input.parents('.popup').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
+                        $input.parents('.modal').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
                     })
                     .on('click', "#quantity[type='text']", function () {
                         displayToast("Obecnie nie można zmieniać ilości dostarczanej do szpitali", "warning");
@@ -824,83 +826,310 @@ var index = function () {
                 }
 
                 function onMapLoad(data) {
-                    var userData = data.requests,
-                        latLng, htmlElement, popup, marker, icon;
+                    let pins = data.pins,
+                        userData = data.requests,
+                        lat, lng, type, icon;
 
-                    for (var userId in userData) {
-                        if (USER_PRV === 1 && USER_NAME !== userData[userId].name) {
+                    for (let usersID in userData) {
+                        if (USER_PRV === 1 && USER_NAME !== userData[usersID].name) {
                             continue
                         }
-                        latLng = userData[userId].latLng.split(',');
-                        var additionalComments = userData[userId].comments,
-                            frozen = userData[userId].frozen,
-                            iconUrl = defineIconColor(userData[userId].bascinet, userData[userId].material, frozen),
-                            myIcon = createMyIcon(iconUrl);
+                        [lat, lng] = userData[usersID].latLng.split(',');
+                        let frozen = userData[usersID].frozen,
+                            iconUrl = defineIconColor(userData[usersID].bascinet, userData[usersID].material, frozen),
+                            info = {
+                                type: "request",
+                                name: userData[usersID].name,
+                                tel: userData[usersID].tel,
+                                address: userData[usersID].address,
+                                bascinet: parseInt(userData[usersID].bascinet),
+                                material: parseInt(userData[usersID].material),
+                                comments: userData[usersID].comments,
+                                usersID: usersID,
+                                lat: lat,
+                                lng: lng
+                            },
+                            userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
 
-                        htmlElement = createBindPopup({
-                            type: "request",
-                            name: userData[userId].name,
-                            tel: userData[userId].tel,
-                            address: userData[userId].address,
-                            lat: latLng[0],
-                            lng: latLng[1],
-                            bascinet: userData[userId].bascinet,
-                            material: userData[userId].material,
-                            comments: additionalComments,
-                        });
-
-                        popup = L.popup({
-                            minWidth: 400,
-                            className: 'customPopup',
-                        }).setContent(htmlElement),
-                            marker = L.marker(latLng, {icon: myIcon}).addTo(mymap);
-
-                        if (iconUrl !== IMG_URL + "/pin_frozen.png") {
-                            marker.bindPopup(popup);
+                        if (!frozen) {
+                            userMarker.on('click', () => {
+                                openModal(info);
+                            });
                         }
-
-                        marker._myId = userId;
                     }
 
-                    var pins = data.pins;
+                    for (let pinsID in pins) {
+                        [lat, lng] = pins[pinsID].latLng.split(',');
+                        type = pins[pinsID].type;
 
-                    for (var pinID in pins) {
-                        latLng = pins[pinID].latLng.split(',');
-                        var type = pins[pinID].type;
-                        if (type === "hospital") {
-                            icon = createMyIcon(IMG_URL + "/pin_hospital.png");
-                        } else if (type === "magazine") {
-                            icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+                        switch (type) {
+                            case "hospital":
+                                icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                                break;
+                            case "magazine":
+                                icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+                                break;
+                            default:
+                                icon = createMyIcon(IMG_URL + "/pin_frozen.png");
+                                break;
                         }
 
-                        htmlElement = createBindPopup({
+                        let info = {
                             type: type,
-                            name: pins[pinID].name,
-                            description: pins[pinID].description,
-                            lat: latLng[0],
-                            lng: latLng[1],
-                            bascinet: pins[pinID].bascinet,
-                            material: pins[pinID].material,
-                            bascinetOwn: data.bascinet,
-                            pinID: pinID,
+                            name: pins[pinsID].name,
+                            description: pins[pinsID].description,
+                            bascinet: parseInt(pins[pinsID].bascinet),
+                            material: parseInt(pins[pinsID].material),
+                            bascinetOwn: parseInt(data.bascinet),
+                            pinsID: pinsID,
+                            lat: lat,
+                            lng: lng
+                        };
+                        let hosMagMarker = L.marker([lat, lng], {icon: icon}).addTo(myMap);
+                        hosMagMarker.on('click', () => {
+                            openModal(info);
                         });
-
-                        var minWidth = 0,
-                            maxWidth = 300;
-                        if (USER_PRV === 2) {
-                            minWidth = 400;
-                            maxWidth = 0;
-                        }
-
-                        popup = L.popup({
-                            minWidth: minWidth,
-                            maxWidth: maxWidth,
-                            className: 'customPopup',
-                        }).setContent(htmlElement);
-
-                        marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(mymap);
-                        marker._myId = pinID;
                     }
+                }
+
+                // function onMapLoad(data) {
+                //     var userData = data.requests,
+                //         latLng, htmlElement, popup, marker, icon;
+                //
+                //     for (var userId in userData) {
+                //         if (USER_PRV === 1 && USER_NAME !== userData[userId].name) {
+                //             continue
+                //         }
+                //         latLng = userData[userId].latLng.split(',');
+                //         var additionalComments = userData[userId].comments,
+                //             frozen = userData[userId].frozen,
+                //             iconUrl = defineIconColor(userData[userId].bascinet, userData[userId].material, frozen),
+                //             myIcon = createMyIcon(iconUrl);
+                //
+                //         htmlElement = createBindPopup({
+                //             type: "request",
+                //             name: userData[userId].name,
+                //             tel: userData[userId].tel,
+                //             address: userData[userId].address,
+                //             lat: latLng[0],
+                //             lng: latLng[1],
+                //             bascinet: userData[userId].bascinet,
+                //             material: userData[userId].material,
+                //             comments: additionalComments,
+                //         });
+                //
+                //         popup = L.popup({
+                //             minWidth: 400,
+                //             className: 'customPopup',
+                //         }).setContent(htmlElement);
+                //         marker = L.marker(latLng, {icon: myIcon}).addTo(myMap);
+                //
+                //         if (iconUrl !== IMG_URL + "/pin_frozen.png") {
+                //             marker.bindPopup(popup);
+                //         }
+                //
+                //         marker._myId = userId;
+                //     }
+                //
+                //     var pins = data.pins;
+                //
+                //     for (var pinID in pins) {
+                //         latLng = pins[pinID].latLng.split(',');
+                //         var type = pins[pinID].type;
+                //         if (type === "hospital") {
+                //             icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                //         } else if (type === "magazine") {
+                //             icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+                //         }
+                //
+                //         htmlElement = createBindPopup({
+                //             type: type,
+                //             name: pins[pinID].name,
+                //             description: pins[pinID].description,
+                //             lat: latLng[0],
+                //             lng: latLng[1],
+                //             bascinet: pins[pinID].bascinet,
+                //             material: pins[pinID].material,
+                //             bascinetOwn: data.bascinet,
+                //             pinID: pinID,
+                //         });
+                //
+                //         var minWidth = 0,
+                //             maxWidth = 300;
+                //         if (USER_PRV === 2) {
+                //             minWidth = 400;
+                //             maxWidth = 0;
+                //         }
+                //
+                //         popup = L.popup({
+                //             minWidth: minWidth,
+                //             maxWidth: maxWidth,
+                //             className: 'customPopup',
+                //         }).setContent(htmlElement);
+                //
+                //         marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(myMap);
+                //         marker._myId = pinID;
+                //     }
+                // }
+
+                function openModal(data) {
+                    let type = data.type,
+                        maxMatFromMag = 600,
+                        $modal, $confirmBtn, $hrInteraction, $interaction, interaction;
+
+                    switch (type) {
+                        case 'hospital':
+                        case 'magazine':
+                            $modal = $map.find("#hosMagModal");
+
+                            $confirmBtn = $modal.find(".modal-footer #hosMag");
+                            $hrInteraction = $modal.find(".modal-body hr.interaction");
+                            $interaction = $modal.find(".modal-body div.interaction");
+
+                            $confirmBtn.hide();
+                            $hrInteraction.hide();
+                            $interaction.hide();
+
+                            $modal.find(".modal-body .name").html(data.name);
+                            $modal.find(".modal-body .description").html(data.description);
+                            let $bascinetMaterial = $modal.find(".modal-body .bascinetMaterial");
+
+                            interaction = "";
+
+                            if (data.bascinet < 0) {
+                                data.bascinet = 0;
+                            }
+
+                            if (data.material < 0) {
+                                data.material = 0;
+                            }
+
+                            if (type === 'hospital') {
+                                $bascinetMaterial.html(`Potrzebne przyłbice <span>${data.bascinet}</span>`);
+
+                                if (data.bascinetOwn > 0) {
+                                    interaction = `
+                                    <label for="quantity" class="md-form mb-1">Ilość</label>
+                                    <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Ilość" value="${data.bascinetOwn}" readonly>
+                                    `;
+                                    $confirmBtn.html(`Potwierdź dostarczenie`);
+                                }
+                            } else {
+                                $bascinetMaterial.html(`Posiadane materiały <span>${data.material}</span>`);
+
+                                if (data.material > 0) {
+                                    interaction = `
+                                    <label for="quantity">Ilość: <span class="quantity">50</span></label>
+                                    <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${maxMatFromMag}" step="50">
+                                    `;
+                                    $confirmBtn.html(`Potwierdź dostarczenie`);
+                                }
+                            }
+                            if ((type === "hospital" && data.bascinetOwn > 0) || (type === "magazine" && data.material > 0)) {
+                                $interaction.html(`
+                                <input type="hidden" name="type" value="${type}">
+                                <input type="hidden" name="pinsID" value="${data.pinsID}">
+                                ${interaction}
+                                `);
+                                $hrInteraction.show();
+                                $interaction.show();
+                                $confirmBtn.show();
+                            }
+                            break;
+                        case 'request':
+                            usersID = data.usersID;
+                            $modal = $map.find("#requestModal");
+
+                            $modal.find(".modal-header .modal-title").html("Zaplanuj transport");
+
+                            $confirmBtn = $modal.find(".modal-footer #hosMag"),
+                                $hrInteraction = $modal.find(".modal-body hr.interaction"),
+                                $interaction = $modal.find(".modal-body div.interaction");
+
+                            $confirmBtn.hide();
+                            $hrInteraction.hide();
+                            $interaction.hide();
+
+                            $modal.find(".modal-body .name").html(data.name);
+                            $modal.find(".modal-body .tel").html(`<a href="tel:${data.tel}">${data.tel}</a>`);
+                            $modal.find(".modal-body .address").html(data.address);
+
+                            if (USER_PRV === 1) {
+                                $modal.find(".modal-header .modal-title").html("Informacje");
+                            } else {
+                                let action;
+
+                                if (data.bascinet === 0) {
+                                    action = `
+                                    <input type='hidden' name='action' value='material'>
+                                    <label class="md-form mb-1">
+                                        Akcja
+                                    </label>
+                                    <input type='text' value='Dostarczenie' class="form-control" readonly>
+                                    `;
+                                } else if (data.material === 0) {
+                                    action = `
+                                    <input type='hidden' name='action' value='bascinet'>
+                                    <label class="md-form mb-1">
+                                        Akcja
+                                    </label>
+                                    <input type='text' value='Odbiór' class="form-control" readonly>
+                                    `;
+                                } else {
+                                    action = `
+                                    <label for="driverSelect" class="md-form mb-1">Wybierz akcję</label>
+                                    <select class="form-control" name="action" id="driverSelect">
+                                        <option value="bascinet">Odbiór</option>
+                                        <option value="material">Dostarczenie</option>
+                                        <option value="both" selected>Odbiór i dostarczenie</option>
+                                    </select>
+                                    `;
+                                }
+                                $interaction.html(`
+                                <div class="form-group col-12 mb-2">
+                                    ${action}
+                                </div>
+                                <div class="form-group col-12 mb-2">
+                                    <label for="driverDate" class="md-form mb-1">Dzień</label>
+                                    <input type="text" id="driverDate" class="form-control" placeholder="Dzień" value="${today}" readonly>
+                                </div>
+                                <div class="form-group col-12 mb-3">
+                                    <label for="driverTime" class="md-form mb-1">Godzina</label>
+                                    <input type="time" id="driverTime" class="form-control" placeholder="Godzina" value="">
+                                </div>
+                                `);
+                                $hrInteraction.show();
+                                $interaction.show();
+                                $confirmBtn.show();
+                                $map.find('.modal #driverDate').datepicker({
+                                    autoclose: true,
+                                    language: "pl",
+                                    todayHighlight: true,
+                                    todayBtn: "linked",
+                                    maxViewMode: 2,
+                                    startDate: today,
+                                })
+                                    .on('blur', function (e) {
+                                        if (clickedElement === null) {
+                                            $(this).datepicker('hide');
+                                        }
+                                    });
+                            }
+                            break;
+                        default:
+                            console.log(type);
+                            break;
+                    }
+
+                    let $navigate = $modal.find(".modal-footer .navigate");
+
+                    $navigate.attr('href', generateGoogleMapsLink(data.lat, data.lng));
+
+                    if (USER_PRV === 1) {
+                        $navigate.hide();
+                    }
+
+                    $modal.modal('show');
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
@@ -917,35 +1146,6 @@ var index = function () {
                         //    RED
                         return IMG_URL + '/pin_material.png';
                     }
-                }
-
-                function freezeRequest(userId, action, date, time) {
-                    $.ajax({
-                        url: "/ajax/map/freezeRequest?ajax=true",
-                        type: "POST",
-                        data: {userId: userId, action: action, date: date, time: time},
-                        dataType: "JSON",
-                        beforeSend: function () {
-                            showLoading();
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                setTimeout(function () {
-                                    location.reload();
-                                }, 1E3);
-                            }
-
-                            if (data.alert) {
-                                displayToast(data.message, data.alert);
-                            }
-                        },
-                        error: function () {
-                            displayToast("Wystąpił nieznany błąd", "danger");
-                        },
-                        complete: function () {
-                            hideLoading();
-                        }
-                    });
                 }
             }
         })();

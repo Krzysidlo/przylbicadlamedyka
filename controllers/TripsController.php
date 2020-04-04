@@ -135,7 +135,7 @@ HTML;
 
         if (empty($activities)) {
             $activities[] = <<< HTML
-            <p class="no-frozen">Aktualnie nie masz żadnych zaplanowanych przejazdów. Żeby zaplanować odbiór lub dostarczenie przejdż do mapy i wybierz producenta.</p>
+            <p class="no-frozen mt-4">Aktualnie nie masz żadnych zaplanowanych przejazdów. Żeby zaplanować odbiór lub dostarczenie przejdż do mapy i wybierz producenta.</p>
 HTML;
         }
 

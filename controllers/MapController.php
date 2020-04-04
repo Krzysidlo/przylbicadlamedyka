@@ -114,19 +114,28 @@ class MapController extends PageController
 
     public static function ajax_freezeRequest($get = []): array
     {
-        $usersID = filter_var($get['userId'], FILTER_SANITIZE_STRING);
+        $usersID = filter_var($get['usersID'], FILTER_SANITIZE_STRING);
         $action  = filter_var($get['action'], FILTER_SANITIZE_STRING);
         $date    = filter_var($get['date'], FILTER_SANITIZE_STRING);
         $time    = filter_var($get['time'], FILTER_SANITIZE_STRING);
 
         try {
             $date = new DateTime($date . " " . $time);
+            $now = new DateTime;
         } catch (Exception $e) {
             fs::log($e->getMessage());
             return [
                 'success' => false,
                 'alert'   => "danger",
                 'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        if ($date < $now) {
+            return [
+                'success' => false,
+                'alert'   => "warning",
+                'message' => "Data dostarczenia / odbioru musi być w przyszłości",
             ];
         }
 
@@ -137,7 +146,7 @@ class MapController extends PageController
 
     public static function ajax_hosMag($get = []): array
     {
-        if (empty($get['type']) || empty($get['quantity']) || empty($get['pinID'])) {
+        if (empty($get['type']) || empty($get['quantity']) || empty($get['pinsID'])) {
             return [
                 'success' => false,
                 'alert'   => "danger",
@@ -146,12 +155,12 @@ class MapController extends PageController
         }
 
         try {
-            $pinID    = filter_var($get['pinID'], FILTER_SANITIZE_NUMBER_INT);
+            $pinsID    = filter_var($get['pinsID'], FILTER_SANITIZE_NUMBER_INT);
             $quantity = filter_var($get['quantity'], FILTER_SANITIZE_NUMBER_INT);
-            $data     = Hosmag::create($pinID, $quantity);
+            $data     = Hosmag::create($pinsID, $quantity);
 
             $name = "";
-            $sql  = "SELECT `name` FROM `pins` WHERE `id` = {$pinID};";
+            $sql  = "SELECT `name` FROM `pins` WHERE `id` = {$pinsID};";
             if ($query = fs::$mysqli->query($sql)) {
                 $name = $query->fetch_row()[0] ?? "";
             }

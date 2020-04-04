@@ -203,6 +203,7 @@ body .modal.custom-modal form input {
 }
 body .modal.custom-modal#driverModal .modal-body {
   color: #757575;
+  padding-bottom: 0;
   padding-top: 0;
 }
 body .modal.custom-modal#driverModal .modal-body .activityBox {
@@ -695,81 +696,6 @@ body.map #map {
   height: calc(100vh - 97px);
   font-family: inherit;
 }
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper {
-  border-radius: 0;
-  padding: 0;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content {
-  margin: 0;
-  width: 400px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup {
-  margin: 0;
-  font-size: 16px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .title {
-  background: #B7274B;
-  color: #FFF;
-  font-size: 20px;
-  line-height: 20px;
-  padding: 14px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .userInfo {
-  color: #757575;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .userInfo .name {
-  color: #B7274B;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .bascinetMaterial {
-  color: #000;
-  line-height: 30px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .bascinetMaterial span {
-  color: #B7274B;
-  font-size: 30px;
-  float: right;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup hr {
-  width: calc(100% + 30px);
-  margin-left: -15px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup input, body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup select {
-  border: solid 1px #e4e5ea;
-  padding-left: 16px;
-  height: 50px;
-  color: #000;
-  cursor: pointer;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup input[readonly], body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup select[readonly] {
-  border: solid 1px #e4e5ea;
-  background: transparent;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup .btn-white {
-  -webkit-box-shadow: none;
-          box-shadow: none;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup.pin label[for="quantity"] {
-  line-height: 24px;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup.pin label[for="quantity"] span {
-  color: #B7274B;
-  font-size: 24px;
-  vertical-align: bottom;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup.pin input[type="range"] {
-  border: none;
-  padding: 0;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-content-wrapper .leaflet-popup-content .popup.pin input[type="range"]:focus {
-  -webkit-box-shadow: none;
-          box-shadow: none;
-}
-body.map #map .leaflet-popup.customPopup .leaflet-popup-close-button {
-  padding: 0;
-  width: 48px;
-  height: 48px;
-  line-height: 48px;
-}
 body.map .legend {
   position: fixed;
   bottom: 35px;
@@ -829,6 +755,66 @@ body.map .legend .element.magazine .circle {
     border: 8px solid;
     margin: 0 15px 0 5px;
   }
+}
+body.map .mapModal .modal-header {
+  color: #FFF;
+  background: #B7274B;
+  border-bottom: none;
+}
+body.map .mapModal .modal-header .close {
+  color: #FFF;
+}
+body.map .mapModal .modal-body .name {
+  color: #B7274B;
+}
+body.map .mapModal .modal-body .tel, body.map .mapModal .modal-body .address, body.map .mapModal .modal-body .comments, body.map .mapModal .modal-body .description {
+  color: #757575;
+}
+body.map .mapModal .modal-body .tel a, body.map .mapModal .modal-body .address a, body.map .mapModal .modal-body .comments a, body.map .mapModal .modal-body .description a {
+  color: #757575;
+}
+body.map .mapModal .modal-body .tel a:hover, body.map .mapModal .modal-body .address a:hover, body.map .mapModal .modal-body .comments a:hover, body.map .mapModal .modal-body .description a:hover {
+  color: #B7274B;
+}
+body.map .mapModal .modal-body .bascinetMaterial {
+  color: #000;
+  line-height: 30px;
+}
+body.map .mapModal .modal-body .bascinetMaterial span {
+  color: #B7274B;
+  font-size: 30px;
+  float: right;
+}
+body.map .mapModal .modal-body hr.interaction {
+  width: calc(100% + 30px);
+  margin-left: -15px;
+}
+body.map .mapModal .modal-body label[for="quantity"] {
+  line-height: 24px;
+}
+body.map .mapModal .modal-body label[for="quantity"] span {
+  color: #B7274B;
+  font-size: 24px;
+  vertical-align: bottom;
+}
+body.map .mapModal .modal-body input[type="range"] {
+  border: none;
+  padding: 0;
+}
+body.map .mapModal .modal-body input[type="range"]:focus {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+body.map .mapModal .modal-body input, body.map .mapModal .modal-body select {
+  border: solid 1px #e4e5ea;
+  padding-left: 16px;
+  height: 50px;
+  color: #000;
+  cursor: pointer;
+}
+body.map .mapModal .modal-body input[readonly], body.map .mapModal .modal-body select[readonly] {
+  border: solid 1px #e4e5ea;
+  background: transparent;
 }
 
 body.error, body.construction, body.noaccess {

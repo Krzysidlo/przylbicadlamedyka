@@ -128,9 +128,9 @@ class Hosmag
                     $collectedMaterial = intval($query->fetch_row()[0] ?? 0);
                     $delivredMaterial  = Frozen::count($usersID, "material");
                     $return = $collectedMaterial - $delivredMaterial;
-                    if ($return < 0) {
-                        $return = 0;
-                    }
+//                    if ($return < 0) {
+//                        $return = 0;
+//                    }
                 }
                 break;
             case 'bascinet':
