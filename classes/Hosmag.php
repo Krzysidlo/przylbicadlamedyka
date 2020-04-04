@@ -84,6 +84,10 @@ class Hosmag
             $success = false;
         }
 
+        if ($success) {
+            Activity::clearBascinet($usersID);
+        }
+
         return $success;
     }
 

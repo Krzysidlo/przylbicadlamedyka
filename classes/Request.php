@@ -66,11 +66,35 @@ class Request
         } else {
             $latLng = "'{$latLng}'";
         }
+
         if ($bascinet === NULL) {
             $bascinet = 'NULL';
+        } else {
+            if ($bascinet <= 0) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Porszę podać liczbę większą od zera",
+                ];
+            }
         }
+
         if ($material === NULL) {
             $material = 'NULL';
+        } else {
+            if (Request::count(USER_ID, "material") + $material > 150) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Można zgłosić zapotrzebowanie na maksimum 150 sztuk materiału",
+                ];
+            } else if ($material <= 0) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Porszę podać liczbę większą od zera",
+                ];
+            }
         }
         if ($comments === NULL || $comments === "") {
             $comments = 'NULL';
@@ -123,7 +147,7 @@ class Request
      * @return array
      * @throws Exception
      */
-    public static function getAll(?string $usersID = NULL, bool $delivered = true, bool $deleted = false): array
+    public static function getAll(?string $usersID = NULL, bool $delivered = false, bool $deleted = false): array
     {
         $sql      = "SELECT `id` FROM `requests`";
         $whereAnd = "WHERE";

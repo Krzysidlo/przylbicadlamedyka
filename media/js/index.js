@@ -46,7 +46,6 @@ var index = function () {
                 } else if (requestsID === 0) {
                     method = "material";
                 }
-                console.log(method, frozenID, requestsID);
 
                 $.ajax({
                     url: `/ajax/map/${method}?ajax=true`,
@@ -462,16 +461,16 @@ var index = function () {
         (function map() {
             var $map = $("body.map");
             if ($map.length) {
-                let myMap = L.map('map').setView([50.0647, 19.9450], 25),
+                let myMap = L.map('map').setView([50.0647, 19.9450], 13),
                     today = new Date(Date.now()),
                     clickedElement,
                     usersID;
 
                 //Fix for datepicker to hide on blur
-                $(document).on('mousedown', function (e) {
+                $(document).on('mousedown', e => {
                     clickedElement = $(e.target);
                 })
-                    .on('mouseup', function (e) {
+                    .on('mouseup', () => {
                         clickedElement = null;
                     });
 
@@ -479,7 +478,7 @@ var index = function () {
                 today = ("0" + today.getDate()).slice(-2) + "." + ("0" + (today.getMonth() + 1)).slice(-2) + "." + today.getFullYear();
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 }).addTo(myMap);
 
                 $.ajax({
@@ -531,203 +530,8 @@ var index = function () {
                     });
                 }
 
-                function createBindPopup(info) {
-                    var bascinetInfo = "",
-                        materialInfo = "",
-                        googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
-
-                    googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Nawiguj</a>`;
-                    if (info.type === "hospital" || info.type === "magazine") {
-                        if (info.bascinet) {
-                            bascinetInfo = "<div class='col-12 mt-4 bascinetMaterial'>Potrzebne przyłbice <span>" + info.bascinet + "</span></div>";
-                        }
-
-                        if (info.material) {
-                            materialInfo = "<div class='col-12 mt-4 bascinetMaterial'>Dostępne materiały <span>" + info.material + "</span></div>";
-                        }
-                        if (USER_PRV === 2) {
-                            var type = "odbiór",
-                                longType = "Potwierdź odbiór materiału z magazynu",
-                                max = 600,
-                                ineract = true;
-
-                            if (!info.material) {
-                                ineract = false;
-                                longType = "Informacje";
-                            }
-
-                            let input = `
-                                <label for="quantity">Ilość: <span class="quantity">50</span></label>
-                                <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${max}" step="50">
-                                `;
-
-                            if (info.type === "hospital") {
-                                if (info.bascinetOwn) {
-                                    ineract = true;
-                                    longType = "Potwierdź dostarczenie przyłbic do szpitala";
-                                    input = `
-                                    <label for="quantity" class="md-form mb-1">Ilość</label>
-                                    <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Ilość" value="${info.bascinetOwn}" readonly>
-                                    `;
-                                }
-                                type = "dostarczenie";
-                                longType = "Informacje";
-                            } else if (info.type === "hospital") {
-                                ineract = false;
-                            }
-
-                            let interaction = "";
-                            if (ineract) {
-                                interaction = `
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-12 mb-3">
-                                        <input type="hidden" name="pinID" value="${info.pinID}">
-                                        ${input}
-                                    </div>
-                                    <div class="form-group col-12 mb-0 text-right">
-                                        ${googleMapsLink}
-                                        <button type="button" class="btn btn-red" id="hosMag" data-type="${info.type}">Potwierdź ${type}</button>
-                                    </div>
-                                </div>
-                                `;
-                            }
-
-                            return `
-                            <div class="popup container pin pb-4">
-                                <div class="row">
-                                    <div class="col-12 title">${longType}</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 bascinetMaterial">${info.name}</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 description">${info.description}</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    ${bascinetInfo}
-                                    ${materialInfo}
-                                </div>
-                                ${interaction}
-                            </div>
-                            `;
-                        }
-                        return `
-                        <div class="popup container pin pb-4">
-                            <div class="row">
-                                <div class="col-12 title">Informacje</div>
-                            </div>
-                            <div class="row userInfo mt-3">
-                                <div class="col-12 bascinetMaterial">${info.name}</div>
-                            </div>
-                            <div class="row userInfo mt-3">
-                                <div class="col-12 description">${info.description}</div>
-                            </div>
-                            <div class="row userInfo mt-3">
-                                ${bascinetInfo}
-                                ${materialInfo}
-                            </div>
-                        </div>
-                        `;
-                    } else {
-                        var comments = "",
-                            action = "";
-
-                        if (info.bascinet) {
-                            bascinetInfo = '<div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span>' + info.bascinet + '</span></div>';
-                        }
-
-                        if (info.material) {
-                            materialInfo = '<div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span>' + info.material + '</span></div>';
-                        }
-
-                        if (info.comments) {
-                            comments = '<div class="col-12 comments">Uwagi <span>' + info.comments + '</span></div>';
-                        }
-
-                        if (bascinetInfo === "") {
-                            action = `
-                            <input type='hidden' name='action' value='material'>
-                            <label class="md-form mb-1">
-                                Akcja
-                            </label>
-                            <input type='text' value='Dostarczenie' class="form-control" readonly>
-                            `;
-                        } else if (materialInfo === "") {
-                            action = `
-                            <input type='hidden' name='action' value='bascinet'>
-                            <label class="md-form mb-1">
-                                Akcja
-                            </label>
-                            <input type='text' value='Odbiór' class="form-control" readonly>
-                            `;
-                        } else {
-                            action = `
-                            <label for="driverSelect" class="md-form mb-1">Wybierz akcję</label>
-                            <select class="form-control" name="action" id="driverSelect">
-                                <option value="bascinet">Odbiór</option>
-                                <option value="material">Dostarczenie</option>
-                                <option value="both" selected>Odbiór i dostarczenie</option>
-                            </select>
-                            `;
-                        }
-
-                        if (USER_PRV === 2) {
-                            return `
-                            <div class="popup container">
-                                <div class="row">
-                                    <div class="col-12 title">Zaplanuj transport</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 name">${info.name}</div>
-                                    <div class="col-12 mt-2 tel">${info.tel}</div>
-                                    <div class="col-12 mt-2 address">${info.address}</div>
-                                    ${bascinetInfo}
-                                    ${materialInfo}
-                                    ${comments}
-                                </div>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-12 mb-2">
-                                        ${action}
-                                    </div>
-                                    <div class="form-group col-12 mb-2">
-                                        <label for="driverDate" class="md-form mb-1">Dzień</label>
-                                        <input type="text" id="driverDate" class="form-control" placeholder="Dzień" value="${today}" readonly>
-                                    </div>
-                                    <div class="form-group col-12 mb-3">
-                                        <label for="driverTime" class="md-form mb-1">Godzina</label>
-                                        <input type="time" id="driverTime" class="form-control" placeholder="Godzina" value="">
-                                    </div>
-                                    <div class="form-group col-12 mb-4 text-right">
-                                        ${googleMapsLink}
-                                        <button type="button" class="btn btn-red" id="driver-confirmation">Zapisz</button>
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                        } else {
-                            return `
-                            <div class="popup container pb-4">
-                                <div class="row">
-                                    <div class="col-12 title">Informacje</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 name">${info.name}</div>
-                                    <div class="col-12 mt-2 tel">${info.tel}</div>
-                                    <div class="col-12 mt-2 address">${info.address}</div>
-                                    ${bascinetInfo}
-                                    ${materialInfo}
-                                    ${comments}
-                                </div>
-                            </div>
-                            `;
-                        }
-                    }
-                }
-
                 //On request, hospital or magazine freeze
-                $(document).on('click', "#driver-confirmation", function (e) {
+                $(document).on('click', "#driver-confirmation", e => {
                     e.preventDefault();
                     let action = $map.find('#requestModal [name="action"]').val(),
                         date = $map.find('#requestModal #driverDate').val(),
@@ -809,10 +613,7 @@ var index = function () {
                     .on('input', "#quantity[type='range']", function () {
                         var $input = $(this);
 
-                        $input.parents('.modal').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
-                    })
-                    .on('click', "#quantity[type='text']", function () {
-                        displayToast("Obecnie nie można zmieniać ilości dostarczanej do szpitali", "warning");
+                        $input.parents('.modal').find("label[for='quantity'] span").html($input.val());
                     });
 
                 function generateGoogleMapsLink(lat, lng) {
@@ -847,15 +648,14 @@ var index = function () {
                                 comments: userData[usersID].comments,
                                 usersID: usersID,
                                 lat: lat,
-                                lng: lng
+                                lng: lng,
+                                frozen: frozen
                             },
                             userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
 
-                        if (!frozen) {
-                            userMarker.on('click', () => {
-                                openModal(info);
-                            });
-                        }
+                        userMarker.on('click', () => {
+                            openModal(info);
+                        });
                     }
 
                     for (let pinsID in pins) {
@@ -892,90 +692,10 @@ var index = function () {
                     }
                 }
 
-                // function onMapLoad(data) {
-                //     var userData = data.requests,
-                //         latLng, htmlElement, popup, marker, icon;
-                //
-                //     for (var userId in userData) {
-                //         if (USER_PRV === 1 && USER_NAME !== userData[userId].name) {
-                //             continue
-                //         }
-                //         latLng = userData[userId].latLng.split(',');
-                //         var additionalComments = userData[userId].comments,
-                //             frozen = userData[userId].frozen,
-                //             iconUrl = defineIconColor(userData[userId].bascinet, userData[userId].material, frozen),
-                //             myIcon = createMyIcon(iconUrl);
-                //
-                //         htmlElement = createBindPopup({
-                //             type: "request",
-                //             name: userData[userId].name,
-                //             tel: userData[userId].tel,
-                //             address: userData[userId].address,
-                //             lat: latLng[0],
-                //             lng: latLng[1],
-                //             bascinet: userData[userId].bascinet,
-                //             material: userData[userId].material,
-                //             comments: additionalComments,
-                //         });
-                //
-                //         popup = L.popup({
-                //             minWidth: 400,
-                //             className: 'customPopup',
-                //         }).setContent(htmlElement);
-                //         marker = L.marker(latLng, {icon: myIcon}).addTo(myMap);
-                //
-                //         if (iconUrl !== IMG_URL + "/pin_frozen.png") {
-                //             marker.bindPopup(popup);
-                //         }
-                //
-                //         marker._myId = userId;
-                //     }
-                //
-                //     var pins = data.pins;
-                //
-                //     for (var pinID in pins) {
-                //         latLng = pins[pinID].latLng.split(',');
-                //         var type = pins[pinID].type;
-                //         if (type === "hospital") {
-                //             icon = createMyIcon(IMG_URL + "/pin_hospital.png");
-                //         } else if (type === "magazine") {
-                //             icon = createMyIcon(IMG_URL + "/pin_magazine.png");
-                //         }
-                //
-                //         htmlElement = createBindPopup({
-                //             type: type,
-                //             name: pins[pinID].name,
-                //             description: pins[pinID].description,
-                //             lat: latLng[0],
-                //             lng: latLng[1],
-                //             bascinet: pins[pinID].bascinet,
-                //             material: pins[pinID].material,
-                //             bascinetOwn: data.bascinet,
-                //             pinID: pinID,
-                //         });
-                //
-                //         var minWidth = 0,
-                //             maxWidth = 300;
-                //         if (USER_PRV === 2) {
-                //             minWidth = 400;
-                //             maxWidth = 0;
-                //         }
-                //
-                //         popup = L.popup({
-                //             minWidth: minWidth,
-                //             maxWidth: maxWidth,
-                //             className: 'customPopup',
-                //         }).setContent(htmlElement);
-                //
-                //         marker = L.marker(latLng, {icon: icon}).bindPopup(popup).addTo(myMap);
-                //         marker._myId = pinID;
-                //     }
-                // }
-
                 function openModal(data) {
                     let type = data.type,
-                        maxMatFromMag = 600,
-                        $modal, $confirmBtn, $hrInteraction, $interaction, interaction;
+                        maxFromMagazine = 600,
+                        $modal, $confirmBtn, $hrInteraction, $interaction;
 
                     switch (type) {
                         case 'hospital':
@@ -994,8 +714,6 @@ var index = function () {
                             $modal.find(".modal-body .description").html(data.description);
                             let $bascinetMaterial = $modal.find(".modal-body .bascinetMaterial");
 
-                            interaction = "";
-
                             if (data.bascinet < 0) {
                                 data.bascinet = 0;
                             }
@@ -1004,24 +722,20 @@ var index = function () {
                                 data.material = 0;
                             }
 
+                            let max = 50;
+
                             if (type === 'hospital') {
                                 $bascinetMaterial.html(`Potrzebne przyłbice <span>${data.bascinet}</span>`);
 
                                 if (data.bascinetOwn > 0) {
-                                    interaction = `
-                                    <label for="quantity" class="md-form mb-1">Ilość</label>
-                                    <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Ilość" value="${data.bascinetOwn}" readonly>
-                                    `;
+                                    max = data.bascinetOwn;
                                     $confirmBtn.html(`Potwierdź dostarczenie`);
                                 }
                             } else {
                                 $bascinetMaterial.html(`Posiadane materiały <span>${data.material}</span>`);
 
                                 if (data.material > 0) {
-                                    interaction = `
-                                    <label for="quantity">Ilość: <span class="quantity">50</span></label>
-                                    <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${maxMatFromMag}" step="50">
-                                    `;
+                                    max = maxFromMagazine;
                                     $confirmBtn.html(`Potwierdź dostarczenie`);
                                 }
                             }
@@ -1029,7 +743,8 @@ var index = function () {
                                 $interaction.html(`
                                 <input type="hidden" name="type" value="${type}">
                                 <input type="hidden" name="pinsID" value="${data.pinsID}">
-                                ${interaction}
+                                <label for="quantity">Ilość: <span class="quantity">50</span></label>
+                                <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${max}" step="50">
                                 `);
                                 $hrInteraction.show();
                                 $interaction.show();
@@ -1042,9 +757,9 @@ var index = function () {
 
                             $modal.find(".modal-header .modal-title").html("Zaplanuj transport");
 
-                            $confirmBtn = $modal.find(".modal-footer #hosMag"),
-                                $hrInteraction = $modal.find(".modal-body hr.interaction"),
-                                $interaction = $modal.find(".modal-body div.interaction");
+                            $confirmBtn = $modal.find(".modal-footer #driver-confirmation");
+                            $hrInteraction = $modal.find(".modal-body hr.interaction");
+                            $interaction = $modal.find(".modal-body div.interaction");
 
                             $confirmBtn.hide();
                             $hrInteraction.hide();
@@ -1071,7 +786,8 @@ var index = function () {
 
                             if (USER_PRV === 1) {
                                 $modal.find(".modal-header .modal-title").html("Informacje");
-                            } else {
+                                $modal.find(".modal-footer").hide();
+                            } else if (!data.frozen) {
                                 let action;
 
                                 if (data.bascinet === 0) {
@@ -1132,7 +848,6 @@ var index = function () {
                             }
                             break;
                         default:
-                            console.log(type);
                             break;
                     }
 

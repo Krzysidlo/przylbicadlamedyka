@@ -216,23 +216,31 @@ class Frozen
     public static function count(string $usersID, string $type = "delivered"): int
     {
         $return = 0;
+
+        $sql = NULL;
         switch ($type) {
             case "bascinet":
                 $sql = "SELECT SUM(r.`bascinet`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 0 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`delivered` = 1 AND r.`deleted` = 0;";
+
+                if ($query = fs::$mysqli->query($sql)) {
+                    $return = intval($query->fetch_row()[0] ?? 0);
+                }
+
+                $active = Activity::count($usersID);
+
+                $return = $return - $active;
                 break;
             case "trips":
                 $sql = "SELECT COUNT(DISTINCT f.`date`) FROM `frozen` f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE f.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND f.`deleted` = 0 GROUP BY r.`users_id`;";
-                break;
             case "material":
-                $sql = "SELECT SUM(r.`material`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0;";
-                break;
-            default:
-                $sql = "SELECT 0";
-                break;
-        }
+                if ($sql === NULL) {
+                    $sql = "SELECT SUM(r.`material`) FROM (SELECT * FROM `frozen` WHERE `users_id` = '{$usersID}' AND `delivered` = 1 AND `deleted` = 0) f LEFT JOIN `requests` r ON f.`requests_id` = r.`id` WHERE r.`deleted` = 0;";
+                }
 
-        if ($query = fs::$mysqli->query($sql)) {
-            $return = intval($query->fetch_row()[0] ?? 0);
+                if ($query = fs::$mysqli->query($sql)) {
+                    $return = intval($query->fetch_row()[0] ?? 0);
+                }
+                break;
         }
 
         return $return;

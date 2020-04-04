@@ -160,19 +160,22 @@ class MapController extends PageController
             $data     = Hosmag::create($pinsID, $quantity);
 
             $name = "";
-            $sql  = "SELECT `name` FROM `pins` WHERE `id` = {$pinsID};";
-            if ($query = fs::$mysqli->query($sql)) {
-                $name = $query->fetch_row()[0] ?? "";
+            try {
+                $pin = new Pin($pinsID);
+                $name = $pin->name;
+            } catch (Exception $e) {
+                fs::log("Error: " . $e->getMessage());
             }
 
             $type = filter_var($get['type'], FILTER_SANITIZE_STRING);
             if ($data['success']) {
                 switch ($type) {
                     case "hospital":
-                        if ($data['success'] = Hosmag::deliverBascinet(USER_ID)) {
+                        $endQuantity = Frozen::count(USER_ID, "bascinet");
+                        if ($endQuantity > 0 || $data['success'] = Hosmag::deliverBascinet(USER_ID)) {
                             $date            = new DateTime;
                             $message         = "Dostarczono <span class='quantity'>{$quantity}</span> przyłbic do <span class='name'>{$name}</span>";
-                            $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+                            $data['success'] &= Activity::create(USER_ID, $date, $message, "action", NULL, NULL, $quantity)['success'];
                         }
                         break;
                     case 'magazine':
@@ -375,6 +378,10 @@ class MapController extends PageController
 
     public function content(array $args = [])
     {
+        if (USER_PRV === User::USER_NO_CONFIRM) {
+            self::redirect("/");
+            exit(0);
+        }
         $data = [];
         return parent::content(array_merge($args, $data));
     }

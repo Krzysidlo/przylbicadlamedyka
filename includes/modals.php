@@ -1,6 +1,11 @@
-<?php use classes\User;
+<?php
+use classes\User;
+use classes\Request;
 
 $frozen ??= [];
+
+$requested = Request::count(USER_ID, "material");
+$max = 150 - $requested;
 
 if (USER_PRV === User::USER_PRODUCER) { ?>
     <div class="modal fade custom-modal functionModal" id="bascinetModal" tabindex="-1" role="dialog"
@@ -16,10 +21,10 @@ if (USER_PRV === User::USER_PRODUCER) { ?>
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="bascinet">
-                            Wybierz liczbę gotowych przyłbic do Odbioru
+                            Wybierz liczbę gotowych przyłbic do Odbioru? <span class="quantity">0</span>
                         </label>
-                        <input type="text" name="bascinet" id="bascinet" placeholder="Ilość" required
-                               class="form-control" title='Pole "Ilość" jest wymagane'>
+                        <input type="range" name="bascinet" id="bascinet" class="custom-range" value="0" min="0"
+                               max="300" step="50" required>
                     </div>
                     <div class="form-group">
                         <label for="bascinetComments">
@@ -49,10 +54,10 @@ if (USER_PRV === User::USER_PRODUCER) { ?>
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="material">
-                            Ile materiału potrzebujesz? <span class="quantity">50</span>
+                            Ile materiału potrzebujesz? <span class="quantity">0</span>
                         </label>
-                        <input type="range" name="material" id="material" class="custom-range" value="50" min="50"
-                               max="500" step="50" required>
+                        <input type="range" name="material" id="material" class="custom-range" value="0" min="0"
+                               max="<?= $max; ?>" step="50" required>
                     </div>
                     <div class="form-group">
                         <label for="materialComments">

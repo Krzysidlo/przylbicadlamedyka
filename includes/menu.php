@@ -52,13 +52,15 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
                     <span>Mapa</span>
                 </a>
             </li>
+            <?php if (USER_PRV !== User::USER_NO_CONFIRM) { ?>
             <li class="nav-item<?= $this->menu === "settings" ? " active" : ""; ?>">
                 <a href="/settings" class="nav-link preload">
                     <span class="material-icons">build</span>
                     <span>Ustawienia</span>
                 </a>
             </li>
-            <?php if ($user->getPrivilege() === User::USER_DRIVER) {
+            <?php }
+            if ($user->getPrivilege() === User::USER_DRIVER) {
                 $trips = Frozen::count(USER_ID, "trips"); ?>
                 <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">
                     <a href="/trips" class="nav-link preload">
