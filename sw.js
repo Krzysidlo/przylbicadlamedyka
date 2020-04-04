@@ -65,7 +65,12 @@ self.addEventListener('fetch', event => {
                     return response;
                 }
                 return fetch(event.request.url).then(response => {
-                    return response;
+                    return response || caches.open(cacheName).then(cache => {
+                        return cache.match('/offline').then(response => {
+                            console.log("after internet", response);
+                            return response;
+                        });
+                    });
                 });
             }).catch(() => {
                 caches.open(cacheName).then(cache => {
@@ -75,13 +80,6 @@ self.addEventListener('fetch', event => {
                     });
                 });
             })
-        }).catch(() => {
-            caches.open(cacheName).then(cache => {
-                return cache.match('/offline').then(response => {
-                    console.log("second catch", response);
-                    return response;
-                });
-            });
         })
     );
 });
