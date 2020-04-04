@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Czas generowania: 01 Kwi 2020, 11:19
+-- Czas generowania: 03 Kwi 2020, 22:05
 -- Wersja serwera: 8.0.19-0ubuntu0.19.10.3
 -- Wersja PHP: 7.4.4
 
@@ -34,9 +34,9 @@ CREATE TABLE `activities` (
   `users_id` varchar(256) NOT NULL,
   `type` enum('action','notification') NOT NULL,
   `requests_id` int DEFAULT NULL,
-  `frozen_id` int DEFAULT NULL,
-  `date` timestamp NOT NULL,
-  `message` text NOT NULL,
+  `frozen_id` varchar(128) DEFAULT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `message` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
 
@@ -81,8 +81,6 @@ CREATE TABLE `frozen` (
   `users_id` varchar(256) NOT NULL,
   `date` timestamp NOT NULL,
   `requests_id` int NOT NULL,
-  `bascinet` int DEFAULT NULL,
-  `material` int DEFAULT NULL,
   `delivered` tinyint(1) NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -91,13 +89,14 @@ CREATE TABLE `frozen` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `hospitals`
+-- Struktura tabeli dla tabeli `hos_mag`
 --
 
-CREATE TABLE `hospitals` (
+CREATE TABLE `hos_mag` (
   `id` int NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `location` varchar(256) NOT NULL,
+  `pins_id` int NOT NULL,
+  `users_id` varchar(256) NOT NULL,
+  `quantity` int NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin2;
@@ -144,6 +143,34 @@ CREATE TABLE `options_page` (
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `pins`
+--
+
+CREATE TABLE `pins` (
+  `id` int NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `latLng` varchar(256) NOT NULL,
+  `type` enum('hospital','magazine') NOT NULL,
+  `bascinet` int DEFAULT NULL,
+  `material` int DEFAULT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin2;
+
+--
+-- Zrzut danych tabeli `pins`
+--
+
+INSERT INTO `pins` (`id`, `name`, `description`, `latLng`, `type`, `bascinet`, `material`, `deleted`, `created_at`) VALUES
+(1, 'Nowa Siedziba Szpitala Uniwersyteckiego', 'ul. Macieja Jakubowskiego 2 Po podjechaniu pod szpital należy skierować się pod wejście nr. 3 i zadzwonić do p. Marii Włodkowskiej (rzecznik prasowy SU). Najlepiej przypomnieć się wtedy z prośbą o zabranie pieczątki i długopisu przez pracownika szpitala, który będzie odbierał przyłbice. Osoba: p. Maria Włodkowska Tel.: 785 790 319', '50.00850975,19.99970164986864', 'hospital', 4000, NULL, 0, '2020-04-03 19:57:37'),
+(2, 'Uniwersytecki Szpital Dziecięcy', 'ul. Wielicka 265 Pani rzecznik Katarzyna Pokorna-Hryniszyn będzie do 14:00 w USD, jeśli do tego czasu kierowca podjedzie pod szpital to prosimy dzwonić właśnie do Niej. Jeśli kierowca będzie pod Szpitalem po godzinie 14:00 to prosimy o zostawienie przyłbic w punkcie ochrony, a pan ochroniarz będzie poinformowany, że ma podejść z papierem do dyrekcji i tam przybiją pieczątkę na naszych drukach. Osoba: p. Katarzyna Pokorna-Hryniszyn Tel.: 600 410 792', '50.0116536,20.0021265', 'hospital', 4000, NULL, 0, '2020-04-03 19:57:37'),
+(3, 'Magazyn 1', 'ul. Kącik 13/13', '50.047141,19.9573196', 'magazine', NULL, 5000, 0, '2020-04-03 19:58:28'),
+(4, 'Magazyn 2', 'Os. Centrum E 21/4', '50.0705444,20.0383246', 'magazine', NULL, 5000, 0, '2020-04-03 19:58:28');
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `privileges`
 --
 
@@ -165,7 +192,6 @@ CREATE TABLE `requests` (
   `bascinet` int DEFAULT NULL,
   `material` int DEFAULT NULL,
   `comments` text,
-  `frozen` int DEFAULT NULL,
   `delivered` tinyint(1) NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -219,8 +245,7 @@ CREATE TABLE `users_additional_info` (
 ALTER TABLE `activities`
   ADD PRIMARY KEY (`id`),
   ADD KEY `users_id` (`users_id`),
-  ADD KEY `requests_id` (`requests_id`),
-  ADD KEY `frozen_id` (`frozen_id`);
+  ADD KEY `requests_id` (`requests_id`);
 
 --
 -- Indeksy dla tabeli `address`
@@ -243,10 +268,12 @@ ALTER TABLE `frozen`
   ADD KEY `request_id` (`requests_id`);
 
 --
--- Indeksy dla tabeli `hospitals`
+-- Indeksy dla tabeli `hos_mag`
 --
-ALTER TABLE `hospitals`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `hos_mag`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pins_id` (`pins_id`),
+  ADD KEY `users_id` (`users_id`);
 
 --
 -- Indeksy dla tabeli `notifications`
@@ -270,6 +297,12 @@ ALTER TABLE `options_page`
   ADD PRIMARY KEY (`name`);
 
 --
+-- Indeksy dla tabeli `pins`
+--
+ALTER TABLE `pins`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeksy dla tabeli `privileges`
 --
 ALTER TABLE `privileges`
@@ -280,8 +313,7 @@ ALTER TABLE `privileges`
 --
 ALTER TABLE `requests`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `users_id` (`users_id`),
-  ADD KEY `frozen` (`frozen`);
+  ADD KEY `users_id` (`users_id`);
 
 --
 -- Indeksy dla tabeli `users`
@@ -318,9 +350,9 @@ ALTER TABLE `frozen`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT dla tabeli `hospitals`
+-- AUTO_INCREMENT dla tabeli `hos_mag`
 --
-ALTER TABLE `hospitals`
+ALTER TABLE `hos_mag`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -328,6 +360,12 @@ ALTER TABLE `hospitals`
 --
 ALTER TABLE `notifications`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT dla tabeli `pins`
+--
+ALTER TABLE `pins`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT dla tabeli `requests`
@@ -344,8 +382,7 @@ ALTER TABLE `requests`
 --
 ALTER TABLE `activities`
   ADD CONSTRAINT `activities_ibfk_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `activities_ibfk_2` FOREIGN KEY (`requests_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `activities_ibfk_3` FOREIGN KEY (`frozen_id`) REFERENCES `frozen` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `activities_ibfk_2` FOREIGN KEY (`requests_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `address`
@@ -359,6 +396,13 @@ ALTER TABLE `address`
 ALTER TABLE `frozen`
   ADD CONSTRAINT `frozen_ibfk_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `frozen_ibfk_2` FOREIGN KEY (`requests_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Ograniczenia dla tabeli `hos_mag`
+--
+ALTER TABLE `hos_mag`
+  ADD CONSTRAINT `hos_mag_ibfk_1` FOREIGN KEY (`pins_id`) REFERENCES `pins` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `hos_mag_ibfk_2` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `notifications`
@@ -382,8 +426,7 @@ ALTER TABLE `privileges`
 -- Ograniczenia dla tabeli `requests`
 --
 ALTER TABLE `requests`
-  ADD CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `requests_ibfk_2` FOREIGN KEY (`frozen`) REFERENCES `frozen` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `users_additional_info`

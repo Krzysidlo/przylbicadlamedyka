@@ -1,18 +1,23 @@
 <?php
 
-use classes\User;
-
 require_once __DIR__ . "/config/config.php";
 global $pageClass;
 
 $content = $pageClass->content();
-?>
+
+use classes\User; ?>
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <?= $pageClass->head(); ?>
 </head>
-<body class="<?= $pageClass->view; ?> no_scroll">
+<?php
+$dataLogged = "";
+if (LOGGED_IN) {
+    $dataLogged = "data-logged='true'";
+}
+?>
+<body class="<?= $pageClass->view; ?> no_scroll" <?= $dataLogged; ?>>
 <div id="preloader">
     <div class="imgWrapper">
         <img src="<?= IMG_URL; ?>/logo.png">

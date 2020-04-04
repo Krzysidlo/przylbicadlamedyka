@@ -9,7 +9,7 @@ use classes\Functions as fs;
 class Request
 {
     public int      $id;
-    public User     $user;
+    public User     $producer;
     public string   $latLng;
     public ?int     $bascinet;
     public ?int     $material;
@@ -36,8 +36,8 @@ class Request
 
         if ($info) {
             $this->id         = intval($info['id']);
-            $this->user       = new User($info['users_id']);
-            $this->latLng     = trim($info['latLng'] ?? $this->user->getAddress()->location);
+            $this->producer   = new User($info['users_id']);
+            $this->latLng     = trim($info['latLng'] ?? $this->producer->getAddress()->location);
             $this->bascinet   = !empty($info['bascinet']) ? intval($info['bascinet']) : NULL;
             $this->material   = !empty($info['material']) ? intval($info['material']) : NULL;
             $this->comments   = !empty($info['comments']) ? trim($info['comments']) : NULL;
@@ -66,11 +66,35 @@ class Request
         } else {
             $latLng = "'{$latLng}'";
         }
+
         if ($bascinet === NULL) {
             $bascinet = 'NULL';
+        } else {
+            if ($bascinet <= 0) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Porszę podać liczbę większą od zera",
+                ];
+            }
         }
+
         if ($material === NULL) {
             $material = 'NULL';
+        } else {
+            if (Request::count(USER_ID, "material") + $material > 150) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Można zgłosić zapotrzebowanie na maksimum 150 sztuk materiału",
+                ];
+            } else if ($material <= 0) {
+                return [
+                    'success' => false,
+                    'alert'   => "warning",
+                    'message' => "Porszę podać liczbę większą od zera",
+                ];
+            }
         }
         if ($comments === NULL || $comments === "") {
             $comments = 'NULL';
@@ -102,10 +126,10 @@ class Request
                 $date    = new DateTime($date);
                 $message = "";
                 if ($bascinet !== "NULL") {
-                    $message = "Zgłoszono {$bascinet} gotowych przyłbic do odbioru";
+                    $message = "Zgłoszono <span class='quantity'>{$bascinet}</span> gotowych przyłbic do odbioru";
                 } else {
                     if ($material !== "NULL") {
-                        $message = "Zgłoszono zapotrzebowanie na {$material} materiału";
+                        $message = "Zgłoszono zapotrzebowanie na <span class='quantity'>{$material}</span> sztuk materiału";
                     }
                 }
                 Activity::create($usersID, $date, $message, "action", $requestsID);
@@ -123,7 +147,7 @@ class Request
      * @return array
      * @throws Exception
      */
-    public static function getAll(?string $usersID = NULL, bool $delivered = true, bool $deleted = false): array
+    public static function getAll(?string $usersID = NULL, bool $delivered = false, bool $deleted = false): array
     {
         $sql      = "SELECT `id` FROM `requests`";
         $whereAnd = "WHERE";
@@ -159,7 +183,7 @@ class Request
         $return = 0;
         switch ($type) {
             case "material":
-                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `deleted` = 0";
+                $sql = "SELECT SUM(`material`) FROM `requests` WHERE `delivered` = 0 AND `deleted` = 0";
                 if ($usersID !== NULL) {
                     $sql .= " AND `users_id` = '{$usersID}'";
                 }
@@ -194,7 +218,7 @@ class Request
     public static function getIdsByUserID(string $usersID): array
     {
         $return = ['bascinet' => [], 'material' => []];
-        $sql    = "SELECT DISTINCT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
+        $sql    = "SELECT DISTINCT r.`id`, r.`bascinet`, r.`material` FROM `requests` r LEFT JOIN (SELECT * FROM `frozen` WHERE `delivered` = 0 AND `deleted` = 0) f ON r.`id` = f.`requests_id` WHERE r.`users_id` = '{$usersID}' AND r.`delivered` = 0 AND r.`deleted` = 0 AND f.`requests_id` IS NULL;";
         if ($query = fs::$mysqli->query($sql)) {
             while ($result = $query->fetch_assoc()) {
                 if ($result['bascinet'] !== NULL) {
@@ -207,6 +231,11 @@ class Request
         }
 
         return $return;
+    }
+
+    public function deliver(): bool
+    {
+        return !!fs::$mysqli->query("UPDATE `requests` SET `delivered` = 1 WHERE `id` = {$this->id};");
     }
 
     public function delete(bool $activity = true): bool

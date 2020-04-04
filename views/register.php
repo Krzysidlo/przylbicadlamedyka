@@ -64,6 +64,13 @@
                             Zapoznałem się z <a href="/regulations" target="_blank">regulaminem</a>
                         </label>
                     </div>
+                    <div class="form-check mb-3 col-12">
+                        <input type="checkbox" class="form-check-input" name="rodo" required
+                               id="rodo" <?= !empty($this->get('regulations')) ? "checked" : ""; ?>>
+                        <label for="rodo" class="form-check-label">
+                            Zapoznałem się z klauzulą <a href="/rodo" target="_blank">RODO</a>
+                        </label>
+                    </div>
                     <div class="col-12 text-center">
                         <button class="btn btn-red mx-0" type="submit">Zarejestruj się</button>
                     </div>

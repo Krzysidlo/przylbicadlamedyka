@@ -11,45 +11,70 @@ var index = function () {
             settingsMap,
             mapMarker;
 
+        (function serviceWorker() {
+            if ($body.data('logged')) {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, error => {
+                        console.error('ServiceWorker registration failed: ', error);
+                    });
+                }
+            }
+        })();
+
         $(document).trigger('scroll');
 
         if (!mobileAndTabletCheck() && $body.height() > $(window).height()) {
             $body.addClass('desktop');
         }
 
-        function toggleMapInteraction(enable, map, marker) {
-            enable = enable | false;
-            if (enable) {
-                if (!mobileAndTabletCheck()) {
-                    map.dragging.enable();
+        (function driverConfirmation() {
+            let $confirmBtn = $("body .activityBox.trip button.confirm");
+
+            $confirmBtn.on('click', function (e) {
+                e.preventDefault();
+
+                let $btn = $(this),
+                    $box = $btn.parents(".activityBox.trip"),
+                    frozenID = $btn.data('frozen'),
+                    requestsID = $btn.data('requests'),
+                    method = "both";
+
+                if (frozenID === 0) {
+                    method = "bascinet";
+                } else if (requestsID === 0) {
+                    method = "material";
                 }
-                if (map.tap) {
-                    map.tap.enable();
-                }
-                map.touchZoom.enable();
-                map.doubleClickZoom.enable();
-                map.scrollWheelZoom.enable();
-                map.boxZoom.enable();
-                map.keyboard.enable();
-                if (typeof marker !== "undefined") {
-                    marker.dragging.enable()
-                }
-            } else {
-                map.dragging.disable();
-                if (map.tap) {
-                    map.tap.disable();
-                }
-                map.touchZoom.disable();
-                map.doubleClickZoom.disable();
-                map.scrollWheelZoom.disable();
-                map.boxZoom.disable();
-                map.keyboard.disable();
-                if (typeof marker !== "undefined") {
-                    marker.dragging.disable()
-                }
-                map.panTo(marker.getLatLng());
-            }
-        }
+
+                $.ajax({
+                    url: `/ajax/map/${method}?ajax=true`,
+                    type: "POST",
+                    data: {frozenID: frozenID, requestsID: requestsID},
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        showLoading();
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            $box.fadeOut(function () {
+                                $(this).remove();
+                            });
+                        }
+
+                        if (data.alert) {
+                            displayToast(data.message, data.alert);
+                        }
+                    },
+                    error: function () {
+                        displayToast("Wystąpił nieznany błąd", "danger");
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+            });
+        })();
 
         (function index() {
             var $index = $("body.index, body.trips");
@@ -64,8 +89,6 @@ var index = function () {
                             id = $btn.data('id'),
                             type = $btn.data('type'),
                             url = $btn.attr('href');
-
-                        console.log(id);
 
                         $.ajax({
                             url: url + "?ajax=true",
@@ -134,9 +157,7 @@ var index = function () {
             });
 
             $modals.find("input[type='range']").on('input', function () {
-                var $input = $(this),
-                    value = $input.val(),
-                    span = $input.parents('.modal').find("label[for='" + $input.attr('id') + "']");
+                var $input = $(this);
 
                 $input.parents('.modal').find("label[for='" + $input.attr('id') + "'] span").html($input.val());
             });
@@ -440,22 +461,25 @@ var index = function () {
         (function map() {
             var $map = $("body.map");
             if ($map.length) {
-                var mymap = L.map('map').setView([50.0647, 19.9450], 25),
+                let myMap = L.map('map').setView([50.0647, 19.9450], 13),
                     today = new Date(Date.now()),
-                    clickedElement;
+                    clickedElement,
+                    usersID;
 
-                $(document).on('mousedown', function (e) {
+                //Fix for datepicker to hide on blur
+                $(document).on('mousedown', e => {
                     clickedElement = $(e.target);
                 })
-                    .on('mouseup', function (e) {
+                    .on('mouseup', () => {
                         clickedElement = null;
                     });
 
+                //Default date for date picker (current day)
                 today = ("0" + today.getDate()).slice(-2) + "." + ("0" + (today.getMonth() + 1)).slice(-2) + "." + today.getFullYear();
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(mymap);
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                }).addTo(myMap);
 
                 $.ajax({
                     url: "/ajax/map/getInfo?ajax=true",
@@ -464,7 +488,8 @@ var index = function () {
                     dataType: "JSON",
                     success: function (data) {
                         if (data.success) {
-                            var mapInfo = {requests: {}, hospitals: data.hospitals};
+                            let mapInfo = JSON.parse(JSON.stringify(data));
+                            mapInfo.requests = {};
                             for (let userID in data.requests) {
                                 let requests = data.requests[userID];
                                 for (let i in requests) {
@@ -505,230 +530,336 @@ var index = function () {
                     });
                 }
 
-                function createBindPopup(info) {
-                    if (info.type === "hospital") {
-                        return `
-                        <div class="popup container pb-4">
-                            <div class="row">
-                                <div class="col-12 title">Informacje</div>
-                            </div>
-                            <div class="row userInfo mt-3">
-                                <div class="col-12 bascinetMaterial">${info.name}</div>
-                            </div>
-                        </div>
-                        `;
-                    } else {
-                        var bascinetInfo = "",
-                            materialInfo = "",
-                            comments = "",
-                            action = "";
-
-                        if (info.bascinetNo) {
-                            bascinetInfo = '<div class="col-12 mt-4 bascinetMaterial">Gotowe przyłbice <span>' + info.bascinetNo + '</span></div>';
-                        }
-
-                        if (info.materialNo) {
-                            materialInfo = '<div class="col-12 mt-4 bascinetMaterial">Zapotrzebowanie na materiały <span>' + info.materialNo + '</span></div>';
-                        }
-
-                        if (info.comments) {
-                            comments = '<div class="col-12 comments">Uwagi <span>' + info.comments + '</span></div>';
-                        }
-
-                        if (bascinetInfo === "") {
-                            action = `
-                            <input type='hidden' name='action' value='material'>
-                            <label class="md-form mb-1">
-                                Akcja
-                            </label>
-                            <input type='text' value='Dostarczenie' class="form-control" readonly>
-                            `;
-                        } else if (materialInfo === "") {
-                            action = `
-                            <input type='hidden' name='action' value='bascinet'>
-                            <label class="md-form mb-1">
-                                Akcja
-                            </label>
-                            <input type='text' value='Odbiór' class="form-control" readonly>
-                            `;
-                        } else {
-                            action = `
-                            <label for="driverSelect" class="md-form mb-1">Wybierz akcję</label>
-                            <select class="form-control" name="action" id="driverSelect">
-                                <option value="bascinet">Odbiór</option>
-                                <option value="material">Dostarczenie</option>
-                                <option value="both">Odbiór i dostarczenie</option>
-                            </select>
-                            `;
-                        }
-
-                        var googleMapsLink = generateGoogleMapsLink(info.lat, info.lng);
-                        googleMapsLink = `<a href="${googleMapsLink}" class="btn btn-white" target="_blank" data-target="#googlemaps">Maps link</a>`;
-
-                        if (USER_PRV === 2) {
-                            return `
-                            <div class="popup container">
-                                <div class="row">
-                                    <div class="col-12 title">Zaplanuj transport</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 name">${info.name}</div>
-                                    <div class="col-12 mt-2 tel">${info.tel}</div>
-                                    <div class="col-12 mt-2 address">${info.address}</div>
-                                    ${bascinetInfo}
-                                    ${materialInfo}
-                                    ${comments}
-                                </div>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-12 mb-2">
-                                        ${action}
-                                    </div>
-                                    <div class="form-group col-12 mb-2">
-                                        <label for="driverDate" class="md-form mb-1">Dzień</label>
-                                        <input type="text" id="driverDate" class="form-control" placeholder="Dzień" value="${today}" readonly>
-                                    </div>
-                                    <div class="form-group col-12 mb-3">
-                                        <label for="driverTime" class="md-form mb-1">Godzina</label>
-                                        <input type="time" id="driverTime" class="form-control" placeholder="Godzina" value="">
-                                    </div>
-                                    <div class="form-group col-12 mb-4 text-right">
-                                        ${googleMapsLink}
-                                        <button type="button" class="btn btn-red" id="driver-confirmation">Zapisz</button>
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                        } else {
-                            return `
-                            <div class="popup container pb-4">
-                                <div class="row">
-                                    <div class="col-12 title">Informacje</div>
-                                </div>
-                                <div class="row userInfo mt-3">
-                                    <div class="col-12 name">${info.name}</div>
-                                    <div class="col-12 mt-2 tel">${info.tel}</div>
-                                    <div class="col-12 mt-2 address">${info.address}</div>
-                                    ${bascinetInfo}
-                                    ${materialInfo}
-                                    ${comments}
-                                </div>
-                            </div>
-                            `;
-                        }
-                    }
-                }
-
-                var openPopupUserId;
-
-                mymap.on('popupopen', function (e) {
-                    openPopupUserId = e.popup._source._myId;
-                    $map.find('.popup #driverDate').datepicker({
-                        autoclose: true,
-                        language: "pl",
-                        todayHighlight: true,
-                        todayBtn: "linked",
-                        maxViewMode: 2,
-                        startDate: today,
-                    })
-                        .on('blur', function (e) {
-                            if (clickedElement === null) {
-                                $(this).datepicker('hide');
-                            }
-                        });
-
-                    // $map.find('.popup #driverTime').timepicker({
-                    //     uiLibrary: 'bootstrap4',
-                    //     format: "HH:MM",
-                    //     // footer: false,
-                    //     locale: "pl-pl",
-                    // });
-                });
-
-                //On request freeze
-                $(document).on('click', "#driver-confirmation", function (e) {
+                //On request, hospital or magazine freeze
+                $(document).on('click', "#driver-confirmation", e => {
                     e.preventDefault();
-                    var action = $map.find('[name="action"]').val(),
-                        driverDate = $map.find('#driverDate').val(),
-                        driverTime = $map.find('#driverTime').val();
+                    let action = $map.find('#requestModal [name="action"]').val(),
+                        date = $map.find('#requestModal #driverDate').val(),
+                        time = $map.find('#requestModal #driverTime').val();
 
-                    if (driverTime === "") {
+                    if (time === "") {
                         displayToast("Proszę podać godzinę odbioru/dostarczenia", "warning");
                         return false;
                     }
 
-                    freezeRequest(openPopupUserId, action, driverDate, driverTime);
-                });
+                    $.ajax({
+                        url: "/ajax/map/freezeRequest?ajax=true",
+                        type: "POST",
+                        data: {usersID: usersID, action: action, date: date, time: time},
+                        dataType: "JSON",
+                        beforeSend: function () {
+                            showLoading();
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1E3);
+                            }
+
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
+                            }
+                        },
+                        error: function () {
+                            displayToast("Wystąpił nieznany błąd", "danger");
+                        },
+                        complete: function () {
+                            hideLoading();
+                        }
+                    });
+                })
+                    .on('click', "#hosMag", function (e) {
+                        e.preventDefault();
+
+                        var $btn = $(this),
+                            $modal = $btn.parents(".modal"),
+                            type = $modal.find("input[name='type']").val(),
+                            quantity = $modal.find("input[name='quantity']").val(),
+                            pinsID = $modal.find("input[name='pinsID']").val();
+
+                        if (isNaN(quantity) || quantity === "") {
+                            displayToast("Proszę podać poprawną liczbę", "warning");
+                            return false;
+                        }
+
+                        $.ajax({
+                            url: "/ajax/map/hosMag?ajax=true",
+                            type: "POST",
+                            data: {type: type, quantity: quantity, pinsID: pinsID},
+                            dataType: "JSON",
+                            beforeSend: function () {
+                                showLoading();
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 1E3);
+                                }
+
+                                if (data.alert) {
+                                    displayToast(data.message, data.alert);
+                                }
+                            },
+                            error: function () {
+                                displayToast("Wystąpił nieznany błąd", "danger");
+                            },
+                            complete: function () {
+                                hideLoading();
+                            }
+                        });
+                    })
+                    .on('input', "#quantity[type='range']", function () {
+                        var $input = $(this);
+
+                        $input.parents('.modal').find("label[for='quantity'] span").html($input.val());
+                    });
 
                 function generateGoogleMapsLink(lat, lng) {
                     //  https://maps.google.com/maps?q=50.0647,19.9450
-                    return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                    // return "https://maps.google.com/maps?q=" + lat + "," + lng;
+                    if ((navigator.platform.indexOf("iPhone") !== -1) || (navigator.platform.indexOf("iPod") !== -1) || (navigator.platform.indexOf("iPad") !== -1)) {
+                        return "maps://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=" + lat + "," + lng;
+                    } else {
+                        return "https://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=" + lat + "," + lng;
+                    }
                 }
 
                 function onMapLoad(data) {
-                    var userData = data.requests,
-                        latLng,
-                        htmlElement,
-                        popup,
-                        marker;
+                    let pins = data.pins,
+                        userData = data.requests,
+                        lat, lng, type, icon;
 
-                    for (var userId in userData) {
-                        latLng = userData[userId].latLng.split(',');
-                        var userName = userData[userId].name,
-                            userTelNo = userData[userId].tel,
-                            userAddress = userData[userId].address,
-                            readyBascinetsNo = userData[userId].bascinet,
-                            MaterialsNeededNo = userData[userId].material,
-                            additionalComments = userData[userId].comments,
-                            frozen = userData[userId].frozen,
-                            iconUrl = defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen),
-                            myIcon = createMyIcon(iconUrl);
+                    for (let usersID in userData) {
+                        if (USER_PRV === 1 && USER_NAME !== userData[usersID].name) {
+                            continue
+                        }
+                        [lat, lng] = userData[usersID].latLng.split(',');
+                        let frozen = userData[usersID].frozen,
+                            iconUrl = defineIconColor(userData[usersID].bascinet, userData[usersID].material, frozen),
+                            info = {
+                                type: "request",
+                                name: userData[usersID].name,
+                                tel: userData[usersID].tel,
+                                address: userData[usersID].address,
+                                bascinet: parseInt(userData[usersID].bascinet),
+                                material: parseInt(userData[usersID].material),
+                                comments: userData[usersID].comments,
+                                usersID: usersID,
+                                lat: lat,
+                                lng: lng,
+                                frozen: frozen
+                            },
+                            userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
 
-                        htmlElement = createBindPopup({
-                            type: "request",
-                            name: userName,
-                            tel: userTelNo,
-                            address: userAddress,
-                            lat: latLng[0],
-                            lng: latLng[1],
-                            bascinetNo: readyBascinetsNo,
-                            materialNo: MaterialsNeededNo,
-                            comments: additionalComments,
+                        userMarker.on('click', () => {
+                            openModal(info);
                         });
+                    }
 
-                        popup = L.popup({
-                            minWidth: 400,
-                            className: 'customPopup',
-                        }).setContent(htmlElement),
-                            marker = L.marker(latLng, {icon: myIcon}).addTo(mymap);
+                    for (let pinsID in pins) {
+                        [lat, lng] = pins[pinsID].latLng.split(',');
+                        type = pins[pinsID].type;
 
-                        if (iconUrl !== IMG_URL + "/pin_frozen.png") {
-                            marker.bindPopup(popup);
+                        switch (type) {
+                            case "hospital":
+                                icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                                break;
+                            case "magazine":
+                                icon = createMyIcon(IMG_URL + "/pin_magazine.png");
+                                break;
+                            default:
+                                icon = createMyIcon(IMG_URL + "/pin_frozen.png");
+                                break;
                         }
 
-                        marker._myId = userId;
-                    }
-
-                    var hospitalData = data.hospitals;
-
-                    for (var hospitalId in hospitalData) {
-                        latLng = hospitalData[hospitalId].latLng.split(',');
-                        var hospitalName = hospitalData[hospitalId].name,
-                            hospitalIcon = createMyIcon(IMG_URL + "/pin_hospital.png");
-
-                        htmlElement = createBindPopup({
-                            type: "hospital",
-                            name: hospitalName,
+                        let info = {
+                            type: type,
+                            name: pins[pinsID].name,
+                            description: pins[pinsID].description,
+                            bascinet: parseInt(pins[pinsID].bascinet),
+                            material: parseInt(pins[pinsID].material),
+                            bascinetOwn: parseInt(data.bascinet),
+                            pinsID: pinsID,
+                            lat: lat,
+                            lng: lng
+                        };
+                        let hosMagMarker = L.marker([lat, lng], {icon: icon}).addTo(myMap);
+                        hosMagMarker.on('click', () => {
+                            openModal(info);
                         });
-
-                        popup = L.popup({
-                            maxWidth: 200,
-                            className: 'customPopup',
-                        }).setContent(htmlElement);
-
-                        marker = L.marker(latLng, {icon: hospitalIcon}).bindPopup(popup).addTo(mymap);
-                        marker._myId = hospitalId;
                     }
+                }
+
+                function openModal(data) {
+                    let type = data.type,
+                        maxFromMagazine = 600,
+                        $modal, $confirmBtn, $hrInteraction, $interaction;
+
+                    switch (type) {
+                        case 'hospital':
+                        case 'magazine':
+                            $modal = $map.find("#hosMagModal");
+
+                            $confirmBtn = $modal.find(".modal-footer #hosMag");
+                            $hrInteraction = $modal.find(".modal-body hr.interaction");
+                            $interaction = $modal.find(".modal-body div.interaction");
+
+                            $confirmBtn.hide();
+                            $hrInteraction.hide();
+                            $interaction.hide();
+
+                            $modal.find(".modal-body .name").html(data.name);
+                            $modal.find(".modal-body .description").html(data.description);
+                            let $bascinetMaterial = $modal.find(".modal-body .bascinetMaterial");
+
+                            if (data.bascinet < 0) {
+                                data.bascinet = 0;
+                            }
+
+                            if (data.material < 0) {
+                                data.material = 0;
+                            }
+
+                            let max = 50;
+
+                            if (type === 'hospital') {
+                                $bascinetMaterial.html(`Potrzebne przyłbice <span>${data.bascinet}</span>`);
+
+                                if (data.bascinetOwn > 0) {
+                                    max = data.bascinetOwn;
+                                    $confirmBtn.html(`Potwierdź dostarczenie`);
+                                }
+                            } else {
+                                $bascinetMaterial.html(`Posiadane materiały <span>${data.material}</span>`);
+
+                                if (data.material > 0) {
+                                    max = maxFromMagazine;
+                                    $confirmBtn.html(`Potwierdź dostarczenie`);
+                                }
+                            }
+                            if ((type === "hospital" && data.bascinetOwn > 0) || (type === "magazine" && data.material > 0)) {
+                                $interaction.html(`
+                                <input type="hidden" name="type" value="${type}">
+                                <input type="hidden" name="pinsID" value="${data.pinsID}">
+                                <label for="quantity">Ilość: <span class="quantity">50</span></label>
+                                <input type="range" name="quantity" id="quantity" class="custom-range form-control" value="50" min="50" max="${max}" step="50">
+                                `);
+                                $hrInteraction.show();
+                                $interaction.show();
+                                $confirmBtn.show();
+                            }
+                            break;
+                        case 'request':
+                            usersID = data.usersID;
+                            $modal = $map.find("#requestModal");
+
+                            $modal.find(".modal-header .modal-title").html("Zaplanuj transport");
+
+                            $confirmBtn = $modal.find(".modal-footer #driver-confirmation");
+                            $hrInteraction = $modal.find(".modal-body hr.interaction");
+                            $interaction = $modal.find(".modal-body div.interaction");
+
+                            $confirmBtn.hide();
+                            $hrInteraction.hide();
+                            $interaction.hide();
+
+                            $modal.find(".modal-body .name").html(data.name);
+                            $modal.find(".modal-body .tel").html(`<a href="tel:${data.tel}">${data.tel}</a>`);
+                            $modal.find(".modal-body .address").html(data.address);
+
+                            let $bascinet = $modal.find(".modal-body .bascinet"),
+                                $material = $modal.find(".modal-body .material");
+
+                            $bascinet.find("span").html(data.bascinet);
+                            $material.find("span").html(data.material);
+                            $bascinet.show();
+                            $material.show();
+
+                            if (data.bascinet <= 0) {
+                                $bascinet.hide();
+                            }
+                            if (data.material <= 0) {
+                                $material.hide();
+                            }
+
+                            if (USER_PRV === 1) {
+                                $modal.find(".modal-header .modal-title").html("Informacje");
+                                $modal.find(".modal-footer").hide();
+                            } else if (!data.frozen) {
+                                let action;
+
+                                if (data.bascinet === 0) {
+                                    action = `
+                                    <input type='hidden' name='action' value='material'>
+                                    <label class="md-form mb-1">
+                                        Akcja
+                                    </label>
+                                    <input type='text' value='Dostarczenie' class="form-control" readonly>
+                                    `;
+                                } else if (data.material === 0) {
+                                    action = `
+                                    <input type='hidden' name='action' value='bascinet'>
+                                    <label class="md-form mb-1">
+                                        Akcja
+                                    </label>
+                                    <input type='text' value='Odbiór' class="form-control" readonly>
+                                    `;
+                                } else {
+                                    action = `
+                                    <label for="driverSelect" class="md-form mb-1">Wybierz akcję</label>
+                                    <select class="form-control" name="action" id="driverSelect">
+                                        <option value="bascinet">Odbiór</option>
+                                        <option value="material">Dostarczenie</option>
+                                        <option value="both" selected>Odbiór i dostarczenie</option>
+                                    </select>
+                                    `;
+                                }
+                                $interaction.html(`
+                                <div class="form-group col-12 mb-2">
+                                    ${action}
+                                </div>
+                                <div class="form-group col-12 mb-2">
+                                    <label for="driverDate" class="md-form mb-1">Dzień</label>
+                                    <input type="text" id="driverDate" class="form-control" placeholder="Dzień" value="${today}" readonly>
+                                </div>
+                                <div class="form-group col-12 mb-3">
+                                    <label for="driverTime" class="md-form mb-1">Godzina</label>
+                                    <input type="time" id="driverTime" class="form-control" placeholder="Godzina" value="">
+                                </div>
+                                `);
+                                $hrInteraction.show();
+                                $interaction.show();
+                                $confirmBtn.show();
+                                $map.find('.modal #driverDate').datepicker({
+                                    autoclose: true,
+                                    language: "pl",
+                                    todayHighlight: true,
+                                    todayBtn: "linked",
+                                    maxViewMode: 2,
+                                    startDate: today,
+                                })
+                                    .on('blur', function (e) {
+                                        if (clickedElement === null) {
+                                            $(this).datepicker('hide');
+                                        }
+                                    });
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    let $navigate = $modal.find(".modal-footer .navigate");
+
+                    $navigate.attr('href', generateGoogleMapsLink(data.lat, data.lng));
+
+                    if (USER_PRV === 1) {
+                        $navigate.hide();
+                    }
+
+                    $modal.modal('show');
                 }
 
                 function defineIconColor(readyBascinetsNo, MaterialsNeededNo, frozen) {
@@ -745,33 +876,6 @@ var index = function () {
                         //    RED
                         return IMG_URL + '/pin_material.png';
                     }
-                }
-
-                function freezeRequest(userId, action, date, time) {
-                    $.ajax({
-                        url: "/ajax/map/freezeRequest?ajax=true",
-                        type: "POST",
-                        data: {userId: userId, action: action, date: date, time: time},
-                        dataType: "JSON",
-                        beforeSend: function () {
-                            showLoading();
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                location.reload();
-                            }
-
-                            if (data.alert) {
-                                displayToast(data.message, data.alert);
-                            }
-                        },
-                        error: function () {
-                            displayToast("Wystąpił nieznany błąd", "danger");
-                        },
-                        complete: function () {
-                            hideLoading();
-                        }
-                    });
                 }
             }
         })();
@@ -905,7 +1009,7 @@ var index = function () {
                                 $mapContainer.removeClass("loading");
                             }
                         });
-                    }, 15E2);
+                    }, 1E3);
                 });
             }
         })();
@@ -1067,6 +1171,40 @@ var index = function () {
 
         var $body = $("body");
         $body.removeClass('no_scroll');
+    }
+
+    function toggleMapInteraction(enable, map, marker) {
+        enable = enable | false;
+        if (enable) {
+            if (!mobileAndTabletCheck()) {
+                map.dragging.enable();
+            }
+            if (map.tap) {
+                map.tap.enable();
+            }
+            map.touchZoom.enable();
+            map.doubleClickZoom.enable();
+            map.scrollWheelZoom.enable();
+            map.boxZoom.enable();
+            map.keyboard.enable();
+            if (typeof marker !== "undefined") {
+                marker.dragging.enable()
+            }
+        } else {
+            map.dragging.disable();
+            if (map.tap) {
+                map.tap.disable();
+            }
+            map.touchZoom.disable();
+            map.doubleClickZoom.disable();
+            map.scrollWheelZoom.disable();
+            map.boxZoom.disable();
+            map.keyboard.disable();
+            if (typeof marker !== "undefined") {
+                marker.dragging.disable()
+            }
+            map.panTo(marker.getLatLng());
+        }
     }
 
     $.fn.isInViewport = function () {

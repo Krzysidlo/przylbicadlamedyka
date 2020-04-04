@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use classes\Functions as fs;
 
-class Activity extends Action
+class Activity
 {
     public int      $id;
     public User     $user;
@@ -23,7 +23,6 @@ class Activity extends Action
      */
     public function __construct(int $activityID)
     {
-        parent::__construct("activities");
         $info = false;
 
         $sql = "SELECT * FROM `activities` WHERE `id` = '{$activityID}'";
@@ -44,18 +43,12 @@ class Activity extends Action
             } else {
                 $this->request = NULL;
             }
-
-            if (!empty($info['frozen_id'])) {
-                $this->frozen = new Frozen($info['frozen_id']);
-            } else {
-                $this->frozen = NULL;
-            }
         } else {
             throw new Exception("No activity info found with id=[{$activityID}]");
         }
     }
 
-    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?string $frozenIDS = NULL): array
+    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?string $frozenIDS = NULL, ?int $bascinet = NULL): array
     {
         if ($frozenIDS === NULL) {
             $frozenIDS = "NULL";
@@ -65,11 +58,14 @@ class Activity extends Action
         if ($requestsID === NULL) {
             $requestsID = "NULL";
         }
+        if ($bascinet === NULL) {
+            $bascinet = "NULL";
+        }
         $date = $date->format("Y-m-d H:i:s");
 
         $message = base64_encode($message);
 
-        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenIDS}, '{$date}', '{$message}');";
+        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`, `bascinet`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenIDS}, '{$date}', '{$message}', {$bascinet});";
 
         if (fs::$mysqli->query($sql)) {
             $data = [
@@ -116,5 +112,30 @@ class Activity extends Action
         }
 
         return $return;
+    }
+
+    public static function count(string $usersID): int
+    {
+        $return = 0;
+        $sql = "SELECT SUM(`bascinet`) FROM `activities` WHERE `users_id` = '{$usersID}';";
+        if ($query = fs::$mysqli->query($sql)) {
+            if ($result = $query->fetch_row()) {
+                $return = intval($result[0] ?? 0);
+            }
+        }
+
+        return $return;
+    }
+
+    public static function clearBascinet(string $usersID): bool
+    {
+        return !!fs::$mysqli->query("UPDATE `activities` SET `bascinet` = NULL WHERE `users_id` = '{$usersID}'");
+    }
+
+    public function delete(): bool
+    {
+        $sql   = "UPDATE `{activities}` SET `deleted` = 1 WHERE `id` = {$this->id};";
+
+        return !!fs::$mysqli->query($sql);
     }
 }

@@ -41,27 +41,29 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
     <?php if (!$user->noAddress()) { ?>
         <ul class="navbar-nav">
             <li class="nav-item<?= $this->menu === "index" ? " active" : ""; ?>">
-                <a href="/" class="nav-link">
+                <a href="/" class="nav-link preload">
                     <span class="material-icons">assignment</span>
                     <span>Aktywność</span>
                 </a>
             </li>
             <li class="nav-item<?= $this->menu === "map" ? " active" : ""; ?>">
-                <a href="/map" class="nav-link">
+                <a href="/map" class="nav-link preload">
                     <span class="material-icons">map</span>
                     <span>Mapa</span>
                 </a>
             </li>
+            <?php if (USER_PRV !== User::USER_NO_CONFIRM) { ?>
             <li class="nav-item<?= $this->menu === "settings" ? " active" : ""; ?>">
-                <a href="/settings" class="nav-link">
+                <a href="/settings" class="nav-link preload">
                     <span class="material-icons">build</span>
                     <span>Ustawienia</span>
                 </a>
             </li>
-            <?php if ($user->getPrivilege() === User::USER_DRIVER) {
+            <?php }
+            if ($user->getPrivilege() === User::USER_DRIVER) {
                 $trips = Frozen::count(USER_ID, "trips"); ?>
                 <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">
-                    <a href="/trips" class="nav-link">
+                    <a href="/trips" class="nav-link preload">
                         <span class="material-icons">commute</span>
                         <span>Planowane przejazdy (<?= $trips; ?>)</span>
                     </a>
@@ -95,7 +97,7 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
     <?php } ?>
     <ul class="navbar-nav navbar-bottom">
         <li class="nav-item">
-            <a href="/logout" class="nav-link">
+            <a href="/logout" class="nav-link preload">
                 <span class="material-icons">person_outline</span>
                 <span>Wyloguj się</span>
             </a>

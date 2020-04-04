@@ -47,7 +47,7 @@ class SettingsController extends PageController
                 $data = [
                     'success' => false,
                     'alert'   => "danger",
-                    'message' => "Wystąpił nieznany błąd. Proszę spróbować ponownie.",
+                    'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
                     'invalid' => $invalid,
                 ];
             }

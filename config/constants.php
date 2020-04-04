@@ -6,7 +6,7 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 
 use classes\Functions as fs;
 
-//Tryb developerski - wyświetlanie błędów (domyślnie włączony dla testu)
+//Tryb developerski - wyświetlanie błędów oraz korzystanie z nieskompilowanego js-a
 define('DEV_MODE', false);
 
 if (DEV_MODE) {
@@ -16,8 +16,8 @@ if (DEV_MODE) {
 }
 
 //Use local database
-//$DB_HOST = 'localhost';
-$DB_HOST = '185.243.55.171';
+$DB_HOST = 'localhost';
+//$DB_HOST = '185.243.55.171';
 $DB_NAME = 'przylbicadlamedyka';
 $DB_USER = 'root';
 $DB_PSWD = 'Krzysiek2413';
@@ -47,7 +47,8 @@ const LOG_DIR   = ROOT_DIR . "/../logs";
 const AJAX_DIR  = ROOT_DIR . "/ajax";
 const ADMIN_DIR = ROOT_DIR . "/admin";
 
-const IMG_DIR  = MEDIA_DIR . "/img";
+const IMG_DIR   = MEDIA_DIR . "/img";
+const FILES_DIR = MEDIA_DIR . "/files";
 
 /* ---- Urls ---- */
 $ROOT_URL = "";
@@ -76,9 +77,9 @@ define('ROOT_URL', $ROOT_URL);
 const MEDIA_URL = ROOT_URL . "/media";
 const INC_URL   = ROOT_URL . "/includes";
 
-const IMG_URL  = MEDIA_URL . "/img";
-const CSS_URL  = MEDIA_URL . "/css";
-const JS_URL   = MEDIA_URL . "/js";
+const IMG_URL = MEDIA_URL . "/img";
+const CSS_URL = MEDIA_URL . "/css";
+const JS_URL  = MEDIA_URL . "/js";
 
 if (isset($_SERVER['REQUEST_URI'])) {
     $request_uri = $_SERVER['REQUEST_URI'];
@@ -111,8 +112,8 @@ define('EMAIL', $EMAIL);
 
 //Default values of options (returned by getOption function if no value is set)
 define("DEFAULT_OPTIONS", [
-    'changed_name'  => '',
-    'login'         => '',
+    'changed_name' => '',
+    'login'        => '',
 ]);
 /* ------------------------ /Settings ------------------------- */
 

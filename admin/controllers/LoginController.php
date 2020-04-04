@@ -32,16 +32,16 @@ class LoginController extends AdminController
                                 header("Location: /admin/settings");
                                 exit(0);
                             } else {
-                                $data['message']             = "Incorrect password";
+                                $data['message']             = "Niepoprawne hasło";
                                 $data['invalid']['password'] = true;
                             }
                         } else {
-                            $data['message']          = "Incorrect email";
+                            $data['message']          = "Niepoprawny adres email";
                             $data['invalid']['email'] = true;
                         }
                     }
                 } else {
-                    $data['message'] = "Please fill in all necessary fields";
+                    $data['message'] = "Proszę uzupełnić wszystkie pola";
                 }
             }
         }

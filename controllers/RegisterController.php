@@ -6,7 +6,6 @@ use Exception;
 use classes\User;
 use classes\Request;
 use classes\Functions as fs;
-use classes\exceptions\UserNotFoundException;
 
 class RegisterController extends PageController
 {
@@ -58,7 +57,7 @@ class RegisterController extends PageController
                     $data['invalid']['lemail'] = true;
                 }
             } else {
-                $data['message'] = "Please fill in all necessary fields";
+                $data['message'] = "Proszę uzupełnić wszystkie pola";
                 $data['alert']   = "warning";
             }
         }
@@ -80,10 +79,34 @@ class RegisterController extends PageController
                 $data['invalid'][$name] = empty($field);
             }
 
+            if (!empty($get['email'])) {
+                $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $csv = FILES_DIR . "/maile.csv";
+                    if (file_exists($csv)) {
+                        $file          = fopen($csv, "r");
+                        $allowedEmails = [];
+                        while ($line = fgets($file)) {
+                            [$name, $mail] = str_getcsv($line, ";");
+                            $allowedEmails[] = $mail;
+                        }
+                        if (!in_array($email, $allowedEmails)) {
+                            return [
+                                'success' => false,
+                                'alert'   => "warning",
+                                'message' => "Podany adres e-mail nie znajduje się na liście dzwolonych użytkowników. Proszę o kontakt z organizatorem w kwesti możliwości dołączenia.",
+                            ];
+                        }
+                    }
+                }
+            }
+
             if (!empty(fs::getACookie('easyLogIn'))) {
                 fs::setACookie('easyLogIn', NULL, -1);
             }
-            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) && !empty($get['tel']) && !empty($get['password']) && !empty($get['r-password'])) {
+            if (!empty($get['firstname']) && !empty($get['lastname']) && !empty($get['email']) &&
+                !empty($get['tel']) && !empty($get['password']) && !empty($get['r-password']) &&
+                !empty($get['no-quarantine']) && !empty($get['regulations']) && !empty($get['rodo'])) {
                 $email = filter_var($get['email'], FILTER_SANITIZE_EMAIL);
                 try {
                     new User($email);
@@ -285,7 +308,7 @@ HTML;
         }
 
         if (!$break && empty($get['cpassword'])) {
-            $data['message'] = "Please provide current password";
+            $data['message'] = "Proszę podać obecne hasło";
             $data['alert']   = "warning";
             $data['field']   = "cpassword";
             $break           = true;
@@ -299,7 +322,7 @@ HTML;
         }
 
         if (!$break && (empty($get['password']) || empty($get['rpassword']))) {
-            $data['message'] = "Please fill in all fields";
+            $data['message'] = "Proszę uzupełnić wszystkie pola";
             $data['alert']   = "warning";
             $field           = "";
             if (empty($_POST['password'])) {
@@ -325,7 +348,7 @@ HTML;
 
         if (!$break) {
             $success = $user->updatePassword($get['password']);
-            $message = ($success ? ("You have successfully updated your password") : ("There was an error. Please refresh the page and try again."));
+            $message = ($success ? "Poprawnie zaktualizowałeś hasło" : "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.");
             $alert   = ($success ? 'success' : 'warning');
             $data    = [
                 'success' => $success,
@@ -358,23 +381,23 @@ HTML;
         $priv = $get['type'] ?? USER_PRV;
         $priv = intval($priv);
 
-        if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
+//        if ($priv === User::USER_PRODUCER && empty($get['pinName'])) {
+//            $data = [
+//                'success' => false,
+//                'alert'   => "warning",
+//                'message' => "Pole 'Nazwa' nie może być puste",
+//                'invalid' => $invalid,
+//            ];
+//        } else {
+        if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
             $data = [
                 'success' => false,
                 'alert'   => "warning",
-                'message' => "Pole 'Nazwa' nie może być puste",
+                'message' => "Proszę uzupełnić wymagane pola",
                 'invalid' => $invalid,
             ];
-        } else {
-            if (empty($get['city']) || empty($get['street']) || empty($get['building'])) {
-                $data = [
-                    'success' => false,
-                    'alert'   => "warning",
-                    'message' => "Proszę uzupełnić wymagane pola",
-                    'invalid' => $invalid,
-                ];
-            }
         }
+//        }
 
         if ($data['success']) {
             if (empty($get['pinName'])) {
@@ -400,7 +423,7 @@ HTML;
                 $data = [
                     'success' => false,
                     'alert'   => "danger",
-                    'message' => "Wystąpił nieznany błąd. Proszę spróbować ponownie.",
+                    'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
                     'invalid' => $invalid,
                 ];
             }
@@ -473,7 +496,7 @@ HTML;
 
         $this->title = "Zarejestruj się";
 
-        switch($this->view) {
+        switch ($this->view) {
             case 'login':
                 $this->title = "Zaloguj się";
                 break;
@@ -501,11 +524,11 @@ HTML;
         }
 
         try {
-            $delivered = Request::count();
+            $delivered = Request::count(NULL, "delivered");
         } catch (Exception $e) {
             $delivered = 0;
         }
-        $args['view'] = $this->view;
+        $args['view']      = $this->view;
         $args['delivered'] = $delivered;
 
         $this->view = "register";
