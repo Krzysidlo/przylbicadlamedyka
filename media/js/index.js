@@ -39,18 +39,26 @@ var index = function () {
                     $box = $btn.parents(".activityBox.trip"),
                     frozenID = $btn.data('frozen'),
                     requestsID = $btn.data('requests'),
-                    method = "both";
+                    hosMagID = $btn.data('hosmag'),
+                    method = "both",
+                    data;
 
-                if (frozenID === 0) {
-                    method = "bascinet";
-                } else if (requestsID === 0) {
-                    method = "material";
+                if (hosMagID !== 0) {
+                    method = "collectHosMag";
+                    data = {hosMagID: hosMagID};
+                } else {
+                    if (frozenID === 0) {
+                        method = "bascinet";
+                    } else if (requestsID === 0) {
+                        method = "material";
+                    }
+                    data = {frozenID: frozenID, requestsID: requestsID};
                 }
 
                 $.ajax({
                     url: `/ajax/map/${method}?ajax=true`,
                     type: "POST",
-                    data: {frozenID: frozenID, requestsID: requestsID},
+                    data: data,
                     dataType: "JSON",
                     beforeSend: function () {
                         showLoading();
@@ -743,7 +751,7 @@ var index = function () {
 
                                 if (data.material > 0) {
                                     max = maxFromMagazine;
-                                    $confirmBtn.html(`Potwierdź dostarczenie`);
+                                    $confirmBtn.html(`Zgłoś chęć odbioru`);
                                 }
                             }
                             if (((type === "hospital" && data.bascinetOwn > 0) || (type === "magazine" && data.material > 0)) && USER_PRV === 2) {

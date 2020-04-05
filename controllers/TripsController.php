@@ -4,6 +4,7 @@ namespace controllers;
 
 use Exception;
 use classes\Frozen;
+use classes\Hosmag;
 use classes\Request;
 use classes\Functions as fs;
 
@@ -75,7 +76,7 @@ class TripsController extends PageController
             $type             = "Dostarczenie materiału oraz odbiór przyłbic";
             $bascinetQuantity = "<div class='col-12 mb-2'>Ilość przyłbic: <span>{$frozen->bascinet}</span></div>";
             $materialQuantity = "<div class='col-12 mb-2'>Ilość materiału: <span>{$frozen->material}</span></div>";
-            $dataID           = "data-frozen='{$frozenIDs}' data-requests='{$requestsIDs}'";
+            $dataID           = "data-frozen='{$frozenIDs}' data-requests='{$requestsIDs}' data-hosmag='0'";
             if (empty($frozen->bascinet)) {
                 $action           = "dostarczenie";
                 $description      = "Dostarczenie dla";
@@ -127,6 +128,38 @@ class TripsController extends PageController
                     {$cancelButton}
                     <div class='col-12 text-right'>
                         <button class='btn btn-red confirm mx-0' {$dataID}>Potwierdź {$action}</button>
+                    </div>
+                </div>
+            </div>
+HTML;
+        }
+
+        try {
+            $hosMagArr = Hosmag::getAll(USER_ID);
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [];
+        }
+
+        foreach ($hosMagArr as $hosMag) {
+            $activities[] = <<< HTML
+            <div class="activityBox trip container">
+                <div class="content row">
+                    <div class="text col">
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                Odbiór z <span>{$hosMag->pin->name}</span>
+                            </div>
+                            <div class="col-12 mb-2">
+                                Typ: <span>Odbiór materiału</span>
+                            </div>
+                            <div class='col-12 mb-2'>
+                                Ilość materiału: <span>{$hosMag->quantity}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-12 text-right'>
+                        <button class='btn btn-red confirm mx-0' data-hosmag="{$hosMag->id}">Potwierdź odbiór</button>
                     </div>
                 </div>
             </div>

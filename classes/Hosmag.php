@@ -11,6 +11,7 @@ class Hosmag
     public int      $id;
     public Pin      $pin;
     public int      $quantity;
+    public bool     $collected;
     public DateTime $created_at;
 
     /**
@@ -33,6 +34,7 @@ class Hosmag
         if ($info) {
             $this->pin        = new Pin(intval($info['pins_id']));
             $this->quantity   = intval($info['quantity']);
+            $this->collected  = (bool)$info['collected'];
             $this->created_at = new DateTime($info['created_at']);
         } else {
             throw new Exception("No pins info found with id=[{$this->id}]");
@@ -42,7 +44,7 @@ class Hosmag
     public static function create(int $pinsID, int $quantity, string $usersID = NULL): array
     {
         if ($usersID === NULL) {
-            $user = new User();
+            $user    = new User();
             $usersID = $user->id;
         }
         $sql = "INSERT INTO `hos_mag` (`pins_id`, `users_id`, `quantity`) VALUES ({$pinsID}, '{$usersID}', {$quantity});";
@@ -52,12 +54,14 @@ class Hosmag
                 'success' => true,
                 'alert'   => "success",
                 'message' => "Poprawnie zarejestrowano wpis",
+                'id'      => intval(fs::$mysqli->insert_id),
             ];
         } else {
             return [
                 'success' => false,
                 'alert'   => "danger",
                 'message' => "Błąd przy zapisie do bazy danych. Proszę odświeżyć stronę i spróbować ponownie.",
+                'id'      => NULL,
             ];
         }
     }
@@ -77,8 +81,8 @@ class Hosmag
 
         try {
             $frozenIDs = implode(",", $frozenArr);
-            $frozen  = new Frozen($frozenIDs);
-            $success = $frozen->deliver();
+            $frozen    = new Frozen($frozenIDs);
+            $success   = $frozen->deliver();
         } catch (Exception $e) {
             fs::log("Error: " . $e->getMessage());
             $success = false;
@@ -92,19 +96,29 @@ class Hosmag
     }
 
     /**
+     * @param string|null $usersID
+     * @param bool $collected
      * @param bool $deleted
      *
      * @return array
      * @throws Exception
      */
-    public static function getAll(bool $deleted = false): array
+    public static function getAll(?string $usersID = NULL, bool $collected = false, bool $deleted = false): array
     {
         $return = [];
 
         $sql = "SELECT `id` FROM `hos_mag`";
-
+        $whereAnd = "WHERE";
+        if ($usersID !== NULL) {
+            $sql      .= " WHERE `users_id` = '{$usersID}'";
+            $whereAnd = "AND";
+        }
+        if (!$collected) {
+            $sql      .= " $whereAnd `collected` = 0";
+            $whereAnd = "AND";
+        }
         if (!$deleted) {
-            $sql .= " WHERE `deleted` = 0;";
+            $sql .= " $whereAnd `deleted` = 0";
         }
 
         if ($query = fs::$mysqli->query($sql)) {
@@ -126,12 +140,12 @@ class Hosmag
 
         switch ($type) {
             case 'material':
-                $sql = "SELECT SUM(h.`quantity`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`deleted` = 0 AND p.`type` = 'magazine' AND p.`deleted` = 0";
+                $sql = "SELECT SUM(h.`quantity`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`collected` = 1 AND h.`deleted` = 0 AND p.`type` = 'magazine' AND p.`deleted` = 0";
 
                 if ($query = fs::$mysqli->query($sql)) {
                     $collectedMaterial = intval($query->fetch_row()[0] ?? 0);
                     $delivredMaterial  = Frozen::count($usersID, "material");
-                    $return = $collectedMaterial - $delivredMaterial;
+                    $return            = $collectedMaterial - $delivredMaterial;
 //                    if ($return < 0) {
 //                        $return = 0;
 //                    }
@@ -149,10 +163,22 @@ class Hosmag
         return $return;
     }
 
-    public function delete(): bool
+    public function collect(): bool
     {
-        $sql = "UPDATE `pins` SET `deleted` = 1 WHERE `id` = {$this->id};";
+        return !!fs::$mysqli->query("UPDATE `hos_mag` SET `collected` = 1 WHERE `id` = {$this->id};");
+    }
 
-        return !!fs::$mysqli->query($sql);
+    public function delete(bool $activity = true): bool
+    {
+        $sql = "UPDATE `hos_mag` SET `deleted` = 1 WHERE `id` = {$this->id};";
+
+        $success = !!fs::$mysqli->query($sql);
+
+        if ($success && $activity) {
+            $sql = "UPDATE `activities` SET `deleted` = 1 WHERE `hos_mag_id` = {$this->id};";
+            $success &= !!fs::$mysqli->query($sql);
+        }
+
+        return $success;
     }
 }

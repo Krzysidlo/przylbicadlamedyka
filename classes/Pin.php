@@ -47,7 +47,7 @@ class Pin
             throw new Exception("No pins info found with id=[{$this->id}]");
         }
 
-        $sql = "SELECT SUM(`quantity`) FROM `hos_mag` WHERE `pins_id` = {$this->id};";
+        $sql = "SELECT SUM(`quantity`) FROM `hos_mag` WHERE `pins_id` = {$this->id} AND `deleted` = 0;";
         if ($query = fs::$mysqli->query($sql)) {
             if ($result = $query->fetch_row()) {
                 $quantity = intval(filter_var($result[0], FILTER_SANITIZE_NUMBER_INT));

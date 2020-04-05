@@ -12,6 +12,7 @@ class Activity
     public User     $user;
     public string   $type;
     public ?Request $request;
+    public ?Hosmag  $hosMag;
     public DateTime $date;
     public string   $message;
 
@@ -43,12 +44,18 @@ class Activity
             } else {
                 $this->request = NULL;
             }
+
+            if (!empty($info['hos_mag_id'])) {
+                $this->hosMag = new Hosmag($info['hos_mag_id']);
+            } else {
+                $this->hosMag = NULL;
+            }
         } else {
             throw new Exception("No activity info found with id=[{$activityID}]");
         }
     }
 
-    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?string $frozenIDS = NULL, ?int $bascinet = NULL): array
+    public static function create(string $usersID, DateTime $date, string $message, string $type = "action", ?int $requestsID = NULL, ?string $frozenIDS = NULL, ?int $bascinet = NULL, ?string $hosMagID = NULL): array
     {
         if ($frozenIDS === NULL) {
             $frozenIDS = "NULL";
@@ -58,6 +65,9 @@ class Activity
         if ($requestsID === NULL) {
             $requestsID = "NULL";
         }
+        if ($hosMagID === NULL) {
+            $hosMagID = "NULL";
+        }
         if ($bascinet === NULL) {
             $bascinet = "NULL";
         }
@@ -65,7 +75,7 @@ class Activity
 
         $message = base64_encode($message);
 
-        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `date`, `message`, `bascinet`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenIDS}, '{$date}', '{$message}', {$bascinet});";
+        $sql = "INSERT INTO `activities` (`users_id`, `type`, `requests_id`, `frozen_id`, `hos_mag_id`, `date`, `message`, `bascinet`) VALUES ('{$usersID}', '{$type}', {$requestsID}, {$frozenIDS}, {$hosMagID}, '{$date}', '{$message}', {$bascinet});";
 
         if (fs::$mysqli->query($sql)) {
             $data = [

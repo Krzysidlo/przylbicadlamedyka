@@ -48,10 +48,12 @@ class MapController extends PageController
                 ];
             }
 
-            foreach ($data['requests'] as &$dataRequest) {
-                foreach ($dataRequest as &$requests) {
-                    if ($requests['comments'] !== "") {
-                        $requests['comments'] = substr($requests['comments'], 0, -2);
+            if (!empty($data['requests'])) {
+                foreach ($data['requests'] as &$dataRequest) {
+                    foreach ($dataRequest as &$requests) {
+                        if ($requests['comments'] !== "") {
+                            $requests['comments'] = substr($requests['comments'], 0, -2);
+                        }
                     }
                 }
             }
@@ -180,8 +182,8 @@ class MapController extends PageController
                         break;
                     case 'magazine':
                         $date            = new DateTime;
-                        $message         = "Potwierdzono odbiór <span class='quantity'>{$quantity}</span> sztuk materiału z <span class='name'>{$name}</span>";
-                        $data['success'] &= Activity::create(USER_ID, $date, $message)['success'];
+                        $message         = "Zadeklarowano odbiór <span class='quantity'>{$quantity}</span> sztuk materiału z <span class='name'>{$name}</span>";
+                        $data['success'] &= Activity::create(USER_ID, $date, $message, "action", NULL, NULL, NULL, $data['id'])['success'];
                         break;
                 }
             }
@@ -201,6 +203,45 @@ class MapController extends PageController
                 'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
             ];
         }
+    }
+
+    public static function ajax_collectHosMag($get = []): array
+    {
+        if (empty($get['hosMagID'])) {
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        $hosMagID = filter_var($get['hosMagID'], FILTER_SANITIZE_NUMBER_INT);
+        try {
+            $hosMag = new Hosmag($hosMagID);
+            if ($hosMag->collect()) {
+                $date = new DateTime();
+                $message = "Odebrano <span class='quantity'>{$hosMag->quantity}</span> sztuk materiału z <span class='name'>{$hosMag->pin->name}</span>";
+                Activity::create(USER_ID, $date, $message);
+                return [
+                    'success' => true,
+                    'alert'   => "success",
+                    'message' => "Poprawnie potwierdzono odbiór",
+                ];
+            }
+        } catch (Exception $e) {
+            fs::log("Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'alert'   => "danger",
+                'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+            ];
+        }
+
+        return [
+            'success' => false,
+            'alert'   => "danger",
+            'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
+        ];
     }
 
     public static function ajax_delete($get = []): array
@@ -226,6 +267,9 @@ class MapController extends PageController
                         break;
                     case "frozen":
                         $element = new Frozen($get['id']);
+                        break;
+                    case "hosMag":
+                        $element = new Hosmag($get['id']);
                         break;
                     default:
                         $data = $error;
