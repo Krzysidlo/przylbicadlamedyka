@@ -2,6 +2,7 @@
 
 use classes\User;
 use classes\Frozen;
+use classes\Hosmag;
 
 $user = new User;
 
@@ -61,7 +62,8 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
             </li>
             <?php }
             if ($user->getPrivilege() === User::USER_DRIVER) {
-                $trips = Frozen::count(USER_ID, "trips"); ?>
+                $trips = Frozen::count(USER_ID, "trips");
+                $trips += Hosmag::count(USER_ID, "trips"); ?>
                 <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">
                     <a href="/trips" class="nav-link preload">
                         <span class="material-icons">commute</span>

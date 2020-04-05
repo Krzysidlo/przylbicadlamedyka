@@ -99,26 +99,31 @@ class Hosmag
      * @param string|null $usersID
      * @param bool $collected
      * @param bool $deleted
+     * @param bool $trips
      *
      * @return array
      * @throws Exception
      */
-    public static function getAll(?string $usersID = NULL, bool $collected = false, bool $deleted = false): array
+    public static function getAll(?string $usersID = NULL, bool $collected = false, bool $deleted = false, $trips = false): array
     {
         $return = [];
 
-        $sql = "SELECT `id` FROM `hos_mag`";
-        $whereAnd = "WHERE";
-        if ($usersID !== NULL) {
-            $sql      .= " WHERE `users_id` = '{$usersID}'";
-            $whereAnd = "AND";
-        }
-        if (!$collected) {
-            $sql      .= " $whereAnd `collected` = 0";
-            $whereAnd = "AND";
-        }
-        if (!$deleted) {
-            $sql .= " $whereAnd `deleted` = 0";
+        if ($trips) {
+            $sql      = "SELECT h.`id` FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine';";
+        } else {
+            $sql      = "SELECT `id` FROM `hos_mag`";
+            $whereAnd = "WHERE";
+            if ($usersID !== NULL) {
+                $sql      .= " WHERE `users_id` = '{$usersID}'";
+                $whereAnd = "AND";
+            }
+            if (!$collected) {
+                $sql      .= " $whereAnd `collected` = 0";
+                $whereAnd = "AND";
+            }
+            if (!$deleted) {
+                $sql .= " $whereAnd `deleted` = 0";
+            }
         }
 
         if ($query = fs::$mysqli->query($sql)) {
@@ -153,6 +158,13 @@ class Hosmag
                 break;
             case 'bascinet':
                 $sql = "SELECT SUM(h.`quantity`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`deleted` = 0 AND p.`type` = 'hospital' AND p.`deleted` = 0";
+
+                if ($query = fs::$mysqli->query($sql)) {
+                    $return = intval($query->fetch_row()[0] ?? 0);
+                }
+                break;
+            case 'trips':
+                $sql = "SELECT COUNT(h.`id`) FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`users_id` = '{$usersID}' AND h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine';";
 
                 if ($query = fs::$mysqli->query($sql)) {
                     $return = intval($query->fetch_row()[0] ?? 0);

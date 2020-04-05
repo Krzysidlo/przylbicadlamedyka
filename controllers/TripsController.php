@@ -135,7 +135,7 @@ HTML;
         }
 
         try {
-            $hosMagArr = Hosmag::getAll(USER_ID);
+            $hosMagArr = Hosmag::getAll(USER_ID, false, false, true);
         } catch (Exception $e) {
             fs::log("Error: " . $e->getMessage());
             return [];
