@@ -1,0 +1,10 @@
+body.offline {
+  @media screen and (max-width: 767px) {
+    .errorInfo {
+      h2 {
+        color: #000;
+        background: transparent;
+      }
+    }
+  }
+}

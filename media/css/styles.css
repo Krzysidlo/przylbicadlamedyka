@@ -867,35 +867,29 @@ body.regulations ol li, body.rodo ol li {
   margin: 15px 0;
 }
 
-body.error, body.construction, body.noaccess {
+body.error, body.construction, body.offline {
   margin: 0;
 }
-body.error main, body.construction main, body.noaccess main {
+body.error main, body.construction main, body.offline main {
   margin: 0;
 }
-body.error .errorInfo, body.construction .errorInfo, body.noaccess .errorInfo {
+body.error .errorInfo, body.construction .errorInfo, body.offline .errorInfo {
   min-height: calc(100vh - 33px);
   text-align: center;
   background: center;
   background-size: cover;
 }
-body.error .errorInfo h1, body.error .errorInfo h2, body.construction .errorInfo h1, body.construction .errorInfo h2, body.noaccess .errorInfo h1, body.noaccess .errorInfo h2 {
+body.error .errorInfo h1, body.error .errorInfo h2, body.construction .errorInfo h1, body.construction .errorInfo h2, body.offline .errorInfo h1, body.offline .errorInfo h2 {
   background: rgba(0, 0, 0, 0.8);
   padding: 15px 30px;
   color: #CCC;
   display: inline-block;
 }
-body.error .errorInfo h1, body.construction .errorInfo h1, body.noaccess .errorInfo h1 {
+body.error .errorInfo h1, body.construction .errorInfo h1, body.offline .errorInfo h1 {
   margin-top: 50px;
 }
 body.construction .errorInfo h1 {
   margin-top: 100px;
-}
-body.noaccess .errorInfo {
-  background-position: top;
-}
-body.noaccess .errorInfo h1 {
-  margin-top: 40vh;
 }
 
 body.trips .container .feed .activityBox.trip {
@@ -968,6 +962,13 @@ body.index .container .feed .activityBox .content .date, body.trips .container .
   font-size: 10px;
   padding: 5px 0;
   color: #757575;
+}
+
+@media screen and (max-width: 767px) {
+  body.offline .errorInfo h2 {
+    color: #000;
+    background: transparent;
+  }
 }
 
 body.address .container p, body.settings .container p {

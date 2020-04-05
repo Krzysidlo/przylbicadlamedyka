@@ -110,7 +110,7 @@ abstract class PageController
 
     public function menu(array $args = [])
     {
-        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess'])) {
+        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess', 'offline'])) {
             $this->file = INC_DIR . "/menu.php";
         } else {
             $this->file = "";
@@ -135,7 +135,7 @@ abstract class PageController
 
     public function modals(array $args = [])
     {
-        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess'])) {
+        if (LOGGED_IN && !in_array($this->view, ['construction', 'error', 'noaccess', 'offline'])) {
             $this->file = INC_DIR . "/modals.php";
 
             $args['activities'] = TripsController::frozenActivities(true);

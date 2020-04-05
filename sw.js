@@ -1,4 +1,4 @@
-const version = 6,
+const version = 8,
     cacheName = `przylbica-dla-medyka-${version}`;
 
 self.addEventListener('install', event => {
@@ -13,6 +13,17 @@ self.addEventListener('install', event => {
                 '/includes/manifest.json',
                 '/media/img/logo.png',
                 '/media/img/favicon.png',
+                '/media/img/404.jpg',
+                '/media/img/offline.jpg',
+                '/includes/images/icons/icon-72x72.png',
+                '/includes/images/icons/icon-96x96.png',
+                '/includes/images/icons/icon-128x128.png',
+                '/includes/images/icons/icon-144x144.png',
+                '/includes/images/icons/icon-152x152.png',
+                '/includes/images/icons/icon-192x192.png',
+                '/includes/images/icons/icon-384x384.png',
+                '/includes/images/icons/icon-512x512.png',
+                '/offline',
                 'https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.5/css/mdb.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css',
                 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css',
@@ -58,14 +69,16 @@ self.addEventListener('fetch', event => {
     }
     event.respondWith(
         caches.open(cacheName).then(cache => {
-            return cache.match(event.request.url).then(response => {
+            return cache.match(event.request).then(response => {
                 if (response) {
                     return response;
                 }
                 return fetch(event.request).then(response => {
                     return response;
                 });
-            })
+            });
+        }).catch(() => {
+            return caches.match('/offline');
         })
     );
 });

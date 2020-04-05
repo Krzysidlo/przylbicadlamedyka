@@ -1,5 +1,5 @@
 body {
-  &.error, &.construction, &.noaccess {
+  &.error, &.construction, &.offline {
     main {
       margin: 0;
     }
@@ -29,16 +29,6 @@ body {
     .errorInfo {
       h1 {
         margin-top: 100px;
-      }
-    }
-  }
-
-  &.noaccess {
-    .errorInfo {
-      background-position: top;
-
-      h1 {
-        margin-top: 40vh;
       }
     }
   }
