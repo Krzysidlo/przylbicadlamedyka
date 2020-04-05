@@ -746,7 +746,7 @@ var index = function () {
                                     $confirmBtn.html(`Potwierdź dostarczenie`);
                                 }
                             }
-                            if ((type === "hospital" && data.bascinetOwn > 0) || (type === "magazine" && data.material > 0)) {
+                            if (((type === "hospital" && data.bascinetOwn > 0) || (type === "magazine" && data.material > 0)) && USER_PRV === 2) {
                                 $interaction.html(`
                                 <input type="hidden" name="type" value="${type}">
                                 <input type="hidden" name="pinsID" value="${data.pinsID}">
