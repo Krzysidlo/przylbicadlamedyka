@@ -642,7 +642,6 @@ var index = function () {
                 }
 
                 function onMapLoad(data) {
-                    console.log(data);
                     let pins = data.pins,
                         userData = data.requests,
                         lat, lng, type, icon;
