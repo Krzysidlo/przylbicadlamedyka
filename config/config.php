@@ -75,7 +75,7 @@ if (LOGGED_IN) {
 define('USER_PRV', $USER_PRV);
 define('IS_ROOT', $IS_ROOT);
 
-if (IS_ROOT) {
+if (IS_ROOT || (LOGGED_IN && ($user->email === ROOT_EMAIL || $user->email === $CONST_MODE))) {
     $CONST_MODE = false;
 }
 
@@ -83,7 +83,7 @@ if (!DB_CONN) {
     $CONST_MODE = true;
 }
 
-define('CONST_MODE', $CONST_MODE);
+define('CONST_MODE', (bool)$CONST_MODE);
 
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
