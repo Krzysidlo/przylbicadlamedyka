@@ -420,7 +420,7 @@ HTML;
                 $data['success'] = $user->updateAddress($city, $street, $building, $flat, $location, $pinName);
             } catch (Exception $e) {
                 fs::log("Error: " . $e->getMessage());
-                $data = [
+                return [
                     'success' => false,
                     'alert'   => "danger",
                     'message' => "Wystąpił nieznany błąd. Proszę odświeżyć stronę i spróbować ponownie.",
@@ -428,9 +428,7 @@ HTML;
                 ];
             }
 
-            if ($data['success']) {
-                $user->setPrivilege($priv);
-            }
+            $user->setPrivilege($priv);
         }
 
         return $data;

@@ -415,6 +415,8 @@ class User
             ('{$this->id}', {$pinName}, '{$city}', '{$street}', '{$building}', {$flat}, '{$location}')
             ON DUPLICATE KEY UPDATE `pin_name` = {$pinName}, `city` = '{$city}', `street` = '{$street}', `building` = '{$building}', `flat` = '{$flat}', `location` = '{$location}';
 SQL;
+
+        var_dump($sql);
         return !!fs::$mysqli->query($sql);
     }
 
