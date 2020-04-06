@@ -7,7 +7,7 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów oraz korzystanie z nieskompilowanego js-a
-define('DEV_MODE', false);
+define('DEV_MODE', true);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
@@ -99,7 +99,7 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
 /* -------------- Settings (you can change that) -------------- */
 //User with this e-mail has always root access
 //const ROOT_EMAIL = "krzychu.janiszewski@gmail.com";
-const ROOT_EMAIL = "";
+const ROOT_EMAIL = "gmirocki@gmail.com";
 //E-mail address from which messages should be sent
 //Default e-mail address (if not changed in website setiings)
 $EMAIL = ROOT_EMAIL;

@@ -63,9 +63,9 @@ if (LOGGED_IN) {
         $USER_PRV = $user->getPrivilege();
     }
 
-    if ($user->email === ROOT_EMAIL) {
-        $USER_PRV = User::USER_ROOT;
-    }
+//    if ($user->email === ROOT_EMAIL) {
+//        $USER_PRV = User::USER_ROOT;
+//    }
 
     if ($USER_PRV === User::USER_ROOT) {
         $IS_ROOT = true;
