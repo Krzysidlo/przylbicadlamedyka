@@ -93,6 +93,9 @@ if (isset($_SERVER['REQUEST_URI'])) {
 if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE `name` = 'CONST_MODE';")) {
     if ($result = ($query->fetch_row() ?? [false])) {
         $CONST_MODE = $result[0];
+        if ($CONST_MODE === "false") {
+            $CONST_MODE = false;
+        }
     }
 }
 
