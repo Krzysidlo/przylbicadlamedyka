@@ -752,7 +752,11 @@ var index = function () {
                                 $bascinetMaterial.html(`Posiadane materiały <span>${data.material}</span>`);
 
                                 if (data.material > 0) {
-                                    max = maxFromMagazine;
+                                    if (data.material < maxFromMagazine) {
+                                        max = data.material;
+                                    } else {
+                                        max = maxFromMagazine;
+                                    }
                                     $confirmBtn.html(`Zgłoś chęć odbioru`);
                                 }
                             }
