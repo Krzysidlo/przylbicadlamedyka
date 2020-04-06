@@ -783,6 +783,7 @@ var index = function () {
                             $modal.find(".modal-body .name").html(data.name);
                             $modal.find(".modal-body .tel").html(`<a href="tel:${data.tel}">${data.tel}</a>`);
                             $modal.find(".modal-body .address").html(data.address);
+                            $modal.find(".modal-body .comments").html(data.comments);
 
                             let $bascinet = $modal.find(".modal-body .bascinet"),
                                 $material = $modal.find(".modal-body .material");
