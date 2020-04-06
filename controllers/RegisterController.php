@@ -522,7 +522,7 @@ HTML;
         }
 
         try {
-            $delivered = 2650 + Request::count(NULL, "delivered");
+            $delivered = 3600 + Request::count(NULL, "delivered");
         } catch (Exception $e) {
             $delivered = 0;
         }
