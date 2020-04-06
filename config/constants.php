@@ -7,7 +7,7 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów oraz korzystanie z nieskompilowanego js-a
-define('DEV_MODE', false);
+define('DEV_MODE', true);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
