@@ -652,26 +652,28 @@ var index = function () {
                             continue
                         }
                         [lat, lng] = userData[usersID].latLng.split(',');
-                        let frozen = userData[usersID].frozen,
-                            iconUrl = defineIconColor(userData[usersID].bascinet, userData[usersID].material, frozen),
-                            info = {
-                                type: "request",
-                                name: userData[usersID].name,
-                                tel: userData[usersID].tel,
-                                address: userData[usersID].address,
-                                bascinet: parseInt(userData[usersID].bascinet),
-                                material: parseInt(userData[usersID].material),
-                                comments: userData[usersID].comments,
-                                usersID: usersID,
-                                lat: lat,
-                                lng: lng,
-                                frozen: frozen
-                            },
-                            userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
+                        if (typeof lat !== "undefined" && typeof lng !== "undefined") {
+                            let frozen = userData[usersID].frozen,
+                                iconUrl = defineIconColor(userData[usersID].bascinet, userData[usersID].material, frozen),
+                                info = {
+                                    type: "request",
+                                    name: userData[usersID].name,
+                                    tel: userData[usersID].tel,
+                                    address: userData[usersID].address,
+                                    bascinet: parseInt(userData[usersID].bascinet),
+                                    material: parseInt(userData[usersID].material),
+                                    comments: userData[usersID].comments,
+                                    usersID: usersID,
+                                    lat: lat,
+                                    lng: lng,
+                                    frozen: frozen
+                                },
+                                userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
 
-                        userMarker.on('click', () => {
-                            openModal(info);
-                        });
+                            userMarker.on('click', () => {
+                                openModal(info);
+                            });
+                        }
                     }
 
                     for (let pinsID in pins) {

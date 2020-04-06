@@ -409,7 +409,7 @@ HTML;
             $street   = filter_var($get['street'], FILTER_SANITIZE_STRING);
             $building = filter_var($get['building'], FILTER_SANITIZE_STRING);
             if (empty($get['flat'])) {
-                $flat = "NULL";
+                $flat = NULL;
             } else {
                 $flat = filter_var($get['flat'], FILTER_SANITIZE_STRING);
             }
