@@ -88,7 +88,7 @@ class RegisterController extends PageController
                         $allowedEmails = [];
                         while ($line = fgets($file)) {
                             [$name, $mail] = str_getcsv($line, ";");
-                            $allowedEmails[] = $mail;
+                            $allowedEmails[] = trim($mail);
                         }
                         if (!in_array($email, $allowedEmails)) {
                             return [
