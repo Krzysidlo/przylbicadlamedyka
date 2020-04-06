@@ -398,16 +398,21 @@ class User
         return !!fs::$mysqli->query($sql);
     }
 
-    public function updateAddress(string $city, string $street, int $building, $flat, string $location, ?string $pinName = NULL): bool
+    public function updateAddress(string $city, string $street, string $building, ?string $flat, string $location, ?string $pinName = NULL): bool
     {
         if ($pinName === NULL) {
             $pinName = "NULL";
         } else {
             $pinName = "'{$pinName}'";
         }
+        if ($pinName === NULL) {
+            $flat = "NULL";
+        } else {
+            $flat = "'{$flat}'";
+        }
         $sql = <<< SQL
         INSERT INTO `address` (`users_id`, `pin_name`, `city`, `street`, `building`, `flat`, `location`) VALUES
-            ('{$this->id}', {$pinName}, '{$city}', '{$street}', {$building}, {$flat}, '{$location}')
+            ('{$this->id}', {$pinName}, '{$city}', '{$street}', '{$building}', {$flat}, '{$location}')
             ON DUPLICATE KEY UPDATE `pin_name` = {$pinName}, `city` = '{$city}', `street` = '{$street}', `building` = '{$building}', `flat` = '{$flat}', `location` = '{$location}';
 SQL;
         return !!fs::$mysqli->query($sql);
