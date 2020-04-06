@@ -159,7 +159,7 @@ HTML;
                         </div>
                     </div>
                     <div class='col-12 text-right'>
-                        <button class='btn btn-red confirm mx-0' data-hosmag="{$hosMag->id}">Potwierdzam odbiór materiału z magazynu</button>
+                        <button class='btn btn-red confirm mx-0' data-hosmag="{$hosMag->id}">Odebrałem materiał z magazynu</button>
                     </div>
                 </div>
             </div>
