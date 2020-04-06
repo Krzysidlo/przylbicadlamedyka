@@ -83,7 +83,7 @@ if (!DB_CONN) {
     $CONST_MODE = true;
 }
 
-define('CONST_MODE', (bool)$CONST_MODE);
+define('CONST_MODE', $CONST_MODE !== false);
 
 $view = $_GET['view'] ?? MAIN_VIEW;
 $page = $_GET['page'] ?? NULL;
