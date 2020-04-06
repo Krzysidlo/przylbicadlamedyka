@@ -198,7 +198,7 @@ class User
         $mailMessage .= "Hasło: [{$password}]\n\n";
         @mail(EMAIL, PAGE_NAME . ' - pozytywna rejestracja', $mailMessage);
 
-        RegisterController::ajax_sendConfirm(['user' => $user]);
+//        RegisterController::ajax_sendConfirm(['user' => $user]);
 
         $browserInfo = get_browser(NULL, true);
         $platform    = $browserInfo['platform'] ?? "";
