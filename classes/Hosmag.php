@@ -109,7 +109,7 @@ class Hosmag
         $return = [];
 
         if ($trips) {
-            $sql      = "SELECT h.`id` FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine';";
+            $sql      = "SELECT h.`id` FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine'";
             if ($usersID !== NULL) {
                 $sql      .= " AND h.`users_id` = '{$usersID}'";
             }
