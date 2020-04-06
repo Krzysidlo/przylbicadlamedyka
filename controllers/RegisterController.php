@@ -407,11 +407,11 @@ HTML;
             }
             $city     = filter_var($get['city'], FILTER_SANITIZE_STRING);
             $street   = filter_var($get['street'], FILTER_SANITIZE_STRING);
-            $building = filter_var($get['building'], FILTER_SANITIZE_NUMBER_INT);
+            $building = filter_var($get['building'], FILTER_SANITIZE_STRING);
             if (empty($get['flat'])) {
                 $flat = "NULL";
             } else {
-                $flat = filter_var($get['flat'], FILTER_SANITIZE_NUMBER_INT);
+                $flat = filter_var($get['flat'], FILTER_SANITIZE_STRING);
             }
             $location = filter_var($get['location'], FILTER_SANITIZE_STRING);
 
