@@ -88,9 +88,9 @@ class RegisterController extends PageController
                         $allowedEmails = [];
                         while ($line = fgets($file)) {
                             [$name, $mail] = str_getcsv($line, ";");
-                            $allowedEmails[] = trim($mail);
+                            $allowedEmails[] = strtolower(trim($mail));
                         }
-                        if (!in_array($email, $allowedEmails)) {
+                        if (!in_array(strtolower($email), $allowedEmails)) {
                             return [
                                 'success' => false,
                                 'alert'   => "warning",
