@@ -35,6 +35,12 @@ class IndexController extends PageController
                 if (!$row->request->frozen) {
                     $button = true;
                 }
+            } else if ($row->hosMag !== NULL) {
+                $dataId   = "data-id='{$row->hosMag->id}'";
+                $dataType = "data-type='hosMag'";
+                if (!$row->hosMag->collected) {
+                    $button = true;
+                }
             }
             $button       = ($button ? "<div class='button col-3'><a href='/ajax/map/delete' class='btn btn-transparent m-0 cancel' {$dataId} {$dataType}>Anuluj</a></div>" : "");
             $activities[] = <<< HTML

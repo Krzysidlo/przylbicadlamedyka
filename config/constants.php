@@ -98,7 +98,7 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
 
 /* -------------- Settings (you can change that) -------------- */
 //User with this e-mail has always root access
-const ROOT_EMAIL = "";
+const ROOT_EMAIL = "krzychu.janiszewski@gmail.com";
 //E-mail address from which messages should be sent
 //Default e-mail address (if not changed in website setiings)
 $EMAIL = ROOT_EMAIL;
@@ -108,7 +108,7 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
         $EMAIL = ($result[0] ?? NULL);
     }
 }
-define('EMAIL', $EMAIL);
+define('EMAIL', "");
 
 //Default values of options (returned by getOption function if no value is set)
 define("DEFAULT_OPTIONS", [
