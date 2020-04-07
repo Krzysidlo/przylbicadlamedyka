@@ -641,6 +641,8 @@ var index = function () {
                     }
                 }
 
+                var markers = L.markerClusterGroup();
+
                 function onMapLoad(data) {
                     let pins = data.pins,
                         userData = data.requests,
@@ -668,6 +670,7 @@ var index = function () {
                                     frozen: frozen
                                 },
                                 userMarker = L.marker([lat, lng], {icon: createMyIcon(iconUrl)}).addTo(myMap);
+                                markers.addLayer(userMarker);
 
                             userMarker.on('click', () => {
                                 openModal(info);
@@ -703,10 +706,13 @@ var index = function () {
                             lng: lng
                         };
                         let hosMagMarker = L.marker([lat, lng], {icon: icon}).addTo(myMap);
+                        markers.addLayer(hosMagMarker);
+
                         hosMagMarker.on('click', () => {
                             openModal(info);
                         });
                     }
+                    myMap.addLayer(markers);
                 }
 
                 function openModal(data) {
