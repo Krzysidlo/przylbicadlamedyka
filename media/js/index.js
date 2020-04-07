@@ -1,3 +1,5 @@
+var MarkerClusterGroup = require(".../node_modules/leaflet.markercluster/src/index.js")
+
 var index = function () {
     var $preLoader = $("#preloader");
 
