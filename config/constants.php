@@ -112,7 +112,7 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
         $EMAIL = ($result[0] ?? NULL);
     }
 }
-define('EMAIL', "");
+define('EMAIL', "no-reply@przylbicadlamedyka.pl");
 
 //Default values of options (returned by getOption function if no value is set)
 define("DEFAULT_OPTIONS", [
