@@ -686,7 +686,7 @@ var index = function () {
 
                         switch (type) {
                             case "hospital":
-                                icon = createMyIcon(IMG_URL + "/pin_hospital.png");
+                                icon = createMyIcon(IMG_URL + "/pin_frozen.png");
                                 break;
                             case "magazine":
                                 icon = createMyIcon(IMG_URL + "/pin_magazine.png");
