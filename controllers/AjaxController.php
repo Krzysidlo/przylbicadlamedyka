@@ -20,7 +20,7 @@ class AjaxController extends PageController
             try {
                 new User;
             } catch (Exception $e) {
-                fs::log("Error: Unauthorized ajax call", $e->getMessage());
+                fs::log("Error: Unauthorized ajax call", $this->get('file'), $e->getMessage());
                 self::redirect("/");
                 exit(0);
             }
