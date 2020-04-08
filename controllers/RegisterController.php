@@ -2,6 +2,7 @@
 
 namespace controllers;
 
+use stdClass;
 use Exception;
 use classes\User;
 use classes\Request;
@@ -494,6 +495,9 @@ HTML;
 
         $this->title = "Zarejestruj się";
 
+        $user     = new stdClass;
+        $user->id = "";
+
         switch ($this->view) {
             case 'login':
                 $this->title = "Zaloguj się";
@@ -503,22 +507,17 @@ HTML;
                 break;
             case 'reset':
                 $this->title = "Reset hasła";
+
+                $hash = $this->get('hash');
+
+                try {
+                    $user = User::getByHash($hash);
+                } catch (Exception $e) {
+                    fs::log("Error: " . $e->getMessage());
+                    self::redirect("/");
+                    exit(0);
+                }
                 break;
-        }
-
-        if ($this->view === "reset") {
-
-            $hash = $this->get('hash');
-
-            try {
-                $user = User::getByHash($hash);
-            } catch (Exception $e) {
-                fs::log("Error: " . $e->getMessage());
-                self::redirect("/");
-                exit(0);
-            }
-
-            $args['user'] = $user;
         }
 
         try {
@@ -526,6 +525,8 @@ HTML;
         } catch (Exception $e) {
             $delivered = 0;
         }
+
+        $args['user']      = $user;
         $args['view']      = $this->view;
         $args['delivered'] = $delivered;
 
