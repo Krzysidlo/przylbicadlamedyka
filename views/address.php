@@ -28,7 +28,7 @@ use classes\User;
                     <input type="text" name="city" placeholder="Miasto" required
                            class="form-control address validate<?= !empty($invalid['city']) && $invalid['city'] ? " invalid" : ""; ?>"
                            title='Pole "Miasto" jest wymagane'
-                           value="<?= !empty($this->get('city')) ? $this->get('city') : ""; ?>">
+                           value="Kraków">
                 </div>
                 <div class="form-group col-6">
                     <input type="text" name="street" placeholder="Ulica" required

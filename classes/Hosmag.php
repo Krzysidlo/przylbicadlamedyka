@@ -44,7 +44,7 @@ class Hosmag
     public static function create(int $pinsID, int $quantity, string $usersID = NULL): array
     {
         if ($usersID === NULL) {
-            $user    = new User();
+            $user    = new User;
             $usersID = $user->id;
         }
         $sql = "INSERT INTO `hos_mag` (`pins_id`, `users_id`, `quantity`) VALUES ({$pinsID}, '{$usersID}', {$quantity});";
@@ -109,7 +109,10 @@ class Hosmag
         $return = [];
 
         if ($trips) {
-            $sql      = "SELECT h.`id` FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine';";
+            $sql      = "SELECT h.`id` FROM `hos_mag` h LEFT JOIN `pins` p ON h.`pins_id` = p.`id` WHERE h.`collected` = 0 AND h.`deleted` = 0 AND p.`type` = 'magazine'";
+            if ($usersID !== NULL) {
+                $sql      .= " AND h.`users_id` = '{$usersID}'";
+            }
         } else {
             $sql      = "SELECT `id` FROM `hos_mag`";
             $whereAnd = "WHERE";

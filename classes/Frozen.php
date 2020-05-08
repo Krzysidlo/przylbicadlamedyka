@@ -84,7 +84,7 @@ class Frozen
             $sql .= " $whereAnd f.`deleted` = 0";
         }
 
-        $sql .= " GROUP BY f.`date` ORDER BY f.`date`;";
+        $sql .= " GROUP BY f.`date`, r.`users_id` ORDER BY f.`date`;";
 
         $return = [];
         if ($query = fs::$mysqli->query($sql)) {

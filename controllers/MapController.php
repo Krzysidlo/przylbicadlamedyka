@@ -18,6 +18,7 @@ class MapController extends PageController
     {
         $data = [
             'success' => true,
+            'requests' => [],
         ];
         try {
             $requests = Request::getAll();

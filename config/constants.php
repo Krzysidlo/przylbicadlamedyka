@@ -7,7 +7,7 @@ mysqli_report(MYSQLI_REPORT_STRICT);
 use classes\Functions as fs;
 
 //Tryb developerski - wyświetlanie błędów oraz korzystanie z nieskompilowanego js-a
-define('DEV_MODE', false);
+define('DEV_MODE', true);
 
 if (DEV_MODE) {
     ini_set('display_errors', true);
@@ -91,14 +91,18 @@ if (isset($_SERVER['REQUEST_URI'])) {
     define('CURRENT_URL', ROOT_URL);
 }
 if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE `name` = 'CONST_MODE';")) {
-    if ($result = ($query->fetch_row() ?? [NULL])) {
-        $CONST_MODE = ($result[0] === 'true' ? true : false);
+    if ($result = ($query->fetch_row() ?? [false])) {
+        $CONST_MODE = $result[0];
+        if ($CONST_MODE === "false") {
+            $CONST_MODE = false;
+        }
     }
 }
 
 /* -------------- Settings (you can change that) -------------- */
 //User with this e-mail has always root access
-const ROOT_EMAIL = "krzychu.janiszewski@gmail.com";
+//const ROOT_EMAIL = "krzychu.janiszewski@gmail.com";
+const ROOT_EMAIL = "";
 //E-mail address from which messages should be sent
 //Default e-mail address (if not changed in website setiings)
 $EMAIL = ROOT_EMAIL;
@@ -108,7 +112,7 @@ if (DB_CONN && $query = $mysqli->query("SELECT `value` FROM `options_page` WHERE
         $EMAIL = ($result[0] ?? NULL);
     }
 }
-define('EMAIL', "");
+define('EMAIL', "no-reply@przylbicadlamedyka.pl");
 
 //Default values of options (returned by getOption function if no value is set)
 define("DEFAULT_OPTIONS", [

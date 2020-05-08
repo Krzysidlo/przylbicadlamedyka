@@ -2,6 +2,7 @@
 
 namespace controllers;
 
+use stdClass;
 use Exception;
 use classes\User;
 use classes\Request;
@@ -88,9 +89,9 @@ class RegisterController extends PageController
                         $allowedEmails = [];
                         while ($line = fgets($file)) {
                             [$name, $mail] = str_getcsv($line, ";");
-                            $allowedEmails[] = $mail;
+                            $allowedEmails[] = strtolower(trim($mail));
                         }
-                        if (!in_array($email, $allowedEmails)) {
+                        if (!in_array(strtolower($email), $allowedEmails)) {
                             return [
                                 'success' => false,
                                 'alert'   => "warning",
@@ -409,7 +410,7 @@ HTML;
             $street   = filter_var($get['street'], FILTER_SANITIZE_STRING);
             $building = filter_var($get['building'], FILTER_SANITIZE_STRING);
             if (empty($get['flat'])) {
-                $flat = "NULL";
+                $flat = NULL;
             } else {
                 $flat = filter_var($get['flat'], FILTER_SANITIZE_STRING);
             }
@@ -494,6 +495,9 @@ HTML;
 
         $this->title = "Zarejestruj się";
 
+        $user     = new stdClass;
+        $user->id = "";
+
         switch ($this->view) {
             case 'login':
                 $this->title = "Zaloguj się";
@@ -503,29 +507,26 @@ HTML;
                 break;
             case 'reset':
                 $this->title = "Reset hasła";
+
+                $hash = $this->get('hash');
+
+                try {
+                    $user = User::getByHash($hash);
+                } catch (Exception $e) {
+                    fs::log("Error: " . $e->getMessage());
+                    self::redirect("/");
+                    exit(0);
+                }
                 break;
         }
 
-        if ($this->view === "reset") {
-
-            $hash = $this->get('hash');
-
-            try {
-                $user = User::getByHash($hash);
-            } catch (Exception $e) {
-                fs::log("Error: " . $e->getMessage());
-                self::redirect("/");
-                exit(0);
-            }
-
-            $args['user'] = $user;
-        }
-
         try {
-            $delivered = 2650 + Request::count(NULL, "delivered");
+            $delivered = 3600 + Request::count(NULL, "delivered");
         } catch (Exception $e) {
             $delivered = 0;
         }
+
+        $args['user']      = $user;
         $args['view']      = $this->view;
         $args['delivered'] = $delivered;
 

@@ -2,7 +2,9 @@
 
 namespace admin\controllers;
 
-class DefaultController extends AdminController
+use controllers\PageController;
+
+class DefaultController extends PageController
 {
     public function content(array $args = [])
     {
