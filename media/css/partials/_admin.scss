@@ -1,0 +1,14 @@
+body[class^=admin] {
+  section.pins {
+    table.table {
+      td {
+        vertical-align: middle;
+      }
+    }
+    .magazines {
+      textarea {
+        min-height: 80px;
+      }
+    }
+  }
+}

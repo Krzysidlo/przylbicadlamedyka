@@ -1036,76 +1036,100 @@ var index = function () {
             }
         })();
 
-        (function adminPrivileges() {
-            var $body = $("body.privileges");
+        (function admin() {
+            var $body = $("body[class^=admin]");
             if ($body.length) {
-                var $form = $body.find("form.setPrivileges"),
-                    $usersSelect = $form.find("#usersID"),
-                    $privilegesSelect = $form.find("#level"),
-                    usersSelectOptions = {
-                        placeholder: "Wybierz użytkownika",
-                        allowClear: true
-                    },
-                    privSelectOptions = {
-                        placeholder: "Wybierz uprawnienie",
-                        minimumResultsForSearch: -1,
-                        allowClear: true
-                    };
+                var $magazines = $body.find("table.magazines"),
+                    $hospitals = $body.find("table.hospitals");
 
-                $usersSelect.select2(usersSelectOptions);
-                $privilegesSelect.select2(privSelectOptions);
-
-                $usersSelect.on('change', function () {
-                    var $option = $usersSelect.find("option:selected")
-                    priv = $option.data('priv');
-
-                    $privilegesSelect.val(priv);
-                    $privilegesSelect.select2("destroy");
-                    $privilegesSelect.select2(privSelectOptions);
+                $magazines.find("tbody tr td.action .edit").on('click', function (e) {
+                    e.preventDefault();
+                    toggleEdit($(this).parents("tr"), true);
                 });
 
-                $form.on('submit', function (e) {
+                $magazines.find("tbody tr td.action .cancel").on('click', function (e) {
                     e.preventDefault();
+                    toggleEdit($(this).parents("tr"), false, true);
+                });
 
-                    var form = $form.get(0),
-                        formData = new FormData(form);
+                $magazines.find("tbody tr td.action .submit").on('click', function (e) {
+                    e.preventDefault();
+                    var $row = $(this).parents("tr"),
+                        name = $row.find(".name").val(),
+                        desc = $row.find(".description").val(),
+                        material = $row.find(".material").val(),
+                        bascinet = $row.find(".bascinet").val(),
+                        id = $row.data('id');
 
-                    formData.append('savePrivileges', true);
+                    if (typeof material === "undefined") {
+                        material = "null";
+                    }
+                    if (typeof bascinet === "undefined") {
+                        bascinet = "null";
+                    }
 
                     $.ajax({
-                        url: $form.attr('action') + "?ajax=true",
+                        url: `/ajax/adminIndex/savePin?ajax=true`,
                         type: "POST",
-                        data: formData,
+                        data: {id: id, name: name, description: desc, material: material, bascinet: bascinet},
                         dataType: "JSON",
-                        processData: false,
-                        contentType: false,
                         beforeSend: function () {
                             showLoading();
                         },
                         success: function (data) {
                             if (data.success) {
-                                var $option = $usersSelect.find("option:selected"),
-                                    priv = $privilegesSelect.val(),
-                                    text = $option.text(),
-                                    pos = text.lastIndexOf("("),
-                                    newText = text.substr(0, pos) + "(" + priv + ")";
+                                toggleEdit($row, false);
+                                $row.find("input, textarea").each(function (i, e) {
+                                    var $e = $(e),
+                                        value = $e.val();
 
-                                $option.text(newText);
-                                $option.data('priv', priv);
-                                $option.attr('data-priv', priv);
-                                $usersSelect.select2("destroy");
-                                $usersSelect.select2(usersSelectOptions);
+                                    $e.data('value', value);
+                                    $e.attr('data-value', value);
+                                });
                             }
-                            displayToast(data.message, data.alert);
+
+                            if (data.alert) {
+                                displayToast(data.message, data.alert);
+                            }
                         },
                         error: function () {
-                            displayToast("Nieznany błąd", "danger");
+                            displayToast("Wystąpił nieznany błąd", "danger");
                         },
                         complete: function () {
                             hideLoading();
                         }
                     });
+                    toggleEdit($(this).parents("tr"), false);
                 });
+
+                var toggleEdit = function ($row, edit, defVal) {
+                    edit = edit || false;
+                    defVal = defVal || false;
+                    var $editBtn = $row.find("td.action .edit"),
+                        $cancelBtn = $row.find("td.action .cancel"),
+                        $submitBtn = $row.find("td.action .submit");
+
+                    if (edit) {
+                        $editBtn.fadeOut(() => {
+                            $cancelBtn.fadeIn();
+                            $submitBtn.fadeIn();
+                            $row.find("input, textarea").prop("disabled", false);
+                        });
+                    } else {
+                        var $inputs = $row.find("input, textarea");
+                        $inputs.prop("disabled", true);
+                        $submitBtn.fadeOut();
+                        $cancelBtn.fadeOut(() => {
+                            $editBtn.fadeIn();
+                        });
+                        if (defVal) {
+                            $inputs.each(function (i, e) {
+                                var $e = $(e);
+                                $e.val($e.data('value'));
+                            });
+                        }
+                    }
+                };
             }
         })();
     });

@@ -44,7 +44,7 @@ class Hosmag
     public static function create(int $pinsID, int $quantity, string $usersID = NULL): array
     {
         if ($usersID === NULL) {
-            $user    = new User();
+            $user    = new User;
             $usersID = $user->id;
         }
         $sql = "INSERT INTO `hos_mag` (`pins_id`, `users_id`, `quantity`) VALUES ({$pinsID}, '{$usersID}', {$quantity});";

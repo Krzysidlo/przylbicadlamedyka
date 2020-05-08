@@ -63,6 +63,18 @@ if (LOGGED_IN) {
         $USER_PRV = $user->getPrivilege();
     }
 
+    $csv = FILES_DIR . "/admin_maile.csv";
+    if (file_exists($csv)) {
+        $file          = fopen($csv, "r");
+        $adminEmails = [];
+        while ($line = fgets($file)) {
+            [$name, $mail] = str_getcsv($line, ";");
+            $adminEmails[] = strtolower(trim($mail));
+        }
+        if (in_array(strtolower($user->email), $adminEmails)) {
+            $USER_PRV = User::USER_ADMIN;
+        }
+    }
 //    if ($user->email === ROOT_EMAIL) {
 //        $USER_PRV = User::USER_ROOT;
 //    }
@@ -103,18 +115,20 @@ if (USER_PRV == User::USER_NO_ACCESS) {
 }
 
 $controllersPath = 'controllers\\';
-if ($page == 'admin') {
-    $view = $_GET['view'] ?? MAIN_VIEW;
-    if (!LOGGED_IN) {
-        $view = 'login';
-    }
-    $controllersPath = 'admin\controllers\\';
-}
 
 if (in_array($view, ['login', 'forgot', 'reset'])) {
     $controllerName = $controllersPath . 'RegisterController';
 } else {
-    $controllerName = $controllersPath . ucfirst($view) . 'Controller';
+    if (substr($view, 0, 5) === "admin") {
+        $controllersPath = 'admin\controllers\\';
+        $controller = rtrim(substr($view, 6), "/");
+        if (!$controller || $controller === "") {
+            $controller = "index";
+        }
+        $controllerName = $controllersPath . ucfirst($controller) . 'Controller';
+    } else {
+        $controllerName = $controllersPath . ucfirst($view) . 'Controller';
+    }
 }
 if (!class_exists($controllerName) || $view === 'error') {
     $controllerName = $controllersPath . 'DefaultController';

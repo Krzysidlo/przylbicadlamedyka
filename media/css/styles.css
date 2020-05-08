@@ -691,6 +691,13 @@ nav.navbar .dropdown-menu {
             transform: scale3d(1, 1, 1);
   }
 }
+body[class^=admin] section.pins table.table td {
+  vertical-align: middle;
+}
+body[class^=admin] section.pins .magazines textarea {
+  min-height: 80px;
+}
+
 body.map #map {
   width: calc(100% - 62px);
   height: calc(100vh - 97px);

@@ -29,9 +29,20 @@ class AjaxController extends PageController
         $file   = filter_var($this->get('file'), FILTER_SANITIZE_STRING);
         $method = "ajax_" . filter_var($this->get('method'), FILTER_SANITIZE_STRING);
         [$fileName] = explode(".", $file);
-        $controllerPath = ROOT_DIR . "/controllers/" . ucfirst($fileName) . "Controller.php";
+        $admin = false;
+        if (substr($fileName, 0, 5) === "admin") {
+            $admin = true;
+            $fileName = substr($fileName, 5);
+            $controllerPath = ADMIN_DIR . "/controllers/" . ucfirst($fileName) . "Controller.php";
+        } else {
+            $controllerPath = ROOT_DIR . "/controllers/" . ucfirst($fileName) . "Controller.php";
+        }
         if (file_exists($controllerPath)) {
-            $newControllerName = "controllers\\" . ucfirst($fileName) . "Controller";
+            if ($admin) {
+                $newControllerName = "admin\\controllers\\" . ucfirst($fileName) . "Controller";
+            } else {
+                $newControllerName = "controllers\\" . ucfirst($fileName) . "Controller";
+            }
             if (method_exists($newControllerName, $method)) {
 
                 if (!empty($this->get('ajax'))) {

@@ -130,6 +130,34 @@ class Pin
         return $return;
     }
 
+    public function update(string $name, string $description, ?int $material = NULL, ?int $bascinet = NULL): bool
+    {
+        if ($material === NULL) {
+            $material = "NULL";
+        }
+        if ($bascinet === NULL) {
+            $bascinet = "NULL";
+        }
+
+        $sql = "SELECT SUM(`quantity`) FROM `hos_mag` WHERE `pins_id` = {$this->id} AND `deleted` = 0;";
+        if ($query = fs::$mysqli->query($sql)) {
+            if ($result = $query->fetch_row()) {
+                $quantity = intval(filter_var($result[0], FILTER_SANITIZE_NUMBER_INT));
+                switch ($this->type) {
+                    case 'hospital':
+                        $bascinet += $quantity;
+                        break;
+                    case 'magazine':
+                        $material += $quantity;
+                        break;
+                }
+            }
+        }
+
+        $sql = "UPDATE `pins` SET `name` = '{$name}', `description` = '{$description}', `material` = {$material}, `bascinet` = {$bascinet} WHERE `id` = {$this->id};";
+        return !!fs::$mysqli->query($sql);
+    }
+
     public function delete(): bool
     {
         $sql = "UPDATE `pins` SET `deleted` = 1 WHERE `id` = {$this->id};";

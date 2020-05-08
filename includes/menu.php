@@ -33,6 +33,11 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
             Zgłoś dostarczenie / odbiór
         </button>
     <?php }
+    if (USER_PRV === User::USER_ADMIN) { ?>
+        <a class="btn btn-outline-white my-0 actions" href="/admin/">
+            Admin
+        </a>
+    <?php }
     if (!$user->noAddress() && USER_PRV === User::USER_NO_CONFIRM) { ?>
         <span class="navbar-brand actions">Aby móc wykonywać akcje proszę potwierdzić adres e-mail</span>
     <?php } ?>
@@ -61,7 +66,7 @@ $compact = (isset($_COOKIE['leftMenu']) && $_COOKIE['leftMenu'] === "null" ? "" 
                     <span>Ustawienia</span>
                 </a>
             </li>
-            <?php if ($user->getPrivilege() === User::USER_DRIVER) {
+            <?php if ($user->getPrivilege() === User::USER_DRIVER && USER_PRV !== User::USER_ADMIN) {
                 $trips = Frozen::count(USER_ID, "trips");
                 $trips += Hosmag::count(USER_ID, "trips"); ?>
                 <li class="nav-item<?= $this->menu === "trips" ? " active" : ""; ?>">

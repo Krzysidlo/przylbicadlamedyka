@@ -3,7 +3,9 @@
 namespace controllers;
 
 use Exception;
+use classes\User;
 use classes\Frozen;
+use classes\Functions;
 use classes\Functions as fs;
 
 abstract class PageController
@@ -89,11 +91,32 @@ abstract class PageController
     {
         if ($this->file === NULL) {
             $viewsDir = ROOT_DIR . "/views";
+            if (substr($this->view, 0, 5) === "admin") {
+                //Admin page
+                if (USER_PRV === User::USER_ADMIN) {
+                    $view = rtrim(substr($this->view, 6), "/");
+                    if (!$view || $view === "") {
+                        $view = "index";
+                    }
 
-            if (!file_exists($viewsDir . "/" . $this->view . ".php")) {
-                $this->view = 'error';
+                    if (!file_exists(ROOT_DIR . "/admin/views/" . $view . ".php")) {
+                        $this->view = 'error';
+                        $this->file = $viewsDir . "/" . $this->view . ".php";
+                    } else {
+                        $this->file = ADMIN_DIR . "/views/" . $view . ".php";
+                        $this->menu = "admin/" . $view;
+                    }
+                } else {
+                    $this->view = 'error';
+                    $this->file = $viewsDir . "/" . $this->view . ".php";
+                }
+            } else {
+                //Normal page
+                if (!file_exists($viewsDir . "/" . $this->view . ".php")) {
+                    $this->view = 'error';
+                }
+                $this->file = $viewsDir . "/" . $this->view . ".php";
             }
-            $this->file = $viewsDir . "/" . $this->view . ".php";
         }
         ob_start();
         foreach ($args as $name => $value) {
